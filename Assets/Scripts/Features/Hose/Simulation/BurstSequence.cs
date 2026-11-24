@@ -19,6 +19,12 @@ namespace FlameBlame.Hose.Simulation
             _recoverSeconds = recoverSeconds;
         }
 
+        public void Repair()
+        {
+            HasBurst = false;
+            ProgressFraction = 0f;
+        }
+
         public void Update(float pressureFraction, float deltaTime)
         {
             if (HasBurst) return;

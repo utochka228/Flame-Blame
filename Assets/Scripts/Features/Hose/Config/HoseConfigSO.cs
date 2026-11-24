@@ -38,6 +38,7 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Min(1f)] public float MaxPressure { get; private set; } = 100f;
         [field: SerializeField] [field: Min(0f)] public float LossPerMeter { get; private set; } = 2f;
         [field: SerializeField] [field: Min(0f)] public float BurstLeakLoss { get; private set; } = 40f;
+        [field: SerializeField] [field: Min(0f)] public float TapeLeakLoss { get; private set; } = 8f;
         [field: SerializeField] [field: Range(0f, 100f)] public float HeldUpstreamRigidityPercent { get; private set; } = 50f;
         [field: SerializeField] [field: Range(0f, 100f)] public float HeldFreeRigidityPercent { get; private set; } = 5f;
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldUpstreamDampingMultiplier { get; private set; } = 2.5f;

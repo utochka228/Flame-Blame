@@ -13,6 +13,8 @@ namespace FlameBlame.Hose.Components
         public int WeakPointIndex { get; private set; }
         public float ProgressFraction => _sequence.ProgressFraction;
         public bool HasBurst => _sequence.HasBurst;
+        public bool IsTaped { get; private set; }
+        public bool IsLeaking => HasBurst || IsTaped;
 
         public event Action Popped;
 
@@ -27,6 +29,12 @@ namespace FlameBlame.Hose.Components
         private void FixedUpdate()
         {
             _sequence.Update(_hose.PressureFractions[WeakPointIndex], Time.fixedDeltaTime);
+        }
+
+        public void Tape()
+        {
+            _sequence.Repair();
+            IsTaped = true;
         }
 
         private void OnSequencePopped()

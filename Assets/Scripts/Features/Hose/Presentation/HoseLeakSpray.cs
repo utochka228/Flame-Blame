@@ -24,7 +24,7 @@ namespace FlameBlame.Hose.Presentation
 
         private void LateUpdate()
         {
-            if (!_burstMonitor.HasBurst) return;
+            if (!_burstMonitor.IsLeaking) return;
 
             var weakPointIndex = _burstMonitor.WeakPointIndex;
             _particles.transform.position = _hose.Positions[weakPointIndex];

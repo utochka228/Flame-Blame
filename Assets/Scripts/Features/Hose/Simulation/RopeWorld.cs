@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FlameBlame.Core.Extensions;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Simulation
@@ -25,8 +26,28 @@ namespace FlameBlame.Hose.Simulation
 
         public int AddJunction(float breakDistance)
         {
-            _junctions.Add(new Junction(breakDistance));
-            return _junctions.Count - 1;
+            var junction = new Junction(breakDistance);
+            var slot = _junctions.FindIndex(existing => existing.IsFree);
+            if (slot < 0)
+            {
+                _junctions.Add(junction);
+                return _junctions.Count - 1;
+            }
+
+            _junctions[slot] = junction;
+            return slot;
+        }
+
+        public void Break(int junction)
+        {
+            _junctions[junction].IsBroken = true;
+        }
+
+        public void RemoveJunction(int junction)
+        {
+            _junctions[junction].IsBroken = true;
+            _junctions[junction].IsFree = true;
+            _junctions[junction].Ends.Clear();
         }
 
         public void Attach(int junction, RopeEnd end)
@@ -83,7 +104,7 @@ namespace FlameBlame.Hose.Simulation
                     var particle = new RopeParticle(rope, index);
                     if (!_ropes[rope].IsMovable(index)) continue;
 
-                    var offset = RayOffset(particle, origin, direction, reach);
+                    var offset = _ropes[rope].Positions[index].OffsetFromRay(origin, direction, reach);
                     if (offset >= bestOffset) continue;
 
                     bestOffset = offset;
@@ -96,16 +117,7 @@ namespace FlameBlame.Hose.Simulation
 
         public bool IsAlongRay(RopeParticle particle, Vector3 origin, Vector3 direction, float reach, float aimRadius)
         {
-            return RayOffset(particle, origin, direction, reach) < aimRadius;
-        }
-
-        private float RayOffset(RopeParticle particle, Vector3 origin, Vector3 direction, float reach)
-        {
-            var toParticle = _ropes[particle.Rope].Positions[particle.Index] - origin;
-            var along = Vector3.Dot(toParticle, direction);
-            if (along < 0f || along > reach) return float.MaxValue;
-
-            return (toParticle - direction * along).magnitude;
+            return _ropes[particle.Rope].Positions[particle.Index].OffsetFromRay(origin, direction, reach) < aimRadius;
         }
 
         public void Step(float deltaTime)
@@ -246,6 +258,7 @@ namespace FlameBlame.Hose.Simulation
         {
             public float BreakDistance { get; }
             public bool IsBroken { get; set; }
+            public bool IsFree { get; set; }
             public List<RopeEnd> Ends { get; } = new List<RopeEnd>();
 
             public Junction(float breakDistance)
