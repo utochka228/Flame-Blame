@@ -28,34 +28,44 @@ namespace FlameBlame.Firefighter.Components
         {
             if (!commands.WasPressed(FirefighterButtons.Use)) return;
 
+            var targets = FindTargets();
+            var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve);
+            Execute(UseResolver.Resolve(context), targets);
+        }
+
+        private UseTargets FindTargets()
+        {
             var eye = _firefighter.Eye.transform;
-            var heldEnd = HeldEnd(out var hasHeldEnd);
+            var heldEnd = FindHeldEnd(out var hasHeldEnd);
             var connectTarget = default(HoseEndRef);
             var canConnect = hasHeldEnd && _network.IsEndFree(heldEnd) &&
                              _network.TryFindFreeEnd(_network.EndPosition(heldEnd), _config.ConnectRadiusMeters, heldEnd, out connectTarget);
-            var hasBurst = _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
+            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
             var joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
-            var valve = FindValve(eye);
+            return new UseTargets(canConnect, heldEnd, connectTarget, burst, joint, FindValve(eye));
+        }
 
-            switch (UseResolver.Resolve(new UseContext(canConnect, hasBurst, joint != HoseNetwork.NoJoint, valve)))
+        private void Execute(UseAction action, UseTargets targets)
+        {
+            switch (action)
             {
                 case UseAction.Connect:
                     _grabber.Drop();
-                    _network.Connect(heldEnd, connectTarget);
+                    _network.Connect(targets.HeldEnd, targets.ConnectTarget);
                     break;
                 case UseAction.Tape:
-                    burst.Tape();
+                    targets.BurstMonitor.Tape();
                     break;
                 case UseAction.Disconnect:
-                    _network.Disconnect(joint);
+                    _network.Disconnect(targets.Joint);
                     break;
                 case UseAction.ToggleValve:
-                    valve.IsOpen = !valve.IsOpen;
+                    targets.ValveSource.IsOpen = !targets.ValveSource.IsOpen;
                     break;
             }
         }
 
-        private HoseEndRef HeldEnd(out bool hasHeldEnd)
+        private HoseEndRef FindHeldEnd(out bool hasHeldEnd)
         {
             var held = _grabber.HeldParticle;
             var hose = held.IsNone ? null : _network.HoseOf(held.Rope);
@@ -70,6 +80,30 @@ namespace FlameBlame.Firefighter.Components
                 return null;
 
             return hit.collider.GetComponentInParent<PressureSource>();
+        }
+
+        private readonly struct UseTargets
+        {
+            public bool CanConnect { get; }
+            public HoseEndRef HeldEnd { get; }
+            public HoseEndRef ConnectTarget { get; }
+            public HoseBurstMonitor BurstMonitor { get; }
+            public int Joint { get; }
+            public PressureSource ValveSource { get; }
+
+            public bool Burst => BurstMonitor;
+            public bool Valve => ValveSource;
+
+            public UseTargets(bool canConnect, HoseEndRef heldEnd, HoseEndRef connectTarget, HoseBurstMonitor burstMonitor, int joint,
+                PressureSource valveSource)
+            {
+                CanConnect = canConnect;
+                HeldEnd = heldEnd;
+                ConnectTarget = connectTarget;
+                BurstMonitor = burstMonitor;
+                Joint = joint;
+                ValveSource = valveSource;
+            }
         }
     }
 }
