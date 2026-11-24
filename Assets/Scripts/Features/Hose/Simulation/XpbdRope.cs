@@ -141,6 +141,12 @@ namespace FlameBlame.Hose.Simulation
             _positions[index] = position;
         }
 
+        public void AddVelocity(int index, Vector3 velocityDelta)
+        {
+            if (IsMovable(index))
+                _velocities[index] += velocityDelta;
+        }
+
         private void UpdateBendAlphas(float substepTime)
         {
             for (var index = 0; index < _bendAlphas.Length; index++)

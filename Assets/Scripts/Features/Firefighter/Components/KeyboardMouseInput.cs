@@ -16,7 +16,8 @@ namespace FlameBlame.Firefighter.Components
                 return default;
 
             var move = new Vector2(Axis(keyboard.aKey, keyboard.dKey), Axis(keyboard.sKey, keyboard.wKey));
-            return new FirefighterCommands(move, mouse.delta.ReadValue(), keyboard.spaceKey.wasPressedThisFrame);
+            return new FirefighterCommands(move, mouse.delta.ReadValue(), keyboard.spaceKey.wasPressedThisFrame, keyboard.eKey.wasPressedThisFrame,
+                mouse.leftButton.wasPressedThisFrame);
         }
 
         private static float Axis(KeyControl negative, KeyControl positive) => 

@@ -1,3 +1,4 @@
+using System;
 using FlameBlame.Firefighter.Config;
 using FlameBlame.Firefighter.Simulation;
 using UnityEngine;
@@ -18,6 +19,8 @@ namespace FlameBlame.Firefighter.Components
         private bool _jumpRequested;
 
         public Camera Eye => _eye;
+
+        public event Action<FirefighterCommands> Driven;
 
         private void Awake()
         {
@@ -46,6 +49,7 @@ namespace FlameBlame.Firefighter.Components
             _jumpRequested |= commands.JumpPressed;
             _look.Apply(commands.Look);
             _eye.transform.localRotation = Quaternion.Euler(_look.Pitch, 0f, 0f);
+            Driven?.Invoke(commands);
         }
 
         private bool IsGrounded()

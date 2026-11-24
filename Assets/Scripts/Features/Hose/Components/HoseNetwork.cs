@@ -56,6 +56,8 @@ namespace FlameBlame.Hose.Components
             _world.Step(Time.fixedDeltaTime);
         }
 
+        public RopeWorld World => _world;
+
         public Vector3 JointPosition(int jointIndex) => _world.JunctionPosition(_junctionIds[jointIndex]);
 
         private void BuildWorld()

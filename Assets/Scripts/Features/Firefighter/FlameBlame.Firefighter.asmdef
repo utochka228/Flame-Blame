@@ -3,6 +3,7 @@
     "rootNamespace": "FlameBlame.Firefighter",
     "references": [
         "FlameBlame.Core",
+        "FlameBlame.Hose",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],
