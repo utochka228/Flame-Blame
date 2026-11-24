@@ -332,6 +332,7 @@ GameObject:
   - component: {fileID: 199389386}
   - component: {fileID: 199389384}
   - component: {fileID: 199389390}
+  - component: {fileID: 199389391}
   m_Layer: 9
   m_Name: Firefighter_2
   m_TagString: Untagged
@@ -491,7 +492,23 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
   _firefighter: {fileID: 199389384}
   _network: {fileID: 655287859}
-  _nozzle: {fileID: 341209164}
+  _nozzle: {fileID: 410306588}
+--- !u!114 &199389391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 199389383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202d5b3b72f9246fab7ee48637f5535e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Components.FirefighterInteractor
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
+  _firefighter: {fileID: 199389384}
+  _grabber: {fileID: 199389390}
+  _network: {fileID: 655287859}
 --- !u!1 &294101639
 GameObject:
   m_ObjectHideFlags: 0
@@ -728,7 +745,6 @@ GameObject:
   - component: {fileID: 341209160}
   - component: {fileID: 341209162}
   - component: {fileID: 341209161}
-  - component: {fileID: 341209164}
   m_Layer: 0
   m_Name: Hose
   m_TagString: Untagged
@@ -792,23 +808,130 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &341209164
+--- !u!1 &392503106
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 392503107}
+  m_Layer: 0
+  m_Name: Outlet_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &392503107
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392503106}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 2.2, y: 0.5, z: -3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &410306584
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 410306589}
+  - component: {fileID: 410306587}
+  - component: {fileID: 410306586}
+  - component: {fileID: 410306585}
+  - component: {fileID: 410306588}
+  m_Layer: 0
+  m_Name: Hose_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &410306585
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 341209159}
+  m_GameObject: {fileID: 410306584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6809d0c11c4a141318652a40f4e5bd26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Components.HoseBurstMonitor
+  _hose: {fileID: 410306587}
+--- !u!114 &410306586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410306584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e744e11c9d650455195aefa3258778ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Components.HosePinchSensor
+  _hose: {fileID: 410306587}
+--- !u!114 &410306587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410306584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a0629c324f14a0d8f12685c52bd4dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Components.HoseSegment
+  _config: {fileID: 11400000, guid: 29503e50719b8400aa43502dd44d51b9, type: 2}
+  _outlet: {fileID: 392503107}
+  _anchoredToOutlet: 0
+--- !u!114 &410306588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410306584}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3dd57fed8a5f34f829747defb669d2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Components.Nozzle
   _config: {fileID: 11400000, guid: eceb2b9a307ad481489e2bd722127573, type: 2}
-  _hose: {fileID: 341209160}
+  _hose: {fileID: 410306587}
   _network: {fileID: 655287859}
   _jet: {fileID: 665357580}
   _tip: 1
+--- !u!4 &410306589
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410306584}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &534801766
 GameObject:
   m_ObjectHideFlags: 0
@@ -1061,7 +1184,13 @@ MonoBehaviour:
   _sourceHose: {fileID: 341209160}
   _hoses:
   - {fileID: 341209160}
-  _joints: []
+  - {fileID: 410306587}
+  _joints:
+  - _ends:
+    - <Hose>k__BackingField: {fileID: 341209160}
+      <End>k__BackingField: 1
+    - <Hose>k__BackingField: {fileID: 410306587}
+      <End>k__BackingField: 0
   _maxPieces: 16
   _junctionBreakDistance: 1
   _solvesPerSecond: 10
@@ -6058,7 +6187,7 @@ Transform:
   m_GameObject: {fileID: 1144597385}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: -5}
+  m_LocalPosition: {x: -8, y: 0.5, z: -3}
   m_LocalScale: {x: 0.6, y: 0.5, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6078,7 +6207,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: FlameBlame.Pressure::FlameBlame.Pressure.Components.PressureSource
   _maxPressure: 100
-  _pressureFraction: 0.4
+  _pressureFraction: 1
 --- !u!23 &1144597388
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6317,6 +6446,112 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1670810421
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1670810425}
+  - component: {fileID: 1670810424}
+  - component: {fileID: 1670810423}
+  - component: {fileID: 1670810422}
+  m_Layer: 0
+  m_Name: HoseTube_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1670810422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670810421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 526a50da9402e41deaa1b42017394758, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Presentation.HoseTubeRenderer
+  _hose: {fileID: 410306587}
+  _pinchSensor: {fileID: 410306586}
+  _burstMonitor: {fileID: 410306585}
+--- !u!23 &1670810423
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670810421}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: ac5920d639bf54f54bcb4c3500debe06, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1670810424
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670810421}
+  m_Mesh: {fileID: 0}
+--- !u!4 &1670810425
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670810421}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1748583075
 GameObject:
   m_ObjectHideFlags: 0
@@ -6444,6 +6679,7 @@ GameObject:
   - component: {fileID: 1884012713}
   - component: {fileID: 1884012711}
   - component: {fileID: 1884012717}
+  - component: {fileID: 1884012718}
   m_Layer: 9
   m_Name: Firefighter_1
   m_TagString: Untagged
@@ -6603,7 +6839,23 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
   _firefighter: {fileID: 1884012711}
   _network: {fileID: 655287859}
-  _nozzle: {fileID: 341209164}
+  _nozzle: {fileID: 410306588}
+--- !u!114 &1884012718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884012710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 202d5b3b72f9246fab7ee48637f5535e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Components.FirefighterInteractor
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
+  _firefighter: {fileID: 1884012711}
+  _grabber: {fileID: 1884012717}
+  _network: {fileID: 655287859}
 --- !u!1 &2112747356
 GameObject:
   m_ObjectHideFlags: 0
@@ -6628,8 +6880,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2112747356}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.66666675}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0.66666675, y: 0, z: 0}
   m_LocalScale: {x: 1.6666665, y: 2, z: 1.6666665}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6653,3 +6905,6 @@ SceneRoots:
   - {fileID: 99207297}
   - {fileID: 655287860}
   - {fileID: 665357581}
+  - {fileID: 392503107}
+  - {fileID: 410306589}
+  - {fileID: 1670810425}
