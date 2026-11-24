@@ -22,6 +22,11 @@ MonoBehaviour:
   <ReachMeters>k__BackingField: 3
   <AimRadiusMeters>k__BackingField: 0.4
   <HoldDistanceMeters>k__BackingField: 1.5
+  <MaxGripDistanceMeters>k__BackingField: 3.5
+  <ConnectRadiusMeters>k__BackingField: 0.6
+  <InteractLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294966783
   <GripCompliance>k__BackingField: 0.0000001
   <AimGripCompliance>k__BackingField: 0.00001
   <GripFollowSeconds>k__BackingField: 0.12
