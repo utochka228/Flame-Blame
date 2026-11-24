@@ -38,6 +38,10 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Min(1f)] public float MaxPressure { get; private set; } = 100f;
         [field: SerializeField] [field: Min(0f)] public float LossPerMeter { get; private set; } = 2f;
         [field: SerializeField] [field: Min(0f)] public float BurstLeakLoss { get; private set; } = 40f;
+        [field: SerializeField] [field: Range(0f, 100f)] public float HeldUpstreamRigidityPercent { get; private set; } = 50f;
+        [field: SerializeField] [field: Range(0f, 100f)] public float HeldFreeRigidityPercent { get; private set; } = 5f;
+        [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldUpstreamDampingMultiplier { get; private set; } = 2.5f;
+        [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldFreeDampingMultiplier { get; private set; } = 0.7f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
 
@@ -47,6 +51,14 @@ namespace FlameBlame.Hose.Config
         public float PinchSquashFraction => PinchSquashPercent.ToFraction();
         public float BurstWeakPointFraction => BurstWeakPointPercent.ToFraction();
         public float BalloonFraction => BalloonPercent.ToFraction();
+
+        public HeldHoseSettings CreateHeldSettings() => new HeldHoseSettings
+        {
+            UpstreamRigidityFraction = HeldUpstreamRigidityPercent.ToFraction(),
+            FreeRigidityFraction = HeldFreeRigidityPercent.ToFraction(),
+            UpstreamDampingMultiplier = HeldUpstreamDampingMultiplier,
+            FreeDampingMultiplier = HeldFreeDampingMultiplier
+        };
 
         public RopeSettings CreateRopeSettings() => new RopeSettings
         {

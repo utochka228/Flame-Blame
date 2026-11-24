@@ -18,6 +18,7 @@ namespace FlameBlame.Hose.Simulation
         private readonly Vector3[] _velocities;
         private readonly float[] _particleRigidity;
         private readonly float[] _bendAlphas;
+        private readonly float[] _dampingMultipliers;
         private readonly float _floppyBendLog;
         private readonly float _rigidBendLog;
 
@@ -51,6 +52,8 @@ namespace FlameBlame.Hose.Simulation
             _velocities = new Vector3[settings.ParticleCount];
             _particleRigidity = new float[settings.ParticleCount];
             _bendAlphas = new float[settings.ParticleCount];
+            _dampingMultipliers = new float[settings.ParticleCount];
+            Array.Fill(_dampingMultipliers, 1f);
             _floppyBendLog = Mathf.Log(settings.FloppyBendCompliance);
             _rigidBendLog = Mathf.Log(settings.RigidBendCompliance);
 
@@ -71,6 +74,12 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = 0; index < _particleRigidity.Length; index++)
                 _particleRigidity[index] = Mathf.Clamp01(profile[index]);
+        }
+
+        public void SetDampingProfile(IReadOnlyList<float> multipliers)
+        {
+            for (var index = 0; index < _dampingMultipliers.Length; index++)
+                _dampingMultipliers[index] = multipliers[index];
         }
 
         public void Step(float deltaTime)
@@ -165,12 +174,12 @@ namespace FlameBlame.Hose.Simulation
 
         private void Integrate()
         {
-            var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _substepTime);
             for (var index = 0; index < _positions.Length; index++)
             {
                 _substepStartPositions[index] = _positions[index];
                 if (index < FirstFreeIndex) continue;
 
+                var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _dampingMultipliers[index] * _substepTime);
                 var velocity = (_velocities[index] + _settings.Gravity * _substepTime) * dampingFactor;
                 velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
                 _velocities[index] = velocity;

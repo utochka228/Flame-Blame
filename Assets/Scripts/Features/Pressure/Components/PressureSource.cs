@@ -6,7 +6,7 @@ namespace FlameBlame.Pressure.Components
     {
         [SerializeField] [Min(0f)] private float _maxPressure = 200f;
 
-        private float _pressureFraction;
+        [SerializeField] [Range(0f, 1f)] private float _pressureFraction;
 
         public bool IsOpen { get; set; } = true;
         public float CurrentPressure => IsOpen ? _pressureFraction * _maxPressure : 0f;

@@ -78,24 +78,34 @@ namespace FlameBlame.Hose.Simulation
             var bestOffset = aimRadius;
             for (var rope = 0; rope < _ropes.Count; rope++)
             {
-                var positions = _ropes[rope].Positions;
-                for (var index = 0; index < positions.Count; index++)
+                for (var index = 0; index < _ropes[rope].Positions.Count; index++)
                 {
+                    var particle = new RopeParticle(rope, index);
                     if (!_ropes[rope].IsMovable(index)) continue;
 
-                    var toParticle = positions[index] - origin;
-                    var along = Vector3.Dot(toParticle, direction);
-                    if (along < 0f || along > reach) continue;
-
-                    var offset = (toParticle - direction * along).magnitude;
+                    var offset = RayOffset(particle, origin, direction, reach);
                     if (offset >= bestOffset) continue;
 
                     bestOffset = offset;
-                    best = new RopeParticle(rope, index);
+                    best = particle;
                 }
             }
 
             return best;
+        }
+
+        public bool IsAlongRay(RopeParticle particle, Vector3 origin, Vector3 direction, float reach, float aimRadius)
+        {
+            return RayOffset(particle, origin, direction, reach) < aimRadius;
+        }
+
+        private float RayOffset(RopeParticle particle, Vector3 origin, Vector3 direction, float reach)
+        {
+            var toParticle = _ropes[particle.Rope].Positions[particle.Index] - origin;
+            var along = Vector3.Dot(toParticle, direction);
+            if (along < 0f || along > reach) return float.MaxValue;
+
+            return (toParticle - direction * along).magnitude;
         }
 
         public void Step(float deltaTime)

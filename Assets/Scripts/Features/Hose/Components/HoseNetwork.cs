@@ -32,6 +32,7 @@ namespace FlameBlame.Hose.Components
         private RopeWorld _world;
         private HosePinchSensor[] _sensors;
         private HoseBurstMonitor[] _monitors;
+        private Nozzle[] _nozzles;
         private float[][] _profiles;
         private int[] _junctionIds;
         private int[] _splitterPartIds;
@@ -58,6 +59,10 @@ namespace FlameBlame.Hose.Components
 
         public RopeWorld World => _world;
 
+        public int RopeIndex(HoseSegment hose) => HoseIndex(hose);
+
+        public HoseSegment HoseOf(int ropeIndex) => _hoses[ropeIndex];
+
         public Vector3 JointPosition(int jointIndex) => _world.JunctionPosition(_junctionIds[jointIndex]);
 
         private void BuildWorld()
@@ -65,6 +70,7 @@ namespace FlameBlame.Hose.Components
             _world = new RopeWorld(_hoses[0].Config.Substeps) { JunctionIterations = _junctionIterations };
             _sensors = new HosePinchSensor[_hoses.Length];
             _monitors = new HoseBurstMonitor[_hoses.Length];
+            _nozzles = new Nozzle[_hoses.Length];
             _profiles = new float[_hoses.Length][];
             for (var index = 0; index < _hoses.Length; index++)
             {
@@ -72,6 +78,7 @@ namespace FlameBlame.Hose.Components
                 _hoses[index].IsSteppedByNetwork = true;
                 _sensors[index] = _hoses[index].GetComponent<HosePinchSensor>();
                 _monitors[index] = _hoses[index].GetComponent<HoseBurstMonitor>();
+                _nozzles[index] = _hoses[index].GetComponent<Nozzle>();
                 _profiles[index] = new float[_hoses[index].Config.ParticleCount];
                 if (_hoses[index] == _sourceHose)
                     _sourceHoseIndex = index;
@@ -119,9 +126,11 @@ namespace FlameBlame.Hose.Components
             _graph.Link(SourcePartId, PressureGraph.SourceOutlet, HosePartId(_sourceHoseIndex), PressureGraph.HoseStart);
             LinkJoints();
             AddHoseMarkers();
+            AddThumbs();
 
             PressureSolver.Solve(_graph, _result);
             PublishProfiles();
+            PublishNozzles();
         }
 
         private void LinkJoints()
@@ -166,6 +175,24 @@ namespace FlameBlame.Hose.Components
                     var config = _hoses[index].Config;
                     _graph.Leak(partId, config.BurstWeakPointFraction, config.BurstLeakLoss);
                 }
+            }
+        }
+
+        private void AddThumbs()
+        {
+            for (var index = 0; index < _hoses.Length; index++)
+            {
+                if (_nozzles[index])
+                    _graph.Thumb(HosePartId(index), _nozzles[index].ThumbFraction * _nozzles[index].ThumbBoostFraction);
+            }
+        }
+
+        private void PublishNozzles()
+        {
+            for (var index = 0; index < _hoses.Length; index++)
+            {
+                if (_nozzles[index])
+                    _nozzles[index].SetTipPressureFraction(_result.TipPressure(HosePartId(index)) / _hoses[index].Config.MaxPressure);
             }
         }
 

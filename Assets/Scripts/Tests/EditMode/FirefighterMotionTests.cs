@@ -8,6 +8,7 @@ namespace FlameBlame.Tests.EditMode
     {
         private const float MoveSpeed = 5f;
         private const float Acceleration = 10f;
+        private const float Deceleration = 4f;
         private const float JumpSpeed = 6f;
 
         private FirefighterMotion _motion;
@@ -15,7 +16,7 @@ namespace FlameBlame.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
-            _motion = new FirefighterMotion(MoveSpeed, Acceleration, JumpSpeed);
+            _motion = new FirefighterMotion(MoveSpeed, Acceleration, Deceleration, JumpSpeed);
         }
 
         [Test]
@@ -40,7 +41,7 @@ namespace FlameBlame.Tests.EditMode
         {
             var velocity = _motion.Step(new Vector3(0f, 0f, MoveSpeed), Vector2.zero, Quaternion.identity, 0.1f);
 
-            Assert.That(velocity.z, Is.EqualTo(MoveSpeed - Acceleration * 0.1f).Within(1e-4f));
+            Assert.That(velocity.z, Is.EqualTo(MoveSpeed - Deceleration * 0.1f).Within(1e-4f));
         }
 
         [Test]

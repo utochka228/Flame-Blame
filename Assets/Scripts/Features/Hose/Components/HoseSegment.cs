@@ -15,6 +15,10 @@ namespace FlameBlame.Hose.Components
         private Vector3[] _interpolatedPositions;
         private float[] _targetPressureFractions;
         private float[] _smoothedPressureFractions;
+        private float[] _rigidityProfile;
+        private float[] _rigidityCaps;
+        private float[] _dampingMultipliers;
+        private HeldHoseProfile _heldProfile;
 
         public IReadOnlyList<Vector3> Positions => _interpolatedPositions;
         public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
@@ -32,6 +36,11 @@ namespace FlameBlame.Hose.Components
             _interpolatedPositions = new Vector3[_rope.Positions.Count];
             _targetPressureFractions = new float[_rope.Positions.Count];
             _smoothedPressureFractions = new float[_rope.Positions.Count];
+            _rigidityProfile = new float[_rope.Positions.Count];
+            _rigidityCaps = new float[_rope.Positions.Count];
+            _dampingMultipliers = new float[_rope.Positions.Count];
+            _heldProfile = new HeldHoseProfile(_config.CreateHeldSettings());
+            HeldHoseProfile.Clear(_rigidityCaps, _dampingMultipliers);
             Interpolate();
         }
 
@@ -41,7 +50,11 @@ namespace FlameBlame.Hose.Components
             for (var index = 0; index < _smoothedPressureFractions.Length; index++)
                 _smoothedPressureFractions[index] = Mathf.MoveTowards(_smoothedPressureFractions[index], _targetPressureFractions[index], maxDelta);
 
-            _rope.SetRigidityProfile(_smoothedPressureFractions);
+            for (var index = 0; index < _rigidityProfile.Length; index++)
+                _rigidityProfile[index] = Mathf.Min(_smoothedPressureFractions[index], _rigidityCaps[index]);
+
+            _rope.SetRigidityProfile(_rigidityProfile);
+            _rope.SetDampingProfile(_dampingMultipliers);
             if (_anchoredToOutlet)
                 _rope.SetAnchor(_outlet.position, _outlet.forward);
 
@@ -52,6 +65,16 @@ namespace FlameBlame.Hose.Components
         private void LateUpdate()
         {
             Interpolate();
+        }
+
+        public void SetHeld(int particleIndex)
+        {
+            _heldProfile.Apply(particleIndex, _rigidityCaps, _dampingMultipliers);
+        }
+
+        public void ClearHeld()
+        {
+            HeldHoseProfile.Clear(_rigidityCaps, _dampingMultipliers);
         }
 
         public void SetPressureFraction(float pressureFraction)

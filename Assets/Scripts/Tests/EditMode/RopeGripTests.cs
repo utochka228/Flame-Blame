@@ -84,6 +84,22 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void TwoGrips_OrientTheSegmentBetweenThem()
+        {
+            var tip = _world.AddGrip(new RopeParticle(0, ParticleCount - 1), StiffCompliance);
+            var inner = _world.AddGrip(new RopeParticle(0, ParticleCount - 2), StiffCompliance);
+            var direction = new Vector3(0f, 0.6f, 0.8f);
+            var tipTarget = new Vector3(0f, 12f, 1f);
+            _world.SetGripTarget(tip, tipTarget);
+            _world.SetGripTarget(inner, tipTarget - direction * Spacing);
+
+            Simulate(2f);
+
+            var aimed = (_rope.Positions[ParticleCount - 1] - _rope.Positions[ParticleCount - 2]).normalized;
+            Assert.Greater(Vector3.Dot(aimed, direction), 0.99f);
+        }
+
+        [Test]
         public void AddImpulse_MovesTheParticle()
         {
             var start = _rope.Positions[ParticleCount - 1];
@@ -100,6 +116,15 @@ namespace FlameBlame.Tests.EditMode
             var found = _world.FindAlongRay(new Vector3(0.6f, 10f, -3f), Vector3.forward, 5f, 0.3f);
 
             Assert.AreEqual(new RopeParticle(0, 3).Index, found.Index);
+        }
+
+        [Test]
+        public void IsAlongRay_ReportsWhetherTheParticleIsAimedAt()
+        {
+            var origin = new Vector3(1.8f, 10f, -3f);
+
+            Assert.IsTrue(_world.IsAlongRay(new RopeParticle(0, 9), origin, Vector3.forward, 5f, 0.3f));
+            Assert.IsFalse(_world.IsAlongRay(new RopeParticle(0, 0), origin, Vector3.forward, 5f, 0.3f));
         }
 
         [Test]
