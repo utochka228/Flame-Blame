@@ -43,11 +43,14 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Range(0f, 100f)] public float HeldFreeRigidityPercent { get; private set; } = 5f;
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldUpstreamDampingMultiplier { get; private set; } = 2.5f;
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldFreeDampingMultiplier { get; private set; } = 0.7f;
+        [field: SerializeField] [field: Range(0f, 100f)] public float BridgePressurePercent { get; private set; } = 60f;
+        [field: SerializeField] [field: Range(0.05f, 0.4f)] public float BridgeRadiusMeters { get; private set; } = 0.18f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
 
         public float PressureSmoothingFractionPerSecond => PressureSmoothingPercentPerSecond.ToFraction();
         public float Length => (ParticleCount - 1) * Spacing;
+        public float BridgePressureFraction => BridgePressurePercent.ToFraction();
         public float SwellFraction => SwellPercent.ToFraction();
         public float PinchSquashFraction => PinchSquashPercent.ToFraction();
         public float BurstWeakPointFraction => BurstWeakPointPercent.ToFraction();

@@ -27,5 +27,22 @@ namespace FlameBlame.Tests.EditMode
             Assert.AreEqual(UseAction.Tape, UseResolver.Resolve(new UseContext(false, true, true, true)));
             Assert.AreEqual(UseAction.Disconnect, UseResolver.Resolve(new UseContext(false, false, true, true)));
         }
+
+        [Test]
+        public void Resolve_TieRules_PickTieThenUntie()
+        {
+            var tie = new UseContext(false, false, true, true).WithTie(true, true);
+            Assert.AreEqual(UseAction.Tie, UseResolver.Resolve(tie));
+            Assert.AreEqual(UseAction.Untie, UseResolver.Resolve(tie.WithTie(false, true)));
+        }
+
+        [Test]
+        public void Resolve_ClimbIsLastResortAndStopsFirst()
+        {
+            var nearRope = new UseContext(false, false, false, false).WithClimb(true, false);
+            Assert.AreEqual(UseAction.Climb, UseResolver.Resolve(nearRope));
+            Assert.AreEqual(UseAction.ToggleValve, UseResolver.Resolve(new UseContext(false, false, false, true).WithClimb(true, false)));
+            Assert.AreEqual(UseAction.StopClimb, UseResolver.Resolve(new UseContext(true, true, true, true).WithClimb(true, true)));
+        }
     }
 }

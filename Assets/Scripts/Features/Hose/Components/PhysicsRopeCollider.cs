@@ -10,7 +10,6 @@ namespace FlameBlame.Hose.Components
     {
         private const int MaxOverlaps = 32;
         private const float QueryMargin = 0.5f;
-        private const float BoxPushImpulse = 0.02f;
 
         private static readonly ILogger<PhysicsRopeCollider> Logger = Loggers.For<PhysicsRopeCollider>();
 
@@ -58,8 +57,6 @@ namespace FlameBlame.Hose.Components
                     continue;
 
                 position += direction * distance;
-                if (candidate.attachedRigidbody && !candidate.attachedRigidbody.isKinematic)
-                    candidate.attachedRigidbody.AddForceAtPosition(-direction * (distance * BoxPushImpulse), position, ForceMode.Impulse);
             }
 
             return position;
