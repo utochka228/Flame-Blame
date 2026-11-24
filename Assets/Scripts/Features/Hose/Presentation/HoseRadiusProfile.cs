@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace FlameBlame.Hose.Presentation
 {
@@ -22,6 +23,15 @@ namespace FlameBlame.Hose.Presentation
                 var radius = _baseRadius * (1f + _swellFraction * pressureFractions[index]);
                 radii[index] = pinched[index] ? radius * (1f - _pinchSquashFraction) : radius;
             }
+        }
+
+        public static float FalloffWeight(int index, int centerIndex, float widthParticles) =>
+            Mathf.Max(0f, 1f - Mathf.Abs(index - centerIndex) / widthParticles);
+
+        public void AddBulge(float[] radii, int centerIndex, float widthParticles, float extraFraction)
+        {
+            for (var index = 0; index < radii.Length; index++)
+                radii[index] *= 1f + extraFraction * FalloffWeight(index, centerIndex, widthParticles);
         }
     }
 }

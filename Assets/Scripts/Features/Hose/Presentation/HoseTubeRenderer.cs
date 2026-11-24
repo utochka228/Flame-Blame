@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using FlameBlame.Hose.Components;
+using FlameBlame.Hose.Config;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Presentation
@@ -10,6 +12,7 @@ namespace FlameBlame.Hose.Presentation
 
         [SerializeField] private HoseSegment _hose;
         [SerializeField] private HosePinchSensor _pinchSensor;
+        [SerializeField] private HoseBurstMonitor _burstMonitor;
 
         private Mesh _mesh;
         private MeshRenderer _meshRenderer;
@@ -17,6 +20,7 @@ namespace FlameBlame.Hose.Presentation
         private TubeMeshBuilder _builder;
         private HoseRadiusProfile _radiusProfile;
         private float[] _radii;
+        private Vector3[] _shakenPositions;
 
         private void Awake()
         {
@@ -34,6 +38,7 @@ namespace FlameBlame.Hose.Presentation
             _builder = new TubeMeshBuilder(_hose.Positions.Count, config.TubeSamplesPerSegment, config.TubeRingSides, config.TubeMiterLimit);
             _radiusProfile = new HoseRadiusProfile(config.ParticleRadius, config.SwellFraction, config.PinchSquashFraction);
             _radii = new float[_hose.Positions.Count];
+            _shakenPositions = new Vector3[_hose.Positions.Count];
             _mesh.vertices = _builder.Vertices;
             _mesh.triangles = _builder.Triangles;
         }
@@ -41,8 +46,18 @@ namespace FlameBlame.Hose.Presentation
         private void LateUpdate()
         {
             var config = _hose.Config;
+            var burstProgress = _burstMonitor.ProgressFraction;
+
             _radiusProfile.Fill(_hose.PressureFractions, _pinchSensor.Pinched, _radii);
-            _builder.Build(_hose.Positions, _radii);
+            IReadOnlyList<Vector3> points = _hose.Positions;
+            if (burstProgress > 0f)
+            {
+                ApplyBulge(config, burstProgress);
+                ApplyShake(config, burstProgress);
+                points = _shakenPositions;
+            }
+
+            _builder.Build(points, _radii);
             _mesh.vertices = _builder.Vertices;
             _mesh.normals = _builder.Normals;
             _mesh.RecalculateBounds();
@@ -54,6 +69,23 @@ namespace FlameBlame.Hose.Presentation
         private void OnDestroy()
         {
             Destroy(_mesh);
+        }
+
+        private void ApplyBulge(HoseConfigSO config, float burstProgress)
+        {
+            _radiusProfile.AddBulge(_radii, _burstMonitor.WeakPointIndex, config.BalloonWidthParticles, config.BalloonFraction * burstProgress);
+        }
+
+        private void ApplyShake(HoseConfigSO config, float burstProgress)
+        {
+            var center = _burstMonitor.WeakPointIndex;
+            var phase = Time.time * config.ShakeHertz * Mathf.PI * 2f;
+            for (var index = 0; index < _shakenPositions.Length; index++)
+            {
+                var weight = HoseRadiusProfile.FalloffWeight(index, center, config.BalloonWidthParticles);
+                var jitter = new Vector3(Mathf.Sin(phase + index * 1.7f), Mathf.Sin(phase * 1.3f + index * 2.3f), Mathf.Sin(phase * 0.9f + index * 3.1f));
+                _shakenPositions[index] = _hose.Positions[index] + jitter * (config.ShakeAmplitude * burstProgress * weight);
+            }
         }
     }
 }

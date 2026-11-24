@@ -22,5 +22,20 @@ namespace FlameBlame.Tests.EditMode
             Assert.AreEqual(0.06f, radii[1], Tolerance);
             Assert.AreEqual(0.03f, radii[2], Tolerance);
         }
+
+        [Test]
+        public void AddBulge_SwellsAroundTheCenterAndFadesOutByTheWidth()
+        {
+            var profile = new HoseRadiusProfile(BaseRadius, SwellFraction, SquashFraction);
+            var radii = new[] { 0.05f, 0.05f, 0.05f, 0.05f, 0.05f };
+
+            profile.AddBulge(radii, 2, 2f, 1f);
+
+            Assert.AreEqual(0.05f, radii[0], Tolerance);
+            Assert.AreEqual(0.075f, radii[1], Tolerance);
+            Assert.AreEqual(0.1f, radii[2], Tolerance);
+            Assert.AreEqual(0.075f, radii[3], Tolerance);
+            Assert.AreEqual(0.05f, radii[4], Tolerance);
+        }
     }
 }

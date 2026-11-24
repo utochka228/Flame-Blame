@@ -28,12 +28,21 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] public LayerMask PinchLayers { get; private set; }
         [field: SerializeField, Range(1, 30)] public int PinchChecksPerSecond { get; private set; } = 10;
         [field: SerializeField, Range(0f, 100f)] public float PinchSquashPercent { get; private set; } = 60f;
+        [field: SerializeField, Range(0.2f, 10f)] public float BurstOverloadSeconds { get; private set; } = 1.5f;
+        [field: SerializeField, Range(0.2f, 10f)] public float BurstRecoverSeconds { get; private set; } = 1f;
+        [field: SerializeField, Range(0f, 100f)] public float BurstWeakPointPercent { get; private set; } = 50f;
+        [field: SerializeField, Range(0f, 300f)] public float BalloonPercent { get; private set; } = 120f;
+        [field: SerializeField, Range(1f, 20f)] public float BalloonWidthParticles { get; private set; } = 6f;
+        [field: SerializeField, Range(0f, 0.2f)] public float ShakeAmplitude { get; private set; } = 0.04f;
+        [field: SerializeField, Range(1f, 60f)] public float ShakeHertz { get; private set; } = 25f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
 
         public float PressureSmoothingFractionPerSecond => PressureSmoothingPercentPerSecond.ToFraction();
         public float SwellFraction => SwellPercent.ToFraction();
         public float PinchSquashFraction => PinchSquashPercent.ToFraction();
+        public float BurstWeakPointFraction => BurstWeakPointPercent.ToFraction();
+        public float BalloonFraction => BalloonPercent.ToFraction();
 
         public RopeSettings CreateRopeSettings() => new RopeSettings
         {

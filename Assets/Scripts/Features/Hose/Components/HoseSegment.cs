@@ -67,7 +67,7 @@ namespace FlameBlame.Hose.Components
 
         private void SetTarget(int index, float pressureFraction)
         {
-            _targetPressureFractions[index] = Mathf.Clamp01(pressureFraction);
+            _targetPressureFractions[index] = Mathf.Max(0f, pressureFraction);
         }
     }
 }
