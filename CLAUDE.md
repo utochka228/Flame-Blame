@@ -26,7 +26,7 @@ Be brief. No preambles, no closing recaps. One sentence between tool calls, not 
 
 "Flame & Blame" — Unity 6 project (Editor 6000.3.17f1), URP 17.3, new Input System. A demo of one modular fire hose system where water pressure sets hose stiffness and nozzle force. Details in [DESIGN.md](DESIGN.md).
 
-State: one scene (`Assets/Scenes/SampleScene.unity`), no gameplay scripts yet. Core infrastructure exists in `Assets/Scripts/Core/` (`EventBus`, `PercentExtensions`, `Loggers`); no `.asmdef` files yet — each is created with its feature. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Next: milestone 1, the rope prototype (XPBD rope on a hydrant, pressure slider, tube mesh).
+State: one scene (`Assets/Scenes/SampleScene.unity`) holding the milestone 1 rope prototype (hydrant, hose, boxes, pressure slider). Code: `Assets/Scripts/Core/` (`EventBus`, `PercentExtensions`, `Vector3Extensions`, `Loggers`) and `Assets/Scripts/Features/Hose/` (`XpbdRope`, `HoseSegment`, `TubeMeshBuilder`, `HoseConfigSO`), `Features/UI/`, plus EditMode and PlayMode tests. Assemblies: `FlameBlame.Core`, `.Hose`, `.UI`, `.Tests.EditMode`, `.Tests.PlayMode`; each new feature gets its own `.asmdef`. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Milestone 1 is built; its gate (60 fps WebGL profile, floppy-to-rigid feel) is still open. Next: milestone 2, the pressure network.
 
 ## Project Structure
 

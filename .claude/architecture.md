@@ -1,6 +1,6 @@
 # Architecture
 
-Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is planned, not yet created.
+Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
 
 ## Decisions
 
