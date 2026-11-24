@@ -14,9 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Config.FirefighterConfigSO
   <MoveSpeed>k__BackingField: 5
   <Acceleration>k__BackingField: 40
+  <Deceleration>k__BackingField: 10
   <JumpSpeed>k__BackingField: 6
-  <TurnDegreesPerSecond>k__BackingField: 12
+  <LookDegreesPerPixel>k__BackingField: 0.1
+  <PitchLimitDegrees>k__BackingField: 85
   <GroundCheckDistance>k__BackingField: 0.1
+  <ReachMeters>k__BackingField: 3
+  <AimRadiusMeters>k__BackingField: 0.4
+  <HoldDistanceMeters>k__BackingField: 1.5
+  <GripCompliance>k__BackingField: 0.0000001
+  <AimGripCompliance>k__BackingField: 0.00001
+  <GripFollowSeconds>k__BackingField: 0.12
+  <PullAccelerationMultiplier>k__BackingField: 0.05
+  <MaxPullAcceleration>k__BackingField: 6
+  <RecoilTransferMultiplier>k__BackingField: 1
+  <MaxSpeed>k__BackingField: 20
+  <ThrowSpeed>k__BackingField: 12
   <GroundLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 311

@@ -29,7 +29,7 @@ MonoBehaviour:
   <TubeMiterLimit>k__BackingField: 1.5
   <CollisionLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 311
   <PinchLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 256
@@ -45,5 +45,9 @@ MonoBehaviour:
   <MaxPressure>k__BackingField: 100
   <LossPerMeter>k__BackingField: 2
   <BurstLeakLoss>k__BackingField: 40
+  <HeldUpstreamRigidityPercent>k__BackingField: 50
+  <HeldFreeRigidityPercent>k__BackingField: 5
+  <HeldUpstreamDampingMultiplier>k__BackingField: 2.5
+  <HeldFreeDampingMultiplier>k__BackingField: 0.7
   <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
   <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e606044197acc4105a05cf96bb50e856, type: 3}
+  m_Name: NozzleConfig
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Config.NozzleConfigSO
+  <MaxJetLength>k__BackingField: 6
+  <BaseSpreadDegrees>k__BackingField: 6
+  <ThumbSpreadDegrees>k__BackingField: 40
+  <RecoilAcceleration>k__BackingField: 25
+  <ThumbBoostPercent>k__BackingField: 50
+  <PushForce>k__BackingField: 40
+  <PushRadius>k__BackingField: 0.15
+  <PushLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  <ParticleLifetime>k__BackingField: 0.6
+  <ParticlesPerSecondAtFullFlow>k__BackingField: 300
