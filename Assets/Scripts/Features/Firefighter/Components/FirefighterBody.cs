@@ -28,7 +28,7 @@ namespace FlameBlame.Firefighter.Components
             _capsule = GetComponent<CapsuleCollider>();
             _body.freezeRotation = true;
             _look = new LookState(_config.LookDegreesPerPixel, _config.PitchLimitDegrees, transform.eulerAngles.y);
-            _motion = new FirefighterMotion(_config.MoveSpeed, _config.Acceleration, _config.JumpSpeed);
+            _motion = new FirefighterMotion(_config.MoveSpeed, _config.Acceleration, _config.Deceleration, _config.JumpSpeed);
         }
 
         private void FixedUpdate()
@@ -39,7 +39,7 @@ namespace FlameBlame.Firefighter.Components
                 velocity = _motion.Jump(velocity);
 
             _jumpRequested = false;
-            _body.linearVelocity = velocity;
+            _body.linearVelocity = Vector3.ClampMagnitude(velocity, _config.MaxSpeed);
             _body.MoveRotation(facing);
         }
 

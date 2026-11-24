@@ -8,6 +8,7 @@ namespace FlameBlame.Firefighter.Simulation
         None = 0,
         Jump = 1 << 0,
         Grab = 1 << 1,
-        Throw = 1 << 2
+        Throw = 1 << 2,
+        Thumb = 1 << 3
     }
 }

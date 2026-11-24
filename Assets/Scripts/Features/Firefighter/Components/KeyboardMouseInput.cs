@@ -16,7 +16,8 @@ namespace FlameBlame.Firefighter.Components
                 return default;
 
             var move = new Vector2(Axis(keyboard.aKey, keyboard.dKey), Axis(keyboard.sKey, keyboard.wKey));
-            return new FirefighterCommands(move, mouse.delta.ReadValue(), PressedButtons(keyboard, mouse));
+            var held = keyboard.rKey.isPressed ? FirefighterButtons.Thumb : FirefighterButtons.None;
+            return new FirefighterCommands(move, mouse.delta.ReadValue(), PressedButtons(keyboard, mouse), held);
         }
 
         private static FirefighterButtons PressedButtons(Keyboard keyboard, Mouse mouse)
