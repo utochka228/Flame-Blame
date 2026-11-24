@@ -21,6 +21,8 @@ namespace FlameBlame.Firefighter.Components
         private HoseSegment _heldHose;
         private HoldTracker _hold;
 
+        public RopeParticle HeldParticle => IsHolding ? _network.World.GripParticle(_grip) : RopeParticle.None;
+
         private bool IsHolding => _grip != NoGrip;
         private bool IsHoldingNozzle => _aimGrip != NoGrip;
 
@@ -62,6 +64,12 @@ namespace FlameBlame.Firefighter.Components
 
             var pull = _network.World.GripTension(_grip) * _config.PullAccelerationMultiplier;
             _body.AddForce(Vector3.ClampMagnitude(pull, _config.MaxPullAcceleration), ForceMode.Acceleration);
+        }
+
+        public void Drop()
+        {
+            if (IsHolding)
+                ReleaseGrips();
         }
 
         private void OnDriven(FirefighterCommands commands)

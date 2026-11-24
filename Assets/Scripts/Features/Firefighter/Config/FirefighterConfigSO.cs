@@ -16,6 +16,8 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(0.1f, 1f)] public float AimRadiusMeters { get; private set; } = 0.4f;
         [field: SerializeField, Range(0.5f, 3f)] public float HoldDistanceMeters { get; private set; } = 1.5f;
         [field: SerializeField, Range(1f, 10f)] public float MaxGripDistanceMeters { get; private set; } = 3.5f;
+        [field: SerializeField, Range(0.2f, 2f)] public float ConnectRadiusMeters { get; private set; } = 0.6f;
+        [field: SerializeField] public LayerMask InteractLayers { get; private set; } = ~0;
         [field: SerializeField, Min(1e-9f)] public float GripCompliance { get; private set; } = 1e-7f;
         [field: SerializeField, Min(1e-9f)] public float AimGripCompliance { get; private set; } = 1e-5f;
         [field: SerializeField, Range(0.01f, 0.5f)] public float GripFollowSeconds { get; private set; } = 0.12f;

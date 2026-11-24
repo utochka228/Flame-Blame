@@ -27,6 +27,8 @@ namespace FlameBlame.Firefighter.Components
                 pressed |= FirefighterButtons.Jump;
             if (keyboard.eKey.wasPressedThisFrame)
                 pressed |= FirefighterButtons.Grab;
+            if (keyboard.fKey.wasPressedThisFrame)
+                pressed |= FirefighterButtons.Use;
             if (mouse.leftButton.wasPressedThisFrame)
                 pressed |= FirefighterButtons.Throw;
 

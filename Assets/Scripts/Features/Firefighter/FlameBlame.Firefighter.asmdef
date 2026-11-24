@@ -4,6 +4,7 @@
     "references": [
         "FlameBlame.Core",
         "FlameBlame.Hose",
+        "FlameBlame.Pressure",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],
