@@ -1,6 +1,6 @@
 # Architecture
 
-Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/Pressure` (Simulation, Components), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
+Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/Pressure` (Simulation, Components), `Features/Firefighter` (Simulation, Components, Config), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
 
 ## Decisions
 
@@ -29,7 +29,7 @@ Assets/Scripts/
       Config/                 HoseConfigSO (ScriptableObject)
       Events/                 HoseBurst, HoseConnected, NozzleRecoil
       Editor/                 FlameBlame.Hose.Editor
-    Pressure/ Water/ Fire/ Firefighter/ Interactables/ CameraRig/
+    Pressure/ Water/ Fire/ Firefighter/ Interactables/
     UI/                       FlameBlame.UI
   Bootstrap/                  FlameBlame.Bootstrap: GameBootstrap, scene wiring
   Tests/EditMode, Tests/PlayMode

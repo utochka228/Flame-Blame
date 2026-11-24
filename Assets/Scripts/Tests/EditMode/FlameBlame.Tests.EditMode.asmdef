@@ -3,6 +3,7 @@
     "rootNamespace": "FlameBlame.Tests.EditMode",
     "references": [
         "FlameBlame.Core",
+        "FlameBlame.Firefighter",
         "FlameBlame.Hose",
         "FlameBlame.Pressure",
         "UnityEngine.TestRunner",

@@ -106,16 +106,16 @@ Comedy beats:
 
 ## Multiplayer showcase
 
-Decided: local co-op for two players on one screen, sharing a keyboard or using gamepads. A reviewer playing alone can still try both roles by swapping between the two firefighters.
+Decided: one first-person player who swaps between the two firefighters with Tab; the idle one stays where it is.
 
 | Mode | How it works | Status |
 | --- | --- | --- |
-| Local two-player co-op | Player 1 on one half of the keyboard, player 2 on the other half, or either on a gamepad | Core |
+| Local two-player co-op | Needs split-screen with a first-person camera | Cut |
 | Character swap (solo) | One key switches control between the two firefighters; the idle one stays where it is, and can still end up standing on your hose | Core |
 | Simple AI buddy | Takes the second firefighter in solo play: holds a line or works the valve | Stretch |
 | Online multiplayer | Not built: XPBD rope sync over WebSockets is high risk for a small demo | Cut |
 
-Shared camera: one dynamic camera frames all firefighters, zooming out as they spread, as in other couch co-op games.
+First-person camera: each firefighter has an eye camera; only the active one renders.
 
 If the AI buddy stretch goal is built, it's deliberately a bit dumb. It follows simple behaviours on a NavMesh, and its mistakes are a feature: it wanders onto your hose, opens the valve at the wrong moment, or slides through puddles.
 
@@ -247,7 +247,7 @@ Scripts/
       Events/                 HoseBurst, HoseConnected, NozzleRecoil
       Editor/                 FlameBlame.Hose.Editor: gizmos, debug inspector
     Pressure/                 FlameBlame.Pressure (mostly Simulation/)
-    Water/  Fire/  Firefighter/  Interactables/  CameraRig/
+    Water/  Fire/  Firefighter/  Interactables/
     UI/                       FlameBlame.UI
   Bootstrap/                  FlameBlame.Bootstrap: GameBootstrap, scene wiring
   Tests/
@@ -333,7 +333,8 @@ The demo ships the core rule, seven part types and four puzzles. Everything else
 | Thumb boost, tape, recoil, jetting, bridge, rope, throw, tie | In | The actions the four puzzles need |
 | Standing on the hose, door pinch and cut, fire damage, bursts | In | Two-way interactions with existing systems |
 | Slippery puddles, steam | In | Cheap, funny, and reuse the water system |
-| Local two-player co-op, character swap | In | Shows co-op on one machine; solo reviewers can try both roles |
+| Character swap | In | One key switches between the two firefighters |
+| Local two-player co-op | Cut | First-person view would need split-screen |
 | Simple AI buddy | Stretch | Nice for solo play, not required |
 | Fake kinks (sharp bend angle reduces flow) | Stretch | Stable and cheap, but standing on the hose already covers the idea |
 | Real knot detection | Cut | Unstable and expensive for little payoff |
@@ -351,7 +352,7 @@ Work runs in five phases, and each one must pass its gate before the next starts
    - Gate: stays stable at 60 fps, and floppy-to-rigid feels good.
 2. **Pressure network.** Couplings, Y-splitter, valve, pinches, leaks, burst sequence. EditMode tests for the pressure solver.
    - Gate: solver tests pass; bursts and pinches read at a glance.
-3. **Player and hose actions.** Grab, carry, spray, thumb, recoil, jet, throw, tie, bridge, climb, tape. Local two-player co-op, character swap, shared camera.
+3. **Player and hose actions.** Grab, carry, spray, thumb, recoil, jet, throw, tie, bridge, climb, tape. Character swap, first-person camera.
    - Gate: every action works in a test room.
 4. **Systems and level.** Fire, doors, puddles, steam, pushable objects. The burning building with its four puzzles.
    - Gate: level completable start to finish by every route.
