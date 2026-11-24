@@ -1,3 +1,4 @@
+using FlameBlame.Core.Extensions;
 using UnityEngine;
 
 namespace FlameBlame.Firefighter.Config
@@ -27,5 +28,15 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(5f, 40f)] public float MaxSpeed { get; private set; } = 20f;
         [field: SerializeField, Range(1f, 30f)] public float ThrowSpeed { get; private set; } = 12f;
         [field: SerializeField] public LayerMask GroundLayers { get; private set; } = ~0;
+        [field: SerializeField, Range(0.5f, 5f)] public float ClimbSpeed { get; private set; } = 2f;
+        [field: SerializeField, Range(0f, 1f)] public float ClimbStandOffMeters { get; private set; } = 0.25f;
+        [field: SerializeField, Range(0f, 100f)] public float ClimbMaxPressurePercent { get; private set; } = 20f;
+        [field: SerializeField, Range(0f, 0.01f)] public float TieSpeedMultiplier { get; private set; } = 0.0005f;
+        [field: SerializeField, Range(0f, 5000f)] public float TieMinTension { get; private set; } = 500f;
+        [field: SerializeField, Range(0.1f, 3f)] public float TieBlendSeconds { get; private set; } = 0.6f;
+        [field: SerializeField, Range(1f, 100f)] public float TieAcceleration { get; private set; } = 60f;
+        [field: SerializeField, Range(0.5f, 10f)] public float MaxTieSpeed { get; private set; } = 3f;
+
+        public float ClimbMaxPressureFraction => ClimbMaxPressurePercent.ToFraction();
     }
 }

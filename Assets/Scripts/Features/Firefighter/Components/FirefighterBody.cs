@@ -19,6 +19,7 @@ namespace FlameBlame.Firefighter.Components
         private bool _jumpRequested;
 
         public Camera Eye => _eye;
+        public bool IsMotionOverridden { get; set; }
 
         public event Action<FirefighterCommands> Driven;
 
@@ -34,13 +35,15 @@ namespace FlameBlame.Firefighter.Components
         private void FixedUpdate()
         {
             var facing = Quaternion.Euler(0f, _look.Yaw, 0f);
+            _body.MoveRotation(facing);
+            if (IsMotionOverridden) return;
+
             var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime);
             if (_jumpRequested && IsGrounded())
                 velocity = _motion.Jump(velocity);
 
             _jumpRequested = false;
             _body.linearVelocity = Vector3.ClampMagnitude(velocity, _config.MaxSpeed);
-            _body.MoveRotation(facing);
         }
 
         public void Drive(FirefighterCommands commands)

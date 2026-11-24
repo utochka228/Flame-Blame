@@ -1,11 +1,15 @@
 namespace FlameBlame.Firefighter.Simulation
 {
-    public readonly struct UseContext
+    public struct UseContext
     {
-        public bool CanConnectHeldEnd { get; }
-        public bool BurstInReach { get; }
-        public bool JointInReach { get; }
-        public bool ValveInReach { get; }
+        public bool CanConnectHeldEnd { get; private set; }
+        public bool BurstInReach { get; private set; }
+        public bool JointInReach { get; private set; }
+        public bool ValveInReach { get; private set; }
+        public bool CanTieHeld { get; private set; }
+        public bool TiedInReach { get; private set; }
+        public bool RopeInReach { get; private set; }
+        public bool IsClimbing { get; private set; }
 
         public UseContext(bool canConnectHeldEnd, bool burstInReach, bool jointInReach, bool valveInReach)
         {
@@ -13,6 +17,26 @@ namespace FlameBlame.Firefighter.Simulation
             BurstInReach = burstInReach;
             JointInReach = jointInReach;
             ValveInReach = valveInReach;
+            CanTieHeld = false;
+            TiedInReach = false;
+            RopeInReach = false;
+            IsClimbing = false;
+        }
+
+        public UseContext WithTie(bool canTieHeld, bool tiedInReach)
+        {
+            var copy = this;
+            copy.CanTieHeld = canTieHeld;
+            copy.TiedInReach = tiedInReach;
+            return copy;
+        }
+
+        public UseContext WithClimb(bool ropeInReach, bool isClimbing)
+        {
+            var copy = this;
+            copy.RopeInReach = ropeInReach;
+            copy.IsClimbing = isClimbing;
+            return copy;
         }
     }
 }

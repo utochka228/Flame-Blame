@@ -6,6 +6,10 @@ namespace FlameBlame.Firefighter.Simulation
         Connect = 1,
         Tape = 2,
         Disconnect = 3,
-        ToggleValve = 4
+        ToggleValve = 4,
+        Tie = 5,
+        Untie = 6,
+        Climb = 7,
+        StopClimb = 8
     }
 }

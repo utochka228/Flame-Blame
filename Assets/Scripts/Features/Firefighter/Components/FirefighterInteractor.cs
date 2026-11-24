@@ -13,6 +13,8 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseGrabber _grabber;
         [SerializeField] private HoseNetwork _network;
+        [SerializeField] private HoseTie _tie;
+        [SerializeField] private HoseClimber _climber;
 
         private void OnEnable()
         {
@@ -29,7 +31,9 @@ namespace FlameBlame.Firefighter.Components
             if (!commands.WasPressed(FirefighterButtons.Use)) return;
 
             var targets = FindTargets();
-            var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve);
+            var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve)
+                .WithTie(targets.CanTie, targets.TiedInReach)
+                .WithClimb(targets.CanClimb, _climber.IsClimbing);
             Execute(UseResolver.Resolve(context), targets);
         }
 
@@ -42,7 +46,24 @@ namespace FlameBlame.Firefighter.Components
                              _network.TryFindFreeEnd(_network.EndPosition(heldEnd), _config.ConnectRadiusMeters, heldEnd, out connectTarget);
             _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
             var joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
-            return new UseTargets(canConnect, heldEnd, connectTarget, burst, joint, FindValve(eye));
+            var hasTieTarget = _tie.TryFindTarget(eye, out var tieTarget);
+            var isTied = hasTieTarget && _tie.IsTied(tieTarget.Body);
+            var climbParticle = RopeParticle.None;
+            var canClimb = _grabber.HeldParticle.IsNone && _climber.TryFindRope(eye, out climbParticle);
+            return new UseTargets
+            {
+                CanConnect = canConnect,
+                HeldEnd = heldEnd,
+                ConnectTarget = connectTarget,
+                BurstMonitor = burst,
+                Joint = joint,
+                ValveSource = FindValve(eye),
+                TieTarget = tieTarget,
+                CanTie = hasTieTarget && !isTied && !_grabber.HeldParticle.IsNone,
+                TiedInReach = isTied,
+                ClimbParticle = climbParticle,
+                CanClimb = canClimb
+            };
         }
 
         private void Execute(UseAction action, UseTargets targets)
@@ -61,6 +82,20 @@ namespace FlameBlame.Firefighter.Components
                     break;
                 case UseAction.ToggleValve:
                     targets.ValveSource.IsOpen = !targets.ValveSource.IsOpen;
+                    break;
+                case UseAction.Tie:
+                    var held = _grabber.HeldParticle;
+                    _grabber.Drop();
+                    _tie.Tie(held, targets.TieTarget);
+                    break;
+                case UseAction.Untie:
+                    _tie.Untie(targets.TieTarget.Body);
+                    break;
+                case UseAction.Climb:
+                    _climber.Begin(targets.ClimbParticle);
+                    break;
+                case UseAction.StopClimb:
+                    _climber.Stop();
                     break;
             }
         }
@@ -82,28 +117,22 @@ namespace FlameBlame.Firefighter.Components
             return hit.collider.GetComponentInParent<PressureSource>();
         }
 
-        private readonly struct UseTargets
+        private struct UseTargets
         {
-            public bool CanConnect { get; }
-            public HoseEndRef HeldEnd { get; }
-            public HoseEndRef ConnectTarget { get; }
-            public HoseBurstMonitor BurstMonitor { get; }
-            public int Joint { get; }
-            public PressureSource ValveSource { get; }
+            public bool CanConnect { get; set; }
+            public HoseEndRef HeldEnd { get; set; }
+            public HoseEndRef ConnectTarget { get; set; }
+            public HoseBurstMonitor BurstMonitor { get; set; }
+            public int Joint { get; set; }
+            public PressureSource ValveSource { get; set; }
+            public HoseTie.TieTarget TieTarget { get; set; }
+            public bool CanTie { get; set; }
+            public bool TiedInReach { get; set; }
+            public RopeParticle ClimbParticle { get; set; }
+            public bool CanClimb { get; set; }
 
             public bool Burst => BurstMonitor;
             public bool Valve => ValveSource;
-
-            public UseTargets(bool canConnect, HoseEndRef heldEnd, HoseEndRef connectTarget, HoseBurstMonitor burstMonitor, int joint,
-                PressureSource valveSource)
-            {
-                CanConnect = canConnect;
-                HeldEnd = heldEnd;
-                ConnectTarget = connectTarget;
-                BurstMonitor = burstMonitor;
-                Joint = joint;
-                ValveSource = valveSource;
-            }
         }
     }
 }
