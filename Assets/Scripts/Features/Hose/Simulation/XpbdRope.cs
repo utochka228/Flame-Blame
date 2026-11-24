@@ -21,11 +21,13 @@ namespace FlameBlame.Hose.Simulation
         private readonly float _floppyBendLog;
         private readonly float _rigidBendLog;
 
+        private float _substepTime;
         private Vector3 _anchorPosition;
         private Vector3 _anchorDirection;
 
         public IReadOnlyList<Vector3> Positions => _positions;
         public IReadOnlyList<Vector3> PreviousPositions => _previousStepPositions;
+        public bool IsPinned { get; set; } = true;
 
         public float RigidityFraction
         {
@@ -71,26 +73,68 @@ namespace FlameBlame.Hose.Simulation
 
         public void Step(float deltaTime)
         {
-            Array.Copy(_positions, _previousStepPositions, _positions.Length);
-            ApplyAnchor();
-            _collider.Prepare(_positions, _settings.ParticleRadius);
-
-            var substepTime = deltaTime / _settings.Substeps;
-            UpdateBendAlphas(substepTime);
+            BeginStep(deltaTime, _settings.Substeps);
             for (var substep = 0; substep < _settings.Substeps; substep++)
             {
-                Integrate(substepTime);
-                SolveBends();
-                SolveDistances();
-
-                Collide();
-                UpdateVelocities(substepTime);
+                Integrate();
+                SolveConstraints();
+                FinishSubstep();
             }
 
+            EndStep();
+        }
+
+        public void BeginStep(float deltaTime, int substeps)
+        {
+            Array.Copy(_positions, _previousStepPositions, _positions.Length);
+            if (IsPinned)
+                ApplyAnchor();
+
+            _collider.Prepare(_positions, _settings.ParticleRadius);
+            _substepTime = deltaTime / substeps;
+            UpdateBendAlphas(_substepTime);
+        }
+
+        public void Integrate()
+        {
+            var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _substepTime);
+            for (var index = 0; index < _positions.Length; index++)
+            {
+                _substepStartPositions[index] = _positions[index];
+                if (index < FirstFreeIndex) continue;
+
+                var velocity = (_velocities[index] + _settings.Gravity * _substepTime) * dampingFactor;
+                velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
+                _velocities[index] = velocity;
+                _positions[index] += velocity * _substepTime;
+            }
+        }
+
+        public void SolveConstraints()
+        {
+            SolveBends();
+            SolveDistances();
+        }
+
+        public void FinishSubstep()
+        {
+            Collide();
+            UpdateVelocities();
+        }
+
+        public void EndStep()
+        {
             RecoverStretch();
 
             if (!IsFinite())
                 RestoreLastGoodState();
+        }
+
+        public bool IsMovable(int index) => index >= FirstFreeIndex;
+
+        public void SetPosition(int index, Vector3 position)
+        {
+            _positions[index] = position;
         }
 
         private void UpdateBendAlphas(float substepTime)
@@ -99,7 +143,9 @@ namespace FlameBlame.Hose.Simulation
                 _bendAlphas[index] = Mathf.Exp(Mathf.Lerp(_floppyBendLog, _rigidBendLog, _particleRigidity[index])) / (substepTime * substepTime);
         }
 
-        private static float InverseMass(int index) => index < AnchoredCount ? 0f : 1f;
+        private int FirstFreeIndex => IsPinned ? AnchoredCount : 0;
+
+        private float InverseMass(int index) => index < FirstFreeIndex ? 0f : 1f;
 
         private void ApplyAnchor()
         {
@@ -107,21 +153,6 @@ namespace FlameBlame.Hose.Simulation
             _positions[1] = _anchorPosition + _anchorDirection * _settings.Spacing;
             _velocities[0] = Vector3.zero;
             _velocities[1] = Vector3.zero;
-        }
-
-        private void Integrate(float substepTime)
-        {
-            var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * substepTime);
-            for (var index = 0; index < _positions.Length; index++)
-            {
-                _substepStartPositions[index] = _positions[index];
-                if (index < AnchoredCount) continue;
-
-                var velocity = (_velocities[index] + _settings.Gravity * substepTime) * dampingFactor;
-                velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
-                _velocities[index] = velocity;
-                _positions[index] += velocity * substepTime;
-            }
         }
 
         private void SolveDistances()
@@ -153,7 +184,7 @@ namespace FlameBlame.Hose.Simulation
 
         private void Collide()
         {
-            for (var index = AnchoredCount; index < _positions.Length; index++)
+            for (var index = FirstFreeIndex; index < _positions.Length; index++)
             {
                 var unresolved = _positions[index];
                 var resolved = _collider.Resolve(unresolved, _settings.ParticleRadius);
@@ -167,16 +198,16 @@ namespace FlameBlame.Hose.Simulation
             }
         }
 
-        private void UpdateVelocities(float substepTime)
+        private void UpdateVelocities()
         {
-            for (var index = AnchoredCount; index < _positions.Length; index++)
-                _velocities[index] = (_positions[index] - _substepStartPositions[index]) / substepTime;
+            for (var index = FirstFreeIndex; index < _positions.Length; index++)
+                _velocities[index] = (_positions[index] - _substepStartPositions[index]) / _substepTime;
         }
 
         private void RecoverStretch()
         {
             var maxLength = _settings.Spacing * (1f + _settings.MaxStretchFraction);
-            for (var index = AnchoredCount; index < _positions.Length; index++)
+            for (var index = Mathf.Max(FirstFreeIndex, 1); index < _positions.Length; index++)
             {
                 var delta = _positions[index] - _positions[index - 1];
                 var length = delta.magnitude;
