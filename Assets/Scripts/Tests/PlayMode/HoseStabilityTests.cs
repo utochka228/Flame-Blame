@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Reflection;
+using FlameBlame.Core.Extensions;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Config;
 using NUnit.Framework;
@@ -99,8 +100,7 @@ namespace FlameBlame.Tests.PlayMode
             for (var index = 0; index < positions.Count; index++)
             {
                 var position = positions[index];
-                Assert.IsFalse(float.IsNaN(position.x + position.y + position.z), "NaN at particle {0}", index);
-                Assert.IsFalse(float.IsInfinity(position.x + position.y + position.z), "Infinity at particle {0}", index);
+                Assert.IsTrue(position.IsFinite(), "Non-finite position at particle {0}", index);
                 Assert.GreaterOrEqual(position.y, -FloorTolerance, "Particle {0} sank through the floor", index);
                 if (index > 0)
                     length += Vector3.Distance(position, positions[index - 1]);

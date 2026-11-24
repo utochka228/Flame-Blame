@@ -24,6 +24,9 @@ MonoBehaviour:
   <MaxStretchFraction>k__BackingField: 0.1
   <PressureSmoothingPercentPerSecond>k__BackingField: 100
   <SwellPercent>k__BackingField: 40
+  <TubeSamplesPerSegment>k__BackingField: 4
+  <TubeRingSides>k__BackingField: 12
+  <TubeMiterLimit>k__BackingField: 1.5
   <CollisionLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 4294967295

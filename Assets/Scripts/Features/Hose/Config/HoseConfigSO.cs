@@ -7,16 +7,18 @@ namespace FlameBlame.Hose.Config
     [CreateAssetMenu(fileName = "HoseConfig", menuName = "FlameBlame/Configs/Hose")]
     public class HoseConfigSO : ScriptableObject
     {
-        [field: SerializeField, Range(8, 120)] public int ParticleCount { get; private set; } = 50;
-        [field: SerializeField, Range(0.1f, 0.4f)] public float Spacing { get; private set; } = 0.2f;
-        [field: SerializeField, Range(0.02f, 0.15f)] public float ParticleRadius { get; private set; } = 0.05f;
-        [field: SerializeField, Range(2, 16)] public int Substeps { get; private set; } = 8;
-        [field: SerializeField] public float FloppyBendCompliance { get; private set; } = 1f;
-        [field: SerializeField] public float RigidBendCompliance { get; private set; } = 1e-6f;
-        [field: SerializeField, Range(0f, 5f)] public float Damping { get; private set; } = 2.5f;
-        [field: SerializeField, Range(0f, 1f)] public float GroundFriction { get; private set; } = 0.3f;
-        [field: SerializeField, Range(5f, 40f)] public float MaxSpeed { get; private set; } = 20f;
-        [field: SerializeField, Range(0.02f, 0.5f)] public float MaxStretchFraction { get; private set; } = 0.1f;
+        private static readonly RopeSettings Defaults = new RopeSettings();
+
+        [field: SerializeField, Range(8, 120)] public int ParticleCount { get; private set; } = Defaults.ParticleCount;
+        [field: SerializeField, Range(0.1f, 0.4f)] public float Spacing { get; private set; } = Defaults.Spacing;
+        [field: SerializeField, Range(0.02f, 0.15f)] public float ParticleRadius { get; private set; } = Defaults.ParticleRadius;
+        [field: SerializeField, Range(2, 16)] public int Substeps { get; private set; } = Defaults.Substeps;
+        [field: SerializeField] public float FloppyBendCompliance { get; private set; } = Defaults.FloppyBendCompliance;
+        [field: SerializeField] public float RigidBendCompliance { get; private set; } = Defaults.RigidBendCompliance;
+        [field: SerializeField, Range(0f, 5f)] public float Damping { get; private set; } = Defaults.Damping;
+        [field: SerializeField, Range(0f, 1f)] public float GroundFriction { get; private set; } = Defaults.GroundFriction;
+        [field: SerializeField, Range(5f, 40f)] public float MaxSpeed { get; private set; } = Defaults.MaxSpeed;
+        [field: SerializeField, Range(0.02f, 0.5f)] public float MaxStretchFraction { get; private set; } = Defaults.MaxStretchFraction;
         [field: SerializeField, Range(0f, 200f)] public float PressureSmoothingPercentPerSecond { get; private set; } = 100f;
         [field: SerializeField, Range(0f, 100f)] public float SwellPercent { get; private set; } = 40f;
         [field: SerializeField, Range(1, 8)] public int TubeSamplesPerSegment { get; private set; } = 4;

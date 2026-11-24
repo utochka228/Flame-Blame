@@ -1,3 +1,4 @@
+using FlameBlame.Core.Extensions;
 using FlameBlame.Hose.Simulation;
 using NUnit.Framework;
 using UnityEngine;
@@ -46,8 +47,7 @@ namespace FlameBlame.Tests.EditMode
         {
             foreach (var position in rope.Positions)
             {
-                if (float.IsNaN(position.x) || float.IsNaN(position.y) || float.IsNaN(position.z)) return false;
-                if (float.IsInfinity(position.x) || float.IsInfinity(position.y) || float.IsInfinity(position.z)) return false;
+                if (!position.IsFinite()) return false;
             }
 
             return true;

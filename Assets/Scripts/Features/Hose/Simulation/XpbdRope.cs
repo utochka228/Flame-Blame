@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FlameBlame.Core.Extensions;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Simulation
@@ -174,8 +175,7 @@ namespace FlameBlame.Hose.Simulation
         {
             foreach (var position in _positions)
             {
-                if (float.IsNaN(position.x) || float.IsNaN(position.y) || float.IsNaN(position.z)) return false;
-                if (float.IsInfinity(position.x) || float.IsInfinity(position.y) || float.IsInfinity(position.z)) return false;
+                if (!position.IsFinite()) return false;
             }
 
             return true;

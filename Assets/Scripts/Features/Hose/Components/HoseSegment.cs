@@ -26,13 +26,8 @@ namespace FlameBlame.Hose.Components
 
         private void Awake()
         {
-            var collisionProbe = new GameObject("HoseCollisionProbe");
-            collisionProbe.transform.SetParent(transform, false);
-            var probe = collisionProbe.AddComponent<SphereCollider>();
-            probe.isTrigger = true;
-
             _rope = new XpbdRope(_config.CreateRopeSettings(), _outlet.position, _outlet.forward,
-                new PhysicsRopeCollider(_config.CollisionLayers, probe));
+                new PhysicsRopeCollider(_config.CollisionLayers, transform));
             _interpolatedPositions = new Vector3[_rope.Positions.Count];
             Interpolate();
         }

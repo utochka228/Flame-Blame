@@ -1,0 +1,135 @@
+using System.Collections.Generic;
+using FlameBlame.Core.Extensions;
+using FlameBlame.Hose.Presentation;
+using NUnit.Framework;
+using UnityEngine;
+
+namespace FlameBlame.Tests.EditMode
+{
+    public class TubeMeshBuilderTests
+    {
+        private const int Samples = 4;
+        private const int Sides = 12;
+        private const float MiterLimit = 1.5f;
+        private const float Radius = 0.05f;
+        private const float Spacing = 0.2f;
+
+        private static TubeMeshBuilder CreateBuilder(int particleCount) => new TubeMeshBuilder(particleCount, Samples, Sides, MiterLimit);
+
+        private static Vector3[] StraightLine(int count)
+        {
+            var points = new Vector3[count];
+            for (var index = 0; index < count; index++)
+                points[index] = new Vector3(index * Spacing, 0f, 0f);
+            return points;
+        }
+
+        private static Vector3[] RightAngle()
+        {
+            var points = new List<Vector3>();
+            for (var index = 0; index < 6; index++)
+                points.Add(new Vector3(index * Spacing, 0f, 0f));
+            for (var index = 1; index < 6; index++)
+                points.Add(new Vector3(5 * Spacing, index * Spacing, 0f));
+            return points.ToArray();
+        }
+
+        private static bool AllFinite(IReadOnlyList<Vector3> vectors)
+        {
+            foreach (var vector in vectors)
+            {
+                if (!vector.IsFinite()) return false;
+            }
+
+            return true;
+        }
+
+        [Test]
+        public void Build_ProducesExpectedBufferSizes()
+        {
+            var builder = CreateBuilder(10);
+
+            builder.Build(StraightLine(10), Radius);
+
+            var ringCount = 9 * Samples + 1;
+            Assert.AreEqual(ringCount * Sides, builder.Vertices.Length);
+            Assert.AreEqual(builder.Vertices.Length, builder.Normals.Length);
+            Assert.AreEqual((ringCount - 1) * Sides * 6, builder.Triangles.Length);
+        }
+
+        [Test]
+        public void Build_TrianglesFaceOutward()
+        {
+            var builder = CreateBuilder(10);
+
+            builder.Build(StraightLine(10), Radius);
+
+            for (var index = 0; index < builder.Triangles.Length; index += 3)
+            {
+                var first = builder.Vertices[builder.Triangles[index]];
+                var second = builder.Vertices[builder.Triangles[index + 1]];
+                var third = builder.Vertices[builder.Triangles[index + 2]];
+                var faceNormal = Vector3.Cross(second - first, third - first);
+                var radial = (first + second + third) / 3f;
+                radial.x = 0f;
+                Assert.Greater(Vector3.Dot(faceNormal, radial), 0f, "Triangle {0} faces inward", index / 3);
+            }
+        }
+
+        [Test]
+        public void Build_NormalsAreUnitLength()
+        {
+            var builder = CreateBuilder(11);
+
+            builder.Build(RightAngle(), Radius);
+
+            foreach (var normal in builder.Normals)
+                Assert.AreEqual(1f, normal.magnitude, 1e-3f);
+        }
+
+        [Test]
+        public void Build_HairpinStaysFinite()
+        {
+            var points = new List<Vector3>();
+            for (var index = 0; index < 6; index++)
+                points.Add(new Vector3(index * Spacing, 0f, 0f));
+            for (var index = 4; index >= 0; index--)
+                points.Add(new Vector3(index * Spacing, 0.01f, 0f));
+            var builder = CreateBuilder(points.Count);
+
+            builder.Build(points, Radius);
+
+            Assert.IsTrue(AllFinite(builder.Vertices));
+            Assert.IsTrue(AllFinite(builder.Normals));
+        }
+
+        [Test]
+        public void Build_CoincidentPointsStayFinite()
+        {
+            var points = new Vector3[8];
+            var builder = CreateBuilder(points.Length);
+
+            builder.Build(points, Radius);
+
+            Assert.IsTrue(AllFinite(builder.Vertices));
+            Assert.IsTrue(AllFinite(builder.Normals));
+        }
+
+        [Test]
+        public void Build_BendKeepsTubeAtLeastAsThickAsRadius()
+        {
+            var points = RightAngle();
+            var builder = CreateBuilder(points.Length);
+
+            builder.Build(points, Radius);
+
+            foreach (var vertex in builder.Vertices)
+            {
+                var nearest = float.MaxValue;
+                foreach (var center in builder.Centers)
+                    nearest = Mathf.Min(nearest, Vector3.Distance(vertex, center));
+                Assert.GreaterOrEqual(nearest, Radius * 0.9f);
+            }
+        }
+    }
+}
