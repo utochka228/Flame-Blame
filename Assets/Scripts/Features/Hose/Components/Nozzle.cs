@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FlameBlame.Hose.Config;
 using FlameBlame.Hose.Simulation;
 using UnityEngine;
@@ -21,8 +22,13 @@ namespace FlameBlame.Hose.Components
         public float ThumbFraction { get; set; }
         public float ThumbBoostFraction => _config.ThumbBoostFraction;
         public Vector3 RecoilAcceleration { get; private set; }
+        public float Spacing => _hose.Config.Spacing;
+        public Vector3 CurrentDirection => JetDirection(_hose.Rope.Positions);
+        public RopeParticle TipParticle => new RopeParticle(_network.RopeIndex(_hose), TipIndex);
+        public RopeParticle InnerParticle => new RopeParticle(_network.RopeIndex(_hose), InnerIndex);
 
         private int TipIndex => _tip == RopeEndKind.Tail ? _hose.Rope.Positions.Count - 1 : 0;
+        private int InnerIndex => _tip == RopeEndKind.Tail ? TipIndex - 1 : TipIndex + 1;
 
         private void Awake()
         {
@@ -34,7 +40,7 @@ namespace FlameBlame.Hose.Components
             _output = _model.Evaluate(_tipPressureFraction, ThumbFraction);
             var direction = JetDirection(_hose.Rope.Positions);
             RecoilAcceleration = -direction * _output.RecoilAcceleration;
-            _network.World.AddImpulse(TipParticle(), RecoilAcceleration * Time.fixedDeltaTime);
+            _network.World.AddImpulse(TipParticle, RecoilAcceleration * Time.fixedDeltaTime);
             Push(_hose.Rope.Positions[TipIndex], direction);
         }
 
@@ -55,21 +61,9 @@ namespace FlameBlame.Hose.Components
             return particle.Rope == _network.RopeIndex(_hose) && particle.Index == TipIndex;
         }
 
-        public RopeParticle InnerParticle()
+        private Vector3 JetDirection(IReadOnlyList<Vector3> positions)
         {
-            return new RopeParticle(_network.RopeIndex(_hose), _tip == RopeEndKind.Tail ? TipIndex - 1 : TipIndex + 1);
-        }
-
-        public float Spacing => _hose.Config.Spacing;
-
-        public Vector3 CurrentDirection => JetDirection(_hose.Rope.Positions);
-
-        public RopeParticle TipParticle() => new RopeParticle(_network.RopeIndex(_hose), TipIndex);
-
-        private Vector3 JetDirection(System.Collections.Generic.IReadOnlyList<Vector3> positions)
-        {
-            var inner = _tip == RopeEndKind.Tail ? TipIndex - 1 : TipIndex + 1;
-            return (positions[TipIndex] - positions[inner]).normalized;
+            return (positions[TipIndex] - positions[InnerIndex]).normalized;
         }
 
         private void Push(Vector3 origin, Vector3 direction)

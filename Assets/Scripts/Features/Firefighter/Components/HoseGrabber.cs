@@ -19,9 +19,7 @@ namespace FlameBlame.Firefighter.Components
         private int _grip = NoGrip;
         private int _aimGrip = NoGrip;
         private HoseSegment _heldHose;
-        private Vector3 _holdPosition;
-        private Vector3 _holdVelocity;
-        private Vector3 _aimDirection;
+        private HoldTracker _hold;
 
         private bool IsHolding => _grip != NoGrip;
         private bool IsHoldingNozzle => _aimGrip != NoGrip;
@@ -29,6 +27,7 @@ namespace FlameBlame.Firefighter.Components
         private void Awake()
         {
             _body = GetComponent<Rigidbody>();
+            _hold = new HoldTracker(_config.GripFollowSeconds, _config.MaxGripDistanceMeters);
         }
 
         private void OnEnable()
@@ -46,20 +45,18 @@ namespace FlameBlame.Firefighter.Components
             if (!IsHolding) return;
 
             var eye = _firefighter.Eye.transform;
-            if (IsHeldTooFar(eye.position))
+            var heldPosition = _heldHose.Rope.Positions[_network.World.GripParticle(_grip).Index];
+            if (_hold.IsTooFar(heldPosition, eye.position))
             {
-                Release();
+                ReleaseGrips();
                 return;
             }
 
-            var holdPoint = eye.position + eye.forward * _config.HoldDistanceMeters;
-            _holdPosition = Vector3.SmoothDamp(_holdPosition, holdPoint, ref _holdVelocity, _config.GripFollowSeconds, Mathf.Infinity,
-                Time.fixedDeltaTime);
-            _network.World.SetGripTarget(_grip, _holdPosition);
+            _hold.Step(eye.position + eye.forward * _config.HoldDistanceMeters, eye.forward, Time.fixedDeltaTime);
+            _network.World.SetGripTarget(_grip, _hold.Position);
             if (IsHoldingNozzle)
             {
-                _aimDirection = Vector3.Slerp(_aimDirection, eye.forward, 1f - Mathf.Exp(-Time.fixedDeltaTime / _config.GripFollowSeconds));
-                _network.World.SetGripTarget(_aimGrip, _holdPosition - _aimDirection * _nozzle.Spacing);
+                _network.World.SetGripTarget(_aimGrip, _hold.Position - _hold.AimDirection * _nozzle.Spacing);
                 _body.AddForce(_nozzle.RecoilAcceleration * _config.RecoilTransferMultiplier, ForceMode.Acceleration);
             }
 
@@ -80,7 +77,7 @@ namespace FlameBlame.Firefighter.Components
         {
             if (IsHolding)
             {
-                Release();
+                ReleaseGrips();
                 return;
             }
 
@@ -91,23 +88,16 @@ namespace FlameBlame.Firefighter.Components
             _grip = _network.World.AddGrip(found, _config.GripCompliance);
             _heldHose = _network.HoseOf(found.Rope);
             _heldHose.SetHeld(found.Index);
-            _holdPosition = _heldHose.Rope.Positions[found.Index];
-            _holdVelocity = Vector3.zero;
+            _hold.Begin(_heldHose.Rope.Positions[found.Index], eye.forward);
             if (!_nozzle.IsTip(found)) return;
 
-            _aimGrip = _network.World.AddGrip(_nozzle.InnerParticle(), _config.AimGripCompliance);
-            _aimDirection = _nozzle.CurrentDirection;
-        }
-
-        private bool IsHeldTooFar(Vector3 holderPosition)
-        {
-            var heldPosition = _heldHose.Rope.Positions[_network.World.GripParticle(_grip).Index];
-            return Vector3.Distance(heldPosition, holderPosition) > _config.MaxGripDistanceMeters;
+            _aimGrip = _network.World.AddGrip(_nozzle.InnerParticle, _config.AimGripCompliance);
+            _hold.Begin(_heldHose.Rope.Positions[found.Index], _nozzle.CurrentDirection);
         }
 
         private RopeParticle FindTarget(Transform eye)
         {
-            var tip = _nozzle.TipParticle();
+            var tip = _nozzle.TipParticle;
             if (_network.World.IsAlongRay(tip, eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters))
                 return tip;
 
@@ -117,11 +107,11 @@ namespace FlameBlame.Firefighter.Components
         private void Throw()
         {
             var held = _network.World.GripParticle(_grip);
-            Release();
+            ReleaseGrips();
             _network.World.AddImpulse(held, _firefighter.Eye.transform.forward * _config.ThrowSpeed);
         }
 
-        private void Release()
+        private void ReleaseGrips()
         {
             _network.World.Release(_grip);
             _grip = NoGrip;
