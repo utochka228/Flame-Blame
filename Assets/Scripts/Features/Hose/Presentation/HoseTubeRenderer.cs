@@ -9,11 +9,14 @@ namespace FlameBlame.Hose.Presentation
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         [SerializeField] private HoseSegment _hose;
+        [SerializeField] private HosePinchSensor _pinchSensor;
 
         private Mesh _mesh;
         private MeshRenderer _meshRenderer;
         private MaterialPropertyBlock _propertyBlock;
         private TubeMeshBuilder _builder;
+        private HoseRadiusProfile _radiusProfile;
+        private float[] _radii;
 
         private void Awake()
         {
@@ -29,6 +32,8 @@ namespace FlameBlame.Hose.Presentation
         {
             var config = _hose.Config;
             _builder = new TubeMeshBuilder(_hose.Positions.Count, config.TubeSamplesPerSegment, config.TubeRingSides, config.TubeMiterLimit);
+            _radiusProfile = new HoseRadiusProfile(config.ParticleRadius, config.SwellFraction, config.PinchSquashFraction);
+            _radii = new float[_hose.Positions.Count];
             _mesh.vertices = _builder.Vertices;
             _mesh.triangles = _builder.Triangles;
         }
@@ -36,12 +41,13 @@ namespace FlameBlame.Hose.Presentation
         private void LateUpdate()
         {
             var config = _hose.Config;
-            _builder.Build(_hose.Positions, config.ParticleRadius * (1f + config.SwellFraction * _hose.PressureFraction));
+            _radiusProfile.Fill(_hose.PressureFractions, _pinchSensor.Pinched, _radii);
+            _builder.Build(_hose.Positions, _radii);
             _mesh.vertices = _builder.Vertices;
             _mesh.normals = _builder.Normals;
             _mesh.RecalculateBounds();
 
-            _propertyBlock.SetColor(BaseColorId, Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.PressureFraction));
+            _propertyBlock.SetColor(BaseColorId, Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.InletPressureFraction));
             _meshRenderer.SetPropertyBlock(_propertyBlock);
         }
 

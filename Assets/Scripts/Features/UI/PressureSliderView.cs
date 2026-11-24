@@ -12,6 +12,10 @@ namespace FlameBlame.UI
         private void OnEnable()
         {
             _slider.onValueChanged.AddListener(OnSliderChanged);
+        }
+
+        private void Start()
+        {
             OnSliderChanged(_slider.value);
         }
 

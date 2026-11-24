@@ -41,10 +41,7 @@ namespace FlameBlame.Hose.Simulation
             for (var substep = 0; substep < _substeps; substep++)
             {
                 foreach (var rope in _ropes)
-                {
-                    rope.Integrate();
-                    rope.SolveConstraints();
-                }
+                    rope.AdvanceSubstep();
 
                 foreach (var junction in _junctions)
                     SolveJunction(junction);
@@ -62,20 +59,29 @@ namespace FlameBlame.Hose.Simulation
             if (junction.IsBroken || junction.Ends.Count == 0) return;
 
             var target = JunctionTarget(junction);
-            foreach (var end in junction.Ends)
+            if (IsStretchedPastBreakDistance(junction, target))
             {
-                if (Vector3.Distance(EndPosition(end), target) > junction.BreakDistance)
-                {
-                    junction.IsBroken = true;
-                    return;
-                }
+                junction.IsBroken = true;
+                return;
             }
 
             foreach (var end in junction.Ends)
             {
-                if (_ropes[end.Rope].IsMovable(EndIndex(end)))
-                    _ropes[end.Rope].SetPosition(EndIndex(end), target);
+                var resolved = Resolve(end);
+                if (resolved.Rope.IsMovable(resolved.Index))
+                    resolved.Rope.SetPosition(resolved.Index, target);
             }
+        }
+
+        private bool IsStretchedPastBreakDistance(Junction junction, Vector3 target)
+        {
+            foreach (var end in junction.Ends)
+            {
+                if (Vector3.Distance(Resolve(end).Position, target) > junction.BreakDistance)
+                    return true;
+            }
+
+            return false;
         }
 
         private Vector3 JunctionTarget(Junction junction)
@@ -83,19 +89,36 @@ namespace FlameBlame.Hose.Simulation
             var sum = Vector3.zero;
             foreach (var end in junction.Ends)
             {
-                if (!_ropes[end.Rope].IsMovable(EndIndex(end)))
-                    return EndPosition(end);
+                var resolved = Resolve(end);
+                if (!resolved.Rope.IsMovable(resolved.Index))
+                    return resolved.Position;
 
-                sum += EndPosition(end);
+                sum += resolved.Position;
             }
 
             return sum / junction.Ends.Count;
         }
 
-        private int EndIndex(RopeEnd end) =>
-            end.Kind == RopeEndKind.Start ? 0 : _ropes[end.Rope].Positions.Count - 1;
+        private ResolvedEnd Resolve(RopeEnd end)
+        {
+            var rope = _ropes[end.Rope];
+            var index = end.Kind == RopeEndKind.Start ? 0 : rope.Positions.Count - 1;
+            return new ResolvedEnd(rope, index, rope.Positions[index]);
+        }
 
-        private Vector3 EndPosition(RopeEnd end) => _ropes[end.Rope].Positions[EndIndex(end)];
+        private readonly struct ResolvedEnd
+        {
+            public XpbdRope Rope { get; }
+            public int Index { get; }
+            public Vector3 Position { get; }
+
+            public ResolvedEnd(XpbdRope rope, int index, Vector3 position)
+            {
+                Rope = rope;
+                Index = index;
+                Position = position;
+            }
+        }
 
         private class Junction
         {

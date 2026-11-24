@@ -76,8 +76,7 @@ namespace FlameBlame.Hose.Simulation
             BeginStep(deltaTime, _settings.Substeps);
             for (var substep = 0; substep < _settings.Substeps; substep++)
             {
-                Integrate();
-                SolveConstraints();
+                AdvanceSubstep();
                 FinishSubstep();
             }
 
@@ -95,23 +94,9 @@ namespace FlameBlame.Hose.Simulation
             UpdateBendAlphas(_substepTime);
         }
 
-        public void Integrate()
+        public void AdvanceSubstep()
         {
-            var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _substepTime);
-            for (var index = 0; index < _positions.Length; index++)
-            {
-                _substepStartPositions[index] = _positions[index];
-                if (index < FirstFreeIndex) continue;
-
-                var velocity = (_velocities[index] + _settings.Gravity * _substepTime) * dampingFactor;
-                velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
-                _velocities[index] = velocity;
-                _positions[index] += velocity * _substepTime;
-            }
-        }
-
-        public void SolveConstraints()
-        {
+            Integrate();
             SolveBends();
             SolveDistances();
         }
@@ -153,6 +138,21 @@ namespace FlameBlame.Hose.Simulation
             _positions[1] = _anchorPosition + _anchorDirection * _settings.Spacing;
             _velocities[0] = Vector3.zero;
             _velocities[1] = Vector3.zero;
+        }
+
+        private void Integrate()
+        {
+            var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _substepTime);
+            for (var index = 0; index < _positions.Length; index++)
+            {
+                _substepStartPositions[index] = _positions[index];
+                if (index < FirstFreeIndex) continue;
+
+                var velocity = (_velocities[index] + _settings.Gravity * _substepTime) * dampingFactor;
+                velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
+                _velocities[index] = velocity;
+                _positions[index] += velocity * _substepTime;
+            }
         }
 
         private void SolveDistances()

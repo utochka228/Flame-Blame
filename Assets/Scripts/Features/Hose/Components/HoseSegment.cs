@@ -12,16 +12,24 @@ namespace FlameBlame.Hose.Components
 
         private XpbdRope _rope;
         private Vector3[] _interpolatedPositions;
-        private float _targetPressureFraction;
-        private float _smoothedPressureFraction;
+        private float[] _targetPressureFractions;
+        private float[] _smoothedPressureFractions;
 
         public IReadOnlyList<Vector3> Positions => _interpolatedPositions;
-        public float PressureFraction => _smoothedPressureFraction;
+        public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
+        public float InletPressureFraction => _smoothedPressureFractions[0];
         public HoseConfigSO Config => _config;
 
         public void SetPressureFraction(float pressureFraction)
         {
-            _targetPressureFraction = Mathf.Clamp01(pressureFraction);
+            for (var index = 0; index < _targetPressureFractions.Length; index++)
+                SetTarget(index, pressureFraction);
+        }
+
+        public void SetPressureProfile(IReadOnlyList<float> pressureFractions)
+        {
+            for (var index = 0; index < _targetPressureFractions.Length; index++)
+                SetTarget(index, pressureFractions[index]);
         }
 
         private void Awake()
@@ -29,14 +37,18 @@ namespace FlameBlame.Hose.Components
             _rope = new XpbdRope(_config.CreateRopeSettings(), _outlet.position, _outlet.forward,
                 new PhysicsRopeCollider(_config.CollisionLayers, transform));
             _interpolatedPositions = new Vector3[_rope.Positions.Count];
+            _targetPressureFractions = new float[_rope.Positions.Count];
+            _smoothedPressureFractions = new float[_rope.Positions.Count];
             Interpolate();
         }
 
         private void FixedUpdate()
         {
-            _smoothedPressureFraction = Mathf.MoveTowards(_smoothedPressureFraction, _targetPressureFraction,
-                _config.PressureSmoothingFractionPerSecond * Time.fixedDeltaTime);
-            _rope.RigidityFraction = _smoothedPressureFraction;
+            var maxDelta = _config.PressureSmoothingFractionPerSecond * Time.fixedDeltaTime;
+            for (var index = 0; index < _smoothedPressureFractions.Length; index++)
+                _smoothedPressureFractions[index] = Mathf.MoveTowards(_smoothedPressureFractions[index], _targetPressureFractions[index], maxDelta);
+
+            _rope.SetRigidityProfile(_smoothedPressureFractions);
             _rope.SetAnchor(_outlet.position, _outlet.forward);
             _rope.Step(Time.fixedDeltaTime);
         }
@@ -51,6 +63,11 @@ namespace FlameBlame.Hose.Components
             var alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             for (var index = 0; index < _interpolatedPositions.Length; index++)
                 _interpolatedPositions[index] = Vector3.Lerp(_rope.PreviousPositions[index], _rope.Positions[index], alpha);
+        }
+
+        private void SetTarget(int index, float pressureFraction)
+        {
+            _targetPressureFractions[index] = Mathf.Clamp01(pressureFraction);
         }
     }
 }
