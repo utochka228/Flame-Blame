@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0eb3ac82510e44608fc21635865ed54, type: 3}
+  m_Name: HoseConfig_Thin
+  m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Config.HoseConfigSO
+  <ParticleCount>k__BackingField: 15
+  <Spacing>k__BackingField: 0.2
+  <ParticleRadius>k__BackingField: 0.05
+  <Substeps>k__BackingField: 8
+  <FloppyBendCompliance>k__BackingField: 1
+  <RigidBendCompliance>k__BackingField: 0.000001
+  <Damping>k__BackingField: 2.5
+  <GroundFriction>k__BackingField: 0.3
+  <MaxSpeed>k__BackingField: 20
+  <MaxStretchFraction>k__BackingField: 0.1
+  <PressureSmoothingPercentPerSecond>k__BackingField: 100
+  <SwellPercent>k__BackingField: 40
+  <TubeSamplesPerSegment>k__BackingField: 4
+  <TubeRingSides>k__BackingField: 12
+  <TubeMiterLimit>k__BackingField: 1.5
+  <CollisionLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294967039
+  <PinchLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 256
+  <PinchChecksPerSecond>k__BackingField: 10
+  <PinchSquashPercent>k__BackingField: 60
+  <BurstOverloadSeconds>k__BackingField: 1.5
+  <BurstRecoverSeconds>k__BackingField: 1
+  <BurstWeakPointPercent>k__BackingField: 50
+  <BalloonPercent>k__BackingField: 120
+  <BalloonWidthParticles>k__BackingField: 6
+  <ShakeAmplitude>k__BackingField: 0.04
+  <ShakeHertz>k__BackingField: 25
+  <MaxPressure>k__BackingField: 100
+  <LossPerMeter>k__BackingField: 2
+  <BurstLeakLoss>k__BackingField: 40
+  <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
+  <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}

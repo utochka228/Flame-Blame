@@ -101,6 +101,23 @@ namespace FlameBlame.Hose.Simulation
             SolveDistances();
         }
 
+        public void SolveDistances()
+        {
+            for (var index = 0; index < _positions.Length - 1; index++)
+            {
+                var weightSum = InverseMass(index) + InverseMass(index + 1);
+                if (weightSum <= 0f) continue;
+
+                var delta = _positions[index + 1] - _positions[index];
+                var length = delta.magnitude;
+                if (length < MinLength) continue;
+
+                var correction = delta / length * ((length - _settings.Spacing) / weightSum);
+                _positions[index] += correction * InverseMass(index);
+                _positions[index + 1] -= correction * InverseMass(index + 1);
+            }
+        }
+
         public void FinishSubstep()
         {
             Collide();
@@ -152,23 +169,6 @@ namespace FlameBlame.Hose.Simulation
                 velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
                 _velocities[index] = velocity;
                 _positions[index] += velocity * _substepTime;
-            }
-        }
-
-        private void SolveDistances()
-        {
-            for (var index = 0; index < _positions.Length - 1; index++)
-            {
-                var weightSum = InverseMass(index) + InverseMass(index + 1);
-                if (weightSum <= 0f) continue;
-
-                var delta = _positions[index + 1] - _positions[index];
-                var length = delta.magnitude;
-                if (length < MinLength) continue;
-
-                var correction = delta / length * ((length - _settings.Spacing) / weightSum);
-                _positions[index] += correction * InverseMass(index);
-                _positions[index + 1] -= correction * InverseMass(index + 1);
             }
         }
 

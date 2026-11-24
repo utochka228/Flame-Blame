@@ -2,7 +2,8 @@
     "name": "FlameBlame.Hose",
     "rootNamespace": "FlameBlame.Hose",
     "references": [
-        "FlameBlame.Core"
+        "FlameBlame.Core",
+        "FlameBlame.Pressure"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

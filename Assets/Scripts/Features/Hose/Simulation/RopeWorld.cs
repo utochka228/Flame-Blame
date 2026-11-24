@@ -9,6 +9,8 @@ namespace FlameBlame.Hose.Simulation
         private readonly List<XpbdRope> _ropes = new List<XpbdRope>();
         private readonly List<Junction> _junctions = new List<Junction>();
 
+        public int JunctionIterations { get; set; } = 4;
+
         public RopeWorld(int substeps)
         {
             _substeps = substeps;
@@ -33,6 +35,8 @@ namespace FlameBlame.Hose.Simulation
 
         public bool IsIntact(int junction) => !_junctions[junction].IsBroken;
 
+        public Vector3 JunctionPosition(int junction) => JunctionTarget(_junctions[junction]);
+
         public void Step(float deltaTime)
         {
             foreach (var rope in _ropes)
@@ -43,8 +47,14 @@ namespace FlameBlame.Hose.Simulation
                 foreach (var rope in _ropes)
                     rope.AdvanceSubstep();
 
-                foreach (var junction in _junctions)
-                    SolveJunction(junction);
+                for (var iteration = 0; iteration < JunctionIterations; iteration++)
+                {
+                    foreach (var junction in _junctions)
+                        SolveJunction(junction);
+
+                    foreach (var rope in _ropes)
+                        rope.SolveDistances();
+                }
 
                 foreach (var rope in _ropes)
                     rope.FinishSubstep();

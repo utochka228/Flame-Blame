@@ -9,6 +9,7 @@ namespace FlameBlame.Hose.Components
     {
         [SerializeField] private HoseConfigSO _config;
         [SerializeField] private Transform _outlet;
+        [SerializeField] private bool _anchoredToOutlet = true;
 
         private XpbdRope _rope;
         private Vector3[] _interpolatedPositions;
@@ -19,6 +20,8 @@ namespace FlameBlame.Hose.Components
         public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
         public float InletPressureFraction => _smoothedPressureFractions[0];
         public HoseConfigSO Config => _config;
+        public XpbdRope Rope => _rope;
+        public bool IsSteppedByNetwork { get; set; }
 
         public void SetPressureFraction(float pressureFraction)
         {
@@ -35,7 +38,10 @@ namespace FlameBlame.Hose.Components
         private void Awake()
         {
             _rope = new XpbdRope(_config.CreateRopeSettings(), _outlet.position, _outlet.forward,
-                new PhysicsRopeCollider(_config.CollisionLayers, transform));
+                new PhysicsRopeCollider(_config.CollisionLayers, transform))
+            {
+                IsPinned = _anchoredToOutlet
+            };
             _interpolatedPositions = new Vector3[_rope.Positions.Count];
             _targetPressureFractions = new float[_rope.Positions.Count];
             _smoothedPressureFractions = new float[_rope.Positions.Count];
@@ -49,8 +55,11 @@ namespace FlameBlame.Hose.Components
                 _smoothedPressureFractions[index] = Mathf.MoveTowards(_smoothedPressureFractions[index], _targetPressureFractions[index], maxDelta);
 
             _rope.SetRigidityProfile(_smoothedPressureFractions);
-            _rope.SetAnchor(_outlet.position, _outlet.forward);
-            _rope.Step(Time.fixedDeltaTime);
+            if (_anchoredToOutlet)
+                _rope.SetAnchor(_outlet.position, _outlet.forward);
+
+            if (!IsSteppedByNetwork)
+                _rope.Step(Time.fixedDeltaTime);
         }
 
         private void LateUpdate()

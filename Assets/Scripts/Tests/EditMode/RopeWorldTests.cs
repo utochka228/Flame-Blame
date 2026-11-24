@@ -125,5 +125,42 @@ namespace FlameBlame.Tests.EditMode
 
             Assert.IsFalse(world.IsIntact(junction));
         }
+
+        [Test]
+        public void JunctionPosition_FollowsTheJoinedEnds()
+        {
+            var world = new RopeWorld(Substeps);
+            var first = CreateRope(0f, true);
+            var second = CreateRope(TailX, false);
+            var junction = world.AddJunction(BreakDistance);
+            world.Attach(junction, new RopeEnd(world.AddRope(first), RopeEndKind.Tail));
+            world.Attach(junction, new RopeEnd(world.AddRope(second), RopeEndKind.Start));
+
+            Simulate(world, 2f);
+
+            Assert.Less(Vector3.Distance(world.JunctionPosition(junction), EndPosition(first, RopeEndKind.Tail)), GapTolerance);
+        }
+
+        [Test]
+        public void RigidJoinedRopes_KeepTheirEndsTogetherEveryStep()
+        {
+            var world = new RopeWorld(Substeps);
+            var first = CreateRope(0f, true);
+            var second = CreateRope(TailX, false);
+            first.RigidityFraction = 1f;
+            second.RigidityFraction = 1f;
+            var junction = world.AddJunction(BreakDistance);
+            world.Attach(junction, new RopeEnd(world.AddRope(first), RopeEndKind.Tail));
+            world.Attach(junction, new RopeEnd(world.AddRope(second), RopeEndKind.Start));
+            var worstGap = 0f;
+
+            for (var step = 0; step < 300; step++)
+            {
+                world.Step(FixedStep);
+                worstGap = Mathf.Max(worstGap, Vector3.Distance(EndPosition(first, RopeEndKind.Tail), EndPosition(second, RopeEndKind.Start)));
+            }
+
+            Assert.Less(worstGap, GapTolerance);
+        }
     }
 }
