@@ -29,7 +29,7 @@ MonoBehaviour:
   <TubeMiterLimit>k__BackingField: 1.5
   <CollisionLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 4294967039
+    m_Bits: 55
   <PinchLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 256

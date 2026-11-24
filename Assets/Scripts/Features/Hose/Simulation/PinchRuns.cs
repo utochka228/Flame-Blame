@@ -10,8 +10,11 @@ namespace FlameBlame.Hose.Simulation
             var lastIndex = pinched.Count - 1;
             for (var index = 0; index < pinched.Count; index++)
             {
-                var startsRun = pinched[index] && (index == 0 || !pinched[index - 1]);
-                if (startsRun)
+                if (!pinched[index]) continue;
+
+                var startsRun = index == 0 || !pinched[index - 1];
+                var endsRun = index == lastIndex || !pinched[index + 1];
+                if (startsRun || endsRun)
                     positions.Add((float)index / lastIndex);
             }
         }

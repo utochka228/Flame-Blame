@@ -234,6 +234,21 @@ namespace FlameBlame.Tests.EditMode
             Assert.AreEqual(80f, _result.Sample(hose, 1f), Tolerance);
         }
 
+        [Test]
+        public void PinchRunEdges_OnReversedHose_CutAtTheEdgeNearestTheInlet()
+        {
+            var source = _graph.AddSource(100f);
+            var hose = _graph.AddHose(10f, 0f);
+            _graph.Link(source, PressureGraph.SourceOutlet, hose, PressureGraph.HoseEnd);
+            _graph.Pinch(hose, 0.25f);
+            _graph.Pinch(hose, 0.5f);
+
+            PressureSolver.Solve(_graph, _result);
+
+            Assert.AreEqual(100f, _result.Sample(hose, 0.6f), Tolerance);
+            Assert.AreEqual(0f, _result.Sample(hose, 0.45f), Tolerance);
+        }
+
         private int ConnectedHose(float length, float lossPerMeter, float sourcePressure = 100f)
         {
             var source = _graph.AddSource(sourcePressure);

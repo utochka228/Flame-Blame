@@ -22,14 +22,16 @@ namespace FlameBlame.Pressure.Simulation
             var distanceFraction = DistanceFromInlet(inletEnd, position);
             var pressure = _inletPressures[hose] - part.LossPerMeter * part.Length * distanceFraction;
 
-            foreach (var pinch in _graph.Pinches)
+            for (var index = 0; index < _graph.Pinches.Count; index++)
             {
+                var pinch = _graph.Pinches[index];
                 if (pinch.Hose == hose && DistanceFromInlet(inletEnd, pinch.Position) <= distanceFraction)
                     return 0f;
             }
 
-            foreach (var leak in _graph.Leaks)
+            for (var index = 0; index < _graph.Leaks.Count; index++)
             {
+                var leak = _graph.Leaks[index];
                 if (leak.Hose == hose && DistanceFromInlet(inletEnd, leak.Position) <= distanceFraction)
                     pressure -= leak.Loss;
             }

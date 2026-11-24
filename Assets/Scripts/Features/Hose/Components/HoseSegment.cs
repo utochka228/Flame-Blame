@@ -18,22 +18,9 @@ namespace FlameBlame.Hose.Components
 
         public IReadOnlyList<Vector3> Positions => _interpolatedPositions;
         public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
-        public float InletPressureFraction => _smoothedPressureFractions[0];
         public HoseConfigSO Config => _config;
         public XpbdRope Rope => _rope;
         public bool IsSteppedByNetwork { get; set; }
-
-        public void SetPressureFraction(float pressureFraction)
-        {
-            for (var index = 0; index < _targetPressureFractions.Length; index++)
-                SetTarget(index, pressureFraction);
-        }
-
-        public void SetPressureProfile(IReadOnlyList<float> pressureFractions)
-        {
-            for (var index = 0; index < _targetPressureFractions.Length; index++)
-                SetTarget(index, pressureFractions[index]);
-        }
 
         private void Awake()
         {
@@ -65,6 +52,18 @@ namespace FlameBlame.Hose.Components
         private void LateUpdate()
         {
             Interpolate();
+        }
+
+        public void SetPressureFraction(float pressureFraction)
+        {
+            for (var index = 0; index < _targetPressureFractions.Length; index++)
+                SetTarget(index, pressureFraction);
+        }
+
+        public void SetPressureProfile(IReadOnlyList<float> pressureFractions)
+        {
+            for (var index = 0; index < _targetPressureFractions.Length; index++)
+                SetTarget(index, pressureFractions[index]);
         }
 
         private void Interpolate()

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Config;
 using FlameBlame.Hose.Simulation;
@@ -22,6 +23,7 @@ namespace FlameBlame.Tests.PlayMode
         private PressureSource _source;
         private HoseSegment _first;
         private HoseSegment _second;
+        private HoseNetwork _network;
 
         [SetUp]
         public void SetUp()
@@ -34,21 +36,21 @@ namespace FlameBlame.Tests.PlayMode
 
             var config = ScriptableObject.CreateInstance<HoseConfigSO>();
             _source = NewInactive("Source").AddComponent<PressureSource>();
-            _first = CreateHose("First", config, Vector3.zero, true);
-            _second = CreateHose("Second", config, Vector3.right * config.Length, false);
+            _first = CreateAnchoredHose("First", config, Vector3.zero);
+            _second = CreateFreeHose("Second", config, Vector3.right * config.Length);
 
             var networkObject = NewInactive("Network");
-            var network = networkObject.AddComponent<HoseNetwork>();
-            SetField(network, "_source", _source);
-            SetField(network, "_sourceHose", _first);
-            SetField(network, "_hoses", new[] { _first, _second });
-            SetField(network, "_joints", new[]
+            _network = networkObject.AddComponent<HoseNetwork>();
+            SetField(_network, "_source", _source);
+            SetField(_network, "_sourceHose", _first);
+            SetField(_network, "_hoses", new[] { _first, _second });
+            SetField(_network, "_joints", new[]
             {
                 new HoseJoint(new HoseEndRef(_first, RopeEndKind.Tail), new HoseEndRef(_second, RopeEndKind.Start))
             });
 
             _source.SetPressureFraction(SourceFraction);
-            foreach (var child in new[] { _source.gameObject, _first.gameObject, _second.gameObject, networkObject })
+            foreach (var child in new[] { _source.gameObject, _first.gameObject, _second.gameObject })
                 child.SetActive(true);
         }
 
@@ -61,6 +63,8 @@ namespace FlameBlame.Tests.PlayMode
         [UnityTest]
         public IEnumerator OpenValve_LosesPressureAlongTheChain()
         {
+            StartNetwork();
+
             yield return new WaitForSeconds(SettleSeconds);
 
             var config = _first.Config;
@@ -75,6 +79,7 @@ namespace FlameBlame.Tests.PlayMode
         public IEnumerator ClosedValve_DepressurisesTheWholeChain()
         {
             _source.IsOpen = false;
+            StartNetwork();
 
             yield return new WaitForSeconds(SettleSeconds);
 
@@ -85,10 +90,30 @@ namespace FlameBlame.Tests.PlayMode
         [UnityTest]
         public IEnumerator CoupledHoses_StayJoined()
         {
+            StartNetwork();
+
             yield return new WaitForSeconds(SettleSeconds);
 
             var firstTail = _first.Positions[_first.Positions.Count - 1];
             Assert.Less(Vector3.Distance(firstTail, _second.Positions[0]), GapTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator NetworkOverThePieceCap_LogsAnErrorAndLeavesTheHosesAlone()
+        {
+            SetField(_network, "_maxPieces", 2);
+            LogAssert.Expect(LogType.Error, new Regex("pieces"));
+            StartNetwork();
+
+            yield return null;
+
+            Assert.IsFalse(_network.enabled);
+            Assert.IsFalse(_first.IsSteppedByNetwork);
+        }
+
+        private void StartNetwork()
+        {
+            _network.gameObject.SetActive(true);
         }
 
         private GameObject NewInactive(string objectName)
@@ -98,6 +123,12 @@ namespace FlameBlame.Tests.PlayMode
             created.transform.SetParent(_root.transform);
             return created;
         }
+
+        private HoseSegment CreateAnchoredHose(string objectName, HoseConfigSO config, Vector3 start) =>
+            CreateHose(objectName, config, start, true);
+
+        private HoseSegment CreateFreeHose(string objectName, HoseConfigSO config, Vector3 start) =>
+            CreateHose(objectName, config, start, false);
 
         private HoseSegment CreateHose(string objectName, HoseConfigSO config, Vector3 start, bool anchored)
         {

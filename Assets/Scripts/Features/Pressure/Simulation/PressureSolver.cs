@@ -5,8 +5,8 @@ namespace FlameBlame.Pressure.Simulation
         public static void Solve(PressureGraph graph, PressureResult result)
         {
             result.Reset(graph);
-            foreach (var link in graph.Links)
-                result.Connect(link.First, link.Second);
+            for (var index = 0; index < graph.Links.Count; index++)
+                result.Connect(graph.Links[index].First, graph.Links[index].Second);
 
             for (var part = 0; part < graph.Parts.Count; part++)
             {

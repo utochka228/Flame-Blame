@@ -39,6 +39,8 @@ namespace FlameBlame.Hose.Simulation
             }
         }
 
+        private int FirstFreeIndex => IsPinned ? AnchoredCount : 0;
+
         public XpbdRope(RopeSettings settings, Vector3 anchorPosition, Vector3 anchorDirection, IRopeCollider collider)
         {
             _settings = settings;
@@ -144,8 +146,6 @@ namespace FlameBlame.Hose.Simulation
             for (var index = 0; index < _bendAlphas.Length; index++)
                 _bendAlphas[index] = Mathf.Exp(Mathf.Lerp(_floppyBendLog, _rigidBendLog, _particleRigidity[index])) / (substepTime * substepTime);
         }
-
-        private int FirstFreeIndex => IsPinned ? AnchoredCount : 0;
 
         private float InverseMass(int index) => index < FirstFreeIndex ? 0f : 1f;
 

@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using FlameBlame.Core.Logging;
 using FlameBlame.Hose.Simulation;
 using FlameBlame.Pressure.Components;
 using FlameBlame.Pressure.Simulation;
+using Microsoft.Extensions.Logging;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Components
@@ -11,10 +14,13 @@ namespace FlameBlame.Hose.Components
     {
         private const int SourcePartId = 0;
 
+        private static readonly ILogger<HoseNetwork> Logger = Loggers.For<HoseNetwork>();
+
         [SerializeField] private PressureSource _source;
         [SerializeField] private HoseSegment _sourceHose;
         [SerializeField] private HoseSegment[] _hoses;
         [SerializeField] private HoseJoint[] _joints;
+        [SerializeField] [Range(2, 64)] private int _maxPieces = 16;
         [SerializeField] [Min(0.1f)] private float _junctionBreakDistance = 1f;
         [SerializeField] [Range(1, 30)] private int _solvesPerSecond = 10;
         [SerializeField] [Range(1, 8)] private int _junctionIterations = 4;
@@ -31,10 +37,16 @@ namespace FlameBlame.Hose.Components
         private int[] _splitterPartIds;
         private int _sourceHoseIndex;
 
-        public Vector3 JointPosition(int jointIndex) => _world.JunctionPosition(_junctionIds[jointIndex]);
-
         private void Start()
         {
+            var pieceCount = _hoses.Length + _joints.Length;
+            if (pieceCount > _maxPieces)
+            {
+                Logger.LogError("Hose network {Network} has {Count} pieces, over the cap of {Cap}", this, pieceCount, _maxPieces);
+                enabled = false;
+                return;
+            }
+
             BuildWorld();
             StartCoroutine(SolveLoop());
         }
@@ -43,6 +55,8 @@ namespace FlameBlame.Hose.Components
         {
             _world.Step(Time.fixedDeltaTime);
         }
+
+        public Vector3 JointPosition(int jointIndex) => _world.JunctionPosition(_junctionIds[jointIndex]);
 
         private void BuildWorld()
         {
@@ -89,7 +103,10 @@ namespace FlameBlame.Hose.Components
             _graph.Clear();
             _graph.AddSource(_source.CurrentPressure);
             foreach (var hose in _hoses)
-                _graph.AddHose(hose.Config.Length, hose.Config.LossPerMeter);
+            {
+                var config = hose.Config;
+                _graph.AddHose(config.Length, config.LossPerMeter);
+            }
 
             foreach (var joint in _joints)
             {
@@ -112,16 +129,25 @@ namespace FlameBlame.Hose.Components
                 if (!_world.IsIntact(_junctionIds[index])) continue;
 
                 var ends = _joints[index].Ends;
-                if (_joints[index].IsSplitter)
+                if (!_joints[index].IsSplitter)
                 {
-                    for (var port = 0; port < ends.Count; port++)
-                        _graph.Link(HosePartId(HoseIndex(ends[port].Hose)), (int)ends[port].End, _splitterPartIds[index], port);
+                    LinkCoupling(ends[0], ends[1]);
+                    continue;
                 }
-                else
-                {
-                    _graph.Link(HosePartId(HoseIndex(ends[0].Hose)), (int)ends[0].End, HosePartId(HoseIndex(ends[1].Hose)), (int)ends[1].End);
-                }
+
+                for (var port = 0; port < ends.Count; port++)
+                    LinkSplitterPort(ends[port], _splitterPartIds[index], port);
             }
+        }
+
+        private void LinkCoupling(HoseEndRef first, HoseEndRef second)
+        {
+            _graph.Link(PartIdOf(first.Hose), GraphEnd(first.End), PartIdOf(second.Hose), GraphEnd(second.End));
+        }
+
+        private void LinkSplitterPort(HoseEndRef end, int splitterPartId, int port)
+        {
+            _graph.Link(PartIdOf(end.Hose), GraphEnd(end.End), splitterPartId, port);
         }
 
         private void AddHoseMarkers()
@@ -145,17 +171,21 @@ namespace FlameBlame.Hose.Components
         {
             for (var index = 0; index < _hoses.Length; index++)
             {
-                var config = _hoses[index].Config;
+                var maxPressure = _hoses[index].Config.MaxPressure;
                 var profile = _profiles[index];
                 for (var particle = 0; particle < profile.Length; particle++)
-                    profile[particle] = _result.Sample(HosePartId(index), (float)particle / (profile.Length - 1)) / config.MaxPressure;
+                    profile[particle] = _result.Sample(HosePartId(index), (float)particle / (profile.Length - 1)) / maxPressure;
 
                 _hoses[index].SetPressureProfile(profile);
             }
         }
 
-        private int HoseIndex(HoseSegment hose) => System.Array.IndexOf(_hoses, hose);
+        private int HoseIndex(HoseSegment hose) => Array.IndexOf(_hoses, hose);
+
+        private int PartIdOf(HoseSegment hose) => HosePartId(HoseIndex(hose));
 
         private static int HosePartId(int hoseIndex) => SourcePartId + 1 + hoseIndex;
+
+        private static int GraphEnd(RopeEndKind end) => end == RopeEndKind.Start ? PressureGraph.HoseStart : PressureGraph.HoseEnd;
     }
 }

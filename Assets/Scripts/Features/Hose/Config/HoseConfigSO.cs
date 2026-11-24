@@ -26,18 +26,18 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField, Range(1f, 3f)] public float TubeMiterLimit { get; private set; } = 1.5f;
         [field: SerializeField] public LayerMask CollisionLayers { get; private set; } = ~0;
         [field: SerializeField] public LayerMask PinchLayers { get; private set; }
-        [field: SerializeField, Range(1, 30)] public int PinchChecksPerSecond { get; private set; } = 10;
-        [field: SerializeField, Range(0f, 100f)] public float PinchSquashPercent { get; private set; } = 60f;
-        [field: SerializeField, Range(0.2f, 10f)] public float BurstOverloadSeconds { get; private set; } = 1.5f;
-        [field: SerializeField, Range(0.2f, 10f)] public float BurstRecoverSeconds { get; private set; } = 1f;
-        [field: SerializeField, Range(0f, 100f)] public float BurstWeakPointPercent { get; private set; } = 50f;
-        [field: SerializeField, Range(0f, 300f)] public float BalloonPercent { get; private set; } = 120f;
-        [field: SerializeField, Range(1f, 20f)] public float BalloonWidthParticles { get; private set; } = 6f;
-        [field: SerializeField, Range(0f, 0.2f)] public float ShakeAmplitude { get; private set; } = 0.04f;
-        [field: SerializeField, Range(1f, 60f)] public float ShakeHertz { get; private set; } = 25f;
-        [field: SerializeField, Min(1f)] public float MaxPressure { get; private set; } = 100f;
-        [field: SerializeField, Min(0f)] public float LossPerMeter { get; private set; } = 2f;
-        [field: SerializeField, Min(0f)] public float BurstLeakLoss { get; private set; } = 40f;
+        [field: SerializeField] [field: Range(1, 30)] public int PinchChecksPerSecond { get; private set; } = 10;
+        [field: SerializeField] [field: Range(0f, 100f)] public float PinchSquashPercent { get; private set; } = 60f;
+        [field: SerializeField] [field: Range(0.2f, 10f)] public float BurstOverloadSeconds { get; private set; } = 1.5f;
+        [field: SerializeField] [field: Range(0.2f, 10f)] public float BurstRecoverSeconds { get; private set; } = 1f;
+        [field: SerializeField] [field: Range(0f, 100f)] public float BurstWeakPointPercent { get; private set; } = 50f;
+        [field: SerializeField] [field: Range(0f, 300f)] public float BalloonPercent { get; private set; } = 120f;
+        [field: SerializeField] [field: Range(1f, 20f)] public float BalloonWidthParticles { get; private set; } = 6f;
+        [field: SerializeField] [field: Range(0f, 0.2f)] public float ShakeAmplitude { get; private set; } = 0.04f;
+        [field: SerializeField] [field: Range(1f, 60f)] public float ShakeHertz { get; private set; } = 25f;
+        [field: SerializeField] [field: Min(1f)] public float MaxPressure { get; private set; } = 100f;
+        [field: SerializeField] [field: Min(0f)] public float LossPerMeter { get; private set; } = 2f;
+        [field: SerializeField] [field: Min(0f)] public float BurstLeakLoss { get; private set; } = 40f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
 

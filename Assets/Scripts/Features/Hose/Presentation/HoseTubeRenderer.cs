@@ -8,6 +8,12 @@ namespace FlameBlame.Hose.Presentation
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class HoseTubeRenderer : MonoBehaviour
     {
+        private const float ShakePhaseStepX = 1.7f;
+        private const float ShakePhaseStepY = 2.3f;
+        private const float ShakePhaseStepZ = 3.1f;
+        private const float ShakeSpeedY = 1.3f;
+        private const float ShakeSpeedZ = 0.9f;
+
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
         [SerializeField] private HoseSegment _hose;
@@ -62,7 +68,7 @@ namespace FlameBlame.Hose.Presentation
             _mesh.normals = _builder.Normals;
             _mesh.RecalculateBounds();
 
-            _propertyBlock.SetColor(BaseColorId, Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.InletPressureFraction));
+            _propertyBlock.SetColor(BaseColorId, Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.PressureFractions[_burstMonitor.WeakPointIndex]));
             _meshRenderer.SetPropertyBlock(_propertyBlock);
         }
 
@@ -83,7 +89,10 @@ namespace FlameBlame.Hose.Presentation
             for (var index = 0; index < _shakenPositions.Length; index++)
             {
                 var weight = HoseRadiusProfile.FalloffWeight(index, center, config.BalloonWidthParticles);
-                var jitter = new Vector3(Mathf.Sin(phase + index * 1.7f), Mathf.Sin(phase * 1.3f + index * 2.3f), Mathf.Sin(phase * 0.9f + index * 3.1f));
+                var jitter = new Vector3(
+                    Mathf.Sin(phase + index * ShakePhaseStepX),
+                    Mathf.Sin(phase * ShakeSpeedY + index * ShakePhaseStepY),
+                    Mathf.Sin(phase * ShakeSpeedZ + index * ShakePhaseStepZ));
                 _shakenPositions[index] = _hose.Positions[index] + jitter * (config.ShakeAmplitude * burstProgress * weight);
             }
         }

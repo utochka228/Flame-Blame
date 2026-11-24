@@ -11,15 +11,16 @@ namespace FlameBlame.Tests.EditMode
         private readonly List<float> _positions = new List<float>();
 
         [Test]
-        public void CollectPositions_ReportsTheStartOfEachRunAlongTheHose()
+        public void CollectPositions_ReportsBothEdgesOfEachRunAlongTheHose()
         {
             var pinched = new[] { false, true, true, false, true };
 
             PinchRuns.CollectPositions(pinched, _positions);
 
-            Assert.AreEqual(2, _positions.Count);
+            Assert.AreEqual(3, _positions.Count);
             Assert.AreEqual(0.25f, _positions[0], Tolerance);
-            Assert.AreEqual(1f, _positions[1], Tolerance);
+            Assert.AreEqual(0.5f, _positions[1], Tolerance);
+            Assert.AreEqual(1f, _positions[2], Tolerance);
         }
 
         [Test]
