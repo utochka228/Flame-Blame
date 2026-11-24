@@ -70,6 +70,20 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void AddGrip_AfterRelease_ReusesTheSlot()
+        {
+            var first = _world.AddGrip(new RopeParticle(0, 4), StiffCompliance);
+            var second = _world.AddGrip(new RopeParticle(0, 6), StiffCompliance);
+
+            _world.Release(first);
+            var third = _world.AddGrip(new RopeParticle(0, 8), StiffCompliance);
+
+            Assert.AreEqual(first, third);
+            Assert.AreNotEqual(second, third);
+            Assert.AreEqual(8, _world.GripParticle(third).Index);
+        }
+
+        [Test]
         public void AddImpulse_MovesTheParticle()
         {
             var start = _rope.Positions[ParticleCount - 1];

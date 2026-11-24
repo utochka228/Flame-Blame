@@ -46,7 +46,7 @@ namespace FlameBlame.Firefighter.Components
         public void Drive(FirefighterCommands commands)
         {
             _move = commands.Move;
-            _jumpRequested |= commands.JumpPressed;
+            _jumpRequested |= commands.WasPressed(FirefighterButtons.Jump);
             _look.Apply(commands.Look);
             _eye.transform.localRotation = Quaternion.Euler(_look.Pitch, 0f, 0f);
             Driven?.Invoke(commands);

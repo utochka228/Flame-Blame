@@ -4,19 +4,18 @@ namespace FlameBlame.Firefighter.Simulation
 {
     public readonly struct FirefighterCommands
     {
+        private readonly FirefighterButtons _pressed;
+
         public Vector2 Move { get; }
         public Vector2 Look { get; }
-        public bool JumpPressed { get; }
-        public bool GrabPressed { get; }
-        public bool ThrowPressed { get; }
 
-        public FirefighterCommands(Vector2 move, Vector2 look, bool jumpPressed, bool grabPressed, bool throwPressed)
+        public FirefighterCommands(Vector2 move, Vector2 look, FirefighterButtons pressed)
         {
             Move = Vector2.ClampMagnitude(move, 1f);
             Look = look;
-            JumpPressed = jumpPressed;
-            GrabPressed = grabPressed;
-            ThrowPressed = throwPressed;
+            _pressed = pressed;
         }
+
+        public bool WasPressed(FirefighterButtons button) => (_pressed & button) != 0;
     }
 }

@@ -40,9 +40,19 @@ namespace FlameBlame.Hose.Simulation
 
         public int AddGrip(RopeParticle particle, float compliance)
         {
-            _grips.Add(new Grip(particle, compliance, _ropes[particle.Rope].Positions[particle.Index]));
-            return _grips.Count - 1;
+            var grip = new Grip(particle, compliance, _ropes[particle.Rope].Positions[particle.Index]);
+            var slot = _grips.FindIndex(existing => !existing.IsActive);
+            if (slot < 0)
+            {
+                _grips.Add(grip);
+                return _grips.Count - 1;
+            }
+
+            _grips[slot] = grip;
+            return slot;
         }
+
+        public RopeParticle GripParticle(int grip) => _grips[grip].Particle;
 
         public void SetGripTarget(int grip, Vector3 target)
         {

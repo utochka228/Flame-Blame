@@ -8,15 +8,16 @@ namespace FlameBlame.Firefighter.Components
 {
     public class HoseGrabber : MonoBehaviour
     {
+        private const int NoGrip = -1;
+
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseNetwork _network;
 
         private Rigidbody _body;
-        private RopeParticle _held = RopeParticle.None;
-        private int _grip;
+        private int _grip = NoGrip;
 
-        private bool IsHolding => !_held.IsNone;
+        private bool IsHolding => _grip != NoGrip;
 
         private void Awake()
         {
@@ -45,9 +46,9 @@ namespace FlameBlame.Firefighter.Components
 
         private void OnDriven(FirefighterCommands commands)
         {
-            if (commands.ThrowPressed && IsHolding)
+            if (commands.WasPressed(FirefighterButtons.Throw) && IsHolding)
                 Throw();
-            else if (commands.GrabPressed)
+            else if (commands.WasPressed(FirefighterButtons.Grab))
                 ToggleGrab();
         }
 
@@ -63,13 +64,12 @@ namespace FlameBlame.Firefighter.Components
             var found = _network.World.FindAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
             if (found.IsNone) return;
 
-            _held = found;
             _grip = _network.World.AddGrip(found, _config.GripCompliance);
         }
 
         private void Throw()
         {
-            var held = _held;
+            var held = _network.World.GripParticle(_grip);
             Release();
             _network.World.AddImpulse(held, _firefighter.Eye.transform.forward * _config.ThrowSpeed);
         }
@@ -77,7 +77,7 @@ namespace FlameBlame.Firefighter.Components
         private void Release()
         {
             _network.World.Release(_grip);
-            _held = RopeParticle.None;
+            _grip = NoGrip;
         }
     }
 }
