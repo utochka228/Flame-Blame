@@ -4,6 +4,7 @@
     "references": [
         "FlameBlame.Core",
         "FlameBlame.Hose",
+        "FlameBlame.Pressure",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

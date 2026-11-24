@@ -205,5 +205,24 @@ namespace FlameBlame.Tests.EditMode
 
             Assert.AreEqual(before, rope.PreviousPositions[rope.PreviousPositions.Count - 1]);
         }
+
+        [Test]
+        public void RigidityProfile_StiffensOnlyTheParticlesItNames()
+        {
+            var settings = CreateSettings();
+            var rope = CreateRope(settings);
+            var halfCount = settings.ParticleCount / 2;
+            var profile = new float[settings.ParticleCount];
+            for (var index = 0; index < halfCount; index++)
+                profile[index] = 1f;
+            rope.SetRigidityProfile(profile);
+
+            Simulate(rope, 5f);
+
+            var rigidHalfDrop = AnchorHeight - rope.Positions[halfCount - 1].y;
+            var tipDrop = AnchorHeight - rope.Positions[rope.Positions.Count - 1].y;
+            Assert.Less(rigidHalfDrop, RestLength(settings) * 0.15f);
+            Assert.Greater(tipDrop, rigidHalfDrop + RestLength(settings) * 0.2f);
+        }
     }
 }

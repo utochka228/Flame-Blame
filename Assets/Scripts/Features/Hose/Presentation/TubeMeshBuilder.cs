@@ -11,6 +11,7 @@ namespace FlameBlame.Hose.Presentation
         private readonly int _ringSides;
         private readonly float _miterLimit;
         private readonly Vector3[] _centers;
+        private readonly float[] _uniformRadii;
 
         public Vector3[] Vertices { get; }
         public Vector3[] Normals { get; }
@@ -22,6 +23,7 @@ namespace FlameBlame.Hose.Presentation
             _samplesPerSegment = samplesPerSegment;
             _ringSides = ringSides;
             _miterLimit = miterLimit;
+            _uniformRadii = new float[particleCount];
 
             var ringCount = (particleCount - 1) * samplesPerSegment + 1;
             _centers = new Vector3[ringCount];
@@ -32,8 +34,16 @@ namespace FlameBlame.Hose.Presentation
 
         public void Build(IReadOnlyList<Vector3> points, float radius)
         {
+            for (var index = 0; index < _uniformRadii.Length; index++)
+                _uniformRadii[index] = radius;
+
+            Build(points, _uniformRadii);
+        }
+
+        public void Build(IReadOnlyList<Vector3> points, IReadOnlyList<float> radii)
+        {
             SampleCenters(points);
-            BuildRings(radius);
+            BuildRings(radii);
         }
 
         private static int[] BuildTriangles(int ringCount, int ringSides)
@@ -105,7 +115,14 @@ namespace FlameBlame.Hose.Presentation
             _centers[_centers.Length - 1] = points[last];
         }
 
-        private void BuildRings(float radius)
+        private float RingRadius(IReadOnlyList<float> radii, int ring)
+        {
+            var segment = ring / _samplesPerSegment;
+            var next = Mathf.Min(segment + 1, radii.Count - 1);
+            return Mathf.Lerp(radii[segment], radii[next], (float)(ring % _samplesPerSegment) / _samplesPerSegment);
+        }
+
+        private void BuildRings(IReadOnlyList<float> radii)
         {
             var tangent = (_centers[1] - _centers[0]).normalized;
             var side = AnyPerpendicular(tangent);
@@ -120,6 +137,7 @@ namespace FlameBlame.Hose.Presentation
                 side = IsUsable(projectedSide) ? projectedSide.normalized : AnyPerpendicular(tangent);
                 var up = Vector3.Cross(tangent, side);
 
+                var radius = RingRadius(radii, ring);
                 var bendAxis = BendAxis(incoming, outgoing, tangent, out var miterScale);
                 for (var vertex = 0; vertex < _ringSides; vertex++)
                 {

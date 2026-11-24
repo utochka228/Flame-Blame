@@ -16,18 +16,25 @@ namespace FlameBlame.Hose.Simulation
         private readonly Vector3[] _previousStepPositions;
         private readonly Vector3[] _substepStartPositions;
         private readonly Vector3[] _velocities;
+        private readonly float[] _particleRigidity;
+        private readonly float[] _bendAlphas;
+        private readonly float _floppyBendLog;
+        private readonly float _rigidBendLog;
 
         private Vector3 _anchorPosition;
         private Vector3 _anchorDirection;
-        private float _rigidityFraction;
 
         public IReadOnlyList<Vector3> Positions => _positions;
         public IReadOnlyList<Vector3> PreviousPositions => _previousStepPositions;
 
         public float RigidityFraction
         {
-            get => _rigidityFraction;
-            set => _rigidityFraction = Mathf.Clamp01(value);
+            set
+            {
+                var clamped = Mathf.Clamp01(value);
+                for (var index = 0; index < _particleRigidity.Length; index++)
+                    _particleRigidity[index] = clamped;
+            }
         }
 
         public XpbdRope(RopeSettings settings, Vector3 anchorPosition, Vector3 anchorDirection, IRopeCollider collider)
@@ -38,6 +45,10 @@ namespace FlameBlame.Hose.Simulation
             _previousStepPositions = new Vector3[settings.ParticleCount];
             _substepStartPositions = new Vector3[settings.ParticleCount];
             _velocities = new Vector3[settings.ParticleCount];
+            _particleRigidity = new float[settings.ParticleCount];
+            _bendAlphas = new float[settings.ParticleCount];
+            _floppyBendLog = Mathf.Log(settings.FloppyBendCompliance);
+            _rigidBendLog = Mathf.Log(settings.RigidBendCompliance);
 
             SetAnchor(anchorPosition, anchorDirection);
             for (var index = 0; index < _positions.Length; index++)
@@ -52,6 +63,12 @@ namespace FlameBlame.Hose.Simulation
             _anchorDirection = direction.normalized;
         }
 
+        public void SetRigidityProfile(IReadOnlyList<float> profile)
+        {
+            for (var index = 0; index < _particleRigidity.Length; index++)
+                _particleRigidity[index] = Mathf.Clamp01(profile[index]);
+        }
+
         public void Step(float deltaTime)
         {
             Array.Copy(_positions, _previousStepPositions, _positions.Length);
@@ -59,11 +76,11 @@ namespace FlameBlame.Hose.Simulation
             _collider.Prepare(_positions, _settings.ParticleRadius);
 
             var substepTime = deltaTime / _settings.Substeps;
-            var bendAlpha = BendCompliance() / (substepTime * substepTime);
+            UpdateBendAlphas(substepTime);
             for (var substep = 0; substep < _settings.Substeps; substep++)
             {
                 Integrate(substepTime);
-                SolveBends(bendAlpha);
+                SolveBends();
                 SolveDistances();
 
                 Collide();
@@ -76,11 +93,10 @@ namespace FlameBlame.Hose.Simulation
                 RestoreLastGoodState();
         }
 
-        private float BendCompliance()
+        private void UpdateBendAlphas(float substepTime)
         {
-            var floppyLog = Mathf.Log(_settings.FloppyBendCompliance);
-            var rigidLog = Mathf.Log(_settings.RigidBendCompliance);
-            return Mathf.Exp(Mathf.Lerp(floppyLog, rigidLog, _rigidityFraction));
+            for (var index = 0; index < _bendAlphas.Length; index++)
+                _bendAlphas[index] = Mathf.Exp(Mathf.Lerp(_floppyBendLog, _rigidBendLog, _particleRigidity[index])) / (substepTime * substepTime);
         }
 
         private static float InverseMass(int index) => index < AnchoredCount ? 0f : 1f;
@@ -125,12 +141,12 @@ namespace FlameBlame.Hose.Simulation
             }
         }
 
-        private void SolveBends(float scaledCompliance)
+        private void SolveBends()
         {
             for (var index = AnchoredCount; index < _positions.Length; index++)
             {
                 var straightTarget = 2f * _positions[index - 1] - _positions[index - 2];
-                var correction = (straightTarget - _positions[index]) / (1f + scaledCompliance);
+                var correction = (straightTarget - _positions[index]) / (1f + _bendAlphas[index]);
                 _positions[index] += correction;
             }
         }

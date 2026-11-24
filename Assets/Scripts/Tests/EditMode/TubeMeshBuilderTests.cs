@@ -131,5 +131,27 @@ namespace FlameBlame.Tests.EditMode
                 Assert.GreaterOrEqual(nearest, Radius * 0.9f);
             }
         }
+
+        [Test]
+        public void Build_WithRadiusPerParticle_InterpolatesRingRadius()
+        {
+            var builder = CreateBuilder(10);
+            var radii = new float[10];
+            for (var index = 0; index < radii.Length; index++)
+                radii[index] = 0.1f + 0.02f * index;
+
+            builder.Build(StraightLine(10), radii);
+
+            var lastRing = 9 * Samples;
+            var middleRing = 3 * Samples + 2;
+            Assert.AreEqual(0.1f, RingRadius(builder, 0), 1e-3f);
+            Assert.AreEqual(0.28f, RingRadius(builder, lastRing), 1e-3f);
+            Assert.AreEqual(0.17f, RingRadius(builder, middleRing), 1e-3f);
+        }
+
+        private static float RingRadius(TubeMeshBuilder builder, int ring)
+        {
+            return Vector3.Distance(builder.Centers[ring], builder.Vertices[ring * Sides]);
+        }
     }
 }
