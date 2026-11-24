@@ -1,6 +1,6 @@
 # Architecture
 
-Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
+Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/Pressure` (Simulation, Components), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
 
 ## Decisions
 
@@ -39,7 +39,7 @@ Every feature uses the same roles: **Simulation** (no Unity objects), **Componen
 
 ## Dependency direction
 
-`Core <- Features <- UI <- Bootstrap`. Arrow = depends on. Features never reference UI or Bootstrap; Core references nothing; Bootstrap references everything.
+`Core <- Features <- UI <- Bootstrap`. Arrow = depends on. Features never reference UI or Bootstrap; Core references nothing; Bootstrap references everything. `Hose` references `Pressure` (`HoseNetwork` feeds the pressure solver); `Pressure` references only Core; `UI` references both.
 
 - World visuals belong to the feature's Presentation folder.
 - Screen UI is its own feature; it listens to events or reads small read-only interfaces (e.g. `IInteractable.PromptText`). UI depends on features, never the reverse.
