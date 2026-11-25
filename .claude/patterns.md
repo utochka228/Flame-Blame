@@ -11,14 +11,16 @@ classes, serialized fields for MonoBehaviours).
 
 ```csharp
 [CreateAssetMenu(fileName = "FeatureConfig", menuName = "FlameBlame/Configs/Feature")]
-public class FeatureConfigSO : ScriptableObject
+public class FeatureConfigSO : ConfigSO
 {
-    [field: SerializeField] public float Speed { get; private set; } = 10f;
+    [field: SerializeField] public MotionConfig Motion { get; private set; } = new();
 }
 ```
 
 - `menuName` always starts with `FlameBlame/`.
 - Never hardcode balance numbers in a behavior — they belong in the SO.
+- Configs derive from `FlameBlame.Core.Config.ConfigSO`. Group fields into `[Serializable]` sub-configs (`Config/` folder), each exposed on the SO as a `[field: SerializeField]` property (Unity draws the foldout); small configs stay flat with `[field: Header]` categories.
+- Live tuning: `ConfigSO.Changed` fires when a value is edited in play mode (`LiveTuning` on) or via the Apply Now button. Consumers subscribe in `OnEnable`, unsubscribe in `OnDisable`, and re-apply (`ApplyTo(settings)` in place, `Configure(...)` on stateful models, or rebuild a stateless model). Structural values (particle counts, mesh resolution) apply at spawn only.
 
 - SOs are shared assets — **stateless**. Runtime state lives on the consuming object.
 
