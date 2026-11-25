@@ -1195,7 +1195,7 @@ MonoBehaviour:
       <End>k__BackingField: 0
     - <Hose>k__BackingField: {fileID: 1507169451}
       <End>k__BackingField: 0
-  _junctionBreakDistance: 1
+  _junctionBreakDistance: 0.25
   _solvesPerSecond: 10
   _junctionIterations: 4
 --- !u!4 &404639467
