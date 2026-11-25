@@ -12,16 +12,24 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseNetwork _network;
 
+        private const float MantleClearanceMeters = 0.2f;
+        private const float MantleMaxSeconds = 1f;
+
         private Rigidbody _body;
+        private Collider _collider;
         private RopeClimb _climb;
         private HoseSegment _hose;
         private float _climbInput;
+        private bool _isMantling;
+        private float _mantleTopY;
+        private float _mantleSeconds;
 
         public bool IsClimbing => _hose;
 
         private void Awake()
         {
             _body = GetComponent<Rigidbody>();
+            _collider = GetComponentInChildren<Collider>();
             _climb = new RopeClimb(_config.ClimbSpeed);
         }
 
@@ -38,6 +46,12 @@ namespace FlameBlame.Firefighter.Components
         private void FixedUpdate()
         {
             if (!IsClimbing) return;
+
+            if (_isMantling)
+            {
+                StepMantle();
+                return;
+            }
 
             var point = _climb.Step(_hose.Rope.Positions, _climbInput, Time.fixedDeltaTime);
             if (_climb.IsAtTop && _climbInput > 0f)
@@ -68,16 +82,30 @@ namespace FlameBlame.Firefighter.Components
         public void Stop()
         {
             _hose = null;
+            _isMantling = false;
             _firefighter.IsMotionOverridden = false;
             _body.useGravity = true;
         }
 
         private void Mantle()
         {
-            var across = _climb.TopDirection(_hose.Rope.Positions);
-            var heading = across.sqrMagnitude > 0f ? across : transform.forward;
+            _mantleTopY = _climb.Position(_hose.Rope.Positions).y;
+            _mantleSeconds = 0f;
+            _isMantling = true;
+        }
+
+        private void StepMantle()
+        {
+            _mantleSeconds += Time.fixedDeltaTime;
+            var isClear = _collider.bounds.min.y >= _mantleTopY + MantleClearanceMeters;
+            if (!isClear && _mantleSeconds < MantleMaxSeconds)
+            {
+                _body.linearVelocity = Vector3.up * _config.JumpSpeed;
+                return;
+            }
+
             Stop();
-            _body.linearVelocity = Vector3.up * _config.JumpSpeed + heading * _config.MoveSpeed;
+            _body.linearVelocity = transform.forward * _config.MoveSpeed;
         }
 
         private void OnDriven(FirefighterCommands commands)

@@ -6,6 +6,8 @@ namespace FlameBlame.Firefighter.Simulation
     public class RopeClimb
     {
         private const float TopTolerance = 1e-3f;
+        private const float LookaheadMeters = 0.5f;
+        private const float MinRiseMeters = 0.15f;
 
         private readonly float _metersPerSecond;
 
@@ -27,17 +29,17 @@ namespace FlameBlame.Firefighter.Simulation
 
         public Vector3 Step(IReadOnlyList<Vector3> positions, float input, float deltaTime)
         {
-            var peak = PeakIndex(positions);
+            var crest = CrestIndex(positions);
             var lower = LowerIndex(positions);
             var length = Mathf.Max((positions[lower + 1] - positions[lower]).magnitude, 1e-4f);
-            var direction = ClimbDirection(positions, peak, input);
+            var direction = ClimbDirection(positions, crest, input);
             var next = Index + direction * input * _metersPerSecond * deltaTime / length;
             var previous = Index;
-            Index = Mathf.Clamp(Crosses(Index, next, peak) ? peak : next, 0f, positions.Count - 1);
+            Index = Mathf.Clamp(Crosses(Index, next, crest) ? crest : next, 0f, positions.Count - 1);
             if (!Mathf.Approximately(Index, previous))
                 _approachSign = Mathf.Sign(Index - previous);
 
-            IsAtTop = Mathf.Abs(Index - peak) < TopTolerance;
+            IsAtTop = Mathf.Abs(Index - crest) < TopTolerance;
             return Position(positions);
         }
 
@@ -49,31 +51,52 @@ namespace FlameBlame.Firefighter.Simulation
 
         public Vector3 TopDirection(IReadOnlyList<Vector3> positions)
         {
-            var peak = PeakIndex(positions);
-            var far = peak + (int)_approachSign;
+            var crest = CrestIndex(positions);
+            var far = crest + (int)_approachSign;
             if (far < 0 || far >= positions.Count)
-                far = peak - (int)_approachSign;
+                far = crest - (int)_approachSign;
 
-            var across = positions[far] - positions[peak];
+            var across = positions[far] - positions[crest];
             across.y = 0f;
             return across.normalized;
         }
 
-        private float ClimbDirection(IReadOnlyList<Vector3> positions, int peak, float input)
+        private float ClimbDirection(IReadOnlyList<Vector3> positions, int crest, float input)
         {
-            if (Index < peak - TopTolerance) return 1f;
-            if (Index > peak + TopTolerance) return -1f;
+            if (Index < crest - TopTolerance) return 1f;
+            if (Index > crest + TopTolerance) return -1f;
             if (input >= 0f) return 0f;
 
-            var hasBelow = peak > 0;
-            var hasAbove = peak < positions.Count - 1;
+            var hasBelow = crest > 0;
+            var hasAbove = crest < positions.Count - 1;
             if (!hasBelow) return -1f;
             if (!hasAbove) return 1f;
 
-            return positions[peak - 1].y < positions[peak + 1].y ? 1f : -1f;
+            return positions[crest - 1].y < positions[crest + 1].y ? 1f : -1f;
         }
 
-        private static bool Crosses(float from, float to, int peak) => (from - peak) * (to - peak) < 0f;
+        private static bool Crosses(float from, float to, int crest) => (from - crest) * (to - crest) < 0f;
+
+        private int CrestIndex(IReadOnlyList<Vector3> positions)
+        {
+            var crest = Mathf.Clamp(Mathf.RoundToInt(Index), 0, positions.Count - 1);
+            var peak = PeakIndex(positions);
+            if (peak == crest) return crest;
+
+            var start = crest;
+            var step = peak > crest ? 1 : -1;
+            var climbed = Rises(positions, crest - step, step);
+            while (crest != peak)
+            {
+                var rises = Rises(positions, crest, step);
+                if (climbed && !rises) break;
+
+                climbed |= rises;
+                crest += step;
+            }
+
+            return climbed ? crest : start;
+        }
 
         private static int PeakIndex(IReadOnlyList<Vector3> positions)
         {
@@ -85,6 +108,21 @@ namespace FlameBlame.Firefighter.Simulation
             }
 
             return peak;
+        }
+
+        private static bool Rises(IReadOnlyList<Vector3> positions, int from, int step)
+        {
+            if (from < 0 || from >= positions.Count) return false;
+
+            var best = positions[from].y;
+            var distance = 0f;
+            for (var index = from + step; index >= 0 && index < positions.Count && distance < LookaheadMeters; index += step)
+            {
+                distance += (positions[index] - positions[index - step]).magnitude;
+                best = Mathf.Max(best, positions[index].y);
+            }
+
+            return best - positions[from].y >= MinRiseMeters;
         }
 
         private int LowerIndex(IReadOnlyList<Vector3> positions) => Mathf.Clamp(Mathf.FloorToInt(Index), 0, positions.Count - 2);

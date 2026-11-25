@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FlameBlame.Firefighter.Simulation;
 using NUnit.Framework;
 using UnityEngine;
@@ -118,6 +119,126 @@ namespace FlameBlame.Tests.EditMode
 
             Assert.AreEqual(1f, direction.x, 1e-4f);
             Assert.AreEqual(0f, direction.y, 1e-4f);
+        }
+
+        private static Vector3[] RopeOverEdgeOntoFlatRoof(float jitterSign)
+        {
+            var positions = new Vector3[13];
+            for (var index = 0; index < 7; index++)
+                positions[index] = new Vector3(0f, index * 0.5f, 0f);
+
+            for (var index = 7; index < positions.Length; index++)
+                positions[index] = new Vector3((index - 6) * 0.5f, 3f + jitterSign * 0.001f * index, 0f);
+
+            return positions;
+        }
+
+        [Test]
+        public void Step_RopeLiesFlatOnRoof_StopsAtTheLipInsteadOfTheHighestRoofParticle()
+        {
+            var climb = new RopeClimb(10f);
+            climb.Begin(1);
+
+            climb.Step(RopeOverEdgeOntoFlatRoof(1f), 1f, 1f);
+
+            Assert.AreEqual(6f, climb.Index, 1e-4f);
+            Assert.IsTrue(climb.IsAtTop);
+        }
+
+        [Test]
+        public void Step_RoofParticlesJitter_StaysAtTheLip()
+        {
+            var climb = new RopeClimb(10f);
+            climb.Begin(1);
+            climb.Step(RopeOverEdgeOntoFlatRoof(1f), 1f, 1f);
+
+            climb.Step(RopeOverEdgeOntoFlatRoof(-1f), 1f, 0.02f);
+
+            Assert.AreEqual(6f, climb.Index, 1e-4f);
+            Assert.IsTrue(climb.IsAtTop);
+        }
+
+        private static Vector3[] RopeFromGroundOverEdgeOntoRoof()
+        {
+            var positions = new Vector3[16];
+            positions[0] = new Vector3(-1f, 0f, 0f);
+            positions[1] = new Vector3(-0.5f, 0f, 0f);
+            for (var index = 2; index < 9; index++)
+                positions[index] = new Vector3(0f, (index - 2) * 0.5f, 0f);
+
+            for (var index = 9; index < positions.Length; index++)
+                positions[index] = new Vector3((index - 8) * 0.5f, 3f + 0.001f * index, 0f);
+
+            return positions;
+        }
+
+        [Test]
+        public void Step_StartingOnTheGroundBeforeTheWall_ClimbsToTheLip()
+        {
+            var climb = new RopeClimb(10f);
+            climb.Begin(0);
+
+            climb.Step(RopeFromGroundOverEdgeOntoRoof(), 1f, 1f);
+
+            Assert.AreEqual(8f, climb.Index, 1e-4f);
+            Assert.IsTrue(climb.IsAtTop);
+        }
+
+        [Test]
+        public void Step_HoseBulgesOutBelowTheLip_ClimbsPastTheBulge()
+        {
+            var positions = new List<Vector3>();
+            for (var index = 0; index < 9; index++)
+                positions.Add(new Vector3(0f, index * 0.25f, 0f));
+
+            positions.AddRange(new[]
+            {
+                new Vector3(0.2f, 2.05f, 0f), new Vector3(0.3f, 2.3f, 0f), new Vector3(0.3f, 2.55f, 0f),
+                new Vector3(0.3f, 2.8f, 0f), new Vector3(0.3f, 3.05f, 0f)
+            });
+            for (var index = 1; index <= 6; index++)
+                positions.Add(new Vector3(0.3f + index * 0.25f, 3.05f + 0.0005f * index, 0f));
+
+            var climb = new RopeClimb(10f);
+            climb.Begin(0);
+
+            climb.Step(positions, 1f, 1f);
+
+            Assert.AreEqual(13f, climb.Index, 1e-4f);
+            Assert.IsTrue(climb.IsAtTop);
+        }
+
+        [Test]
+        public void Step_AtARoundedLipWithFlatRoofBeyond_StaysAtTheLip()
+        {
+            var positions = new List<Vector3>();
+            for (var index = 0; index < 12; index++)
+                positions.Add(new Vector3(0f, index * 0.25f, 0f));
+
+            positions.Add(new Vector3(0.1f, 2.9f, 0f));
+            positions.Add(new Vector3(0.3f, 3f, 0f));
+            for (var index = 1; index <= 10; index++)
+                positions.Add(new Vector3(0.3f + index * 0.25f, 3f + 0.0005f * index, 0f));
+
+            var climb = new RopeClimb(10f);
+            climb.Begin(13);
+
+            climb.Step(positions, 1f, 1f);
+
+            Assert.AreEqual(13f, climb.Index, 1e-4f);
+            Assert.IsTrue(climb.IsAtTop);
+        }
+
+        [Test]
+        public void TopDirection_RopeLiesFlatOnRoof_PointsOntoTheRoof()
+        {
+            var climb = new RopeClimb(10f);
+            climb.Begin(1);
+            climb.Step(RopeOverEdgeOntoFlatRoof(1f), 1f, 1f);
+
+            var direction = climb.TopDirection(RopeOverEdgeOntoFlatRoof(1f));
+
+            Assert.AreEqual(1f, direction.x, 1e-4f);
         }
     }
 }
