@@ -40,30 +40,44 @@ namespace FlameBlame.Firefighter.Components
         private UseTargets FindTargets()
         {
             var eye = _firefighter.Eye.transform;
-            var heldEnd = FindHeldEnd(out var hasHeldEnd);
-            var connectTarget = default(HoseEndRef);
-            var canConnect = hasHeldEnd && _network.IsEndFree(heldEnd) &&
-                             _network.TryFindFreeEnd(_network.EndPosition(heldEnd), _config.ConnectRadiusMeters, heldEnd, out connectTarget);
-            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
-            var joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
-            var hasTieTarget = _tie.TryFindTarget(eye, out var tieTarget);
-            var isTied = hasTieTarget && _tie.IsTied(tieTarget.Body);
-            var climbParticle = RopeParticle.None;
-            var canClimb = _grabber.HeldParticle.IsNone && _climber.TryFindRope(eye, out climbParticle);
-            return new UseTargets
+            var targets = new UseTargets
             {
-                CanConnect = canConnect,
-                HeldEnd = heldEnd,
-                ConnectTarget = connectTarget,
-                BurstMonitor = burst,
-                Joint = joint,
-                ValveSource = FindValve(eye),
-                TieTarget = tieTarget,
-                CanTie = hasTieTarget && !isTied && !_grabber.HeldParticle.IsNone,
-                TiedInReach = isTied,
-                ClimbParticle = climbParticle,
-                CanClimb = canClimb
+                Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters),
+                ValveSource = FindValve(eye)
             };
+            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
+            targets.BurstMonitor = burst;
+            FindConnectTargets(ref targets);
+            FindTieTargets(eye, ref targets);
+            FindClimbTargets(eye, ref targets);
+            return targets;
+        }
+
+        private void FindConnectTargets(ref UseTargets targets)
+        {
+            targets.HeldEnd = FindHeldEnd(out var hasHeldEnd);
+            if (!hasHeldEnd || !_network.IsEndFree(targets.HeldEnd)) return;
+
+            var heldPosition = _network.EndPosition(targets.HeldEnd);
+            targets.CanConnect = _network.TryFindFreeEnd(heldPosition, _config.ConnectRadiusMeters, targets.HeldEnd, out var connectTarget);
+            targets.ConnectTarget = connectTarget;
+        }
+
+        private void FindTieTargets(Transform eye, ref UseTargets targets)
+        {
+            if (!_tie.TryFindTarget(eye, out var tieTarget)) return;
+
+            targets.TieTarget = tieTarget;
+            targets.TiedInReach = _tie.IsTied(tieTarget.Body);
+            targets.CanTie = !targets.TiedInReach && !_grabber.HeldParticle.IsNone;
+        }
+
+        private void FindClimbTargets(Transform eye, ref UseTargets targets)
+        {
+            if (!_grabber.HeldParticle.IsNone) return;
+
+            targets.CanClimb = _climber.TryFindRope(eye, out var climbParticle);
+            targets.ClimbParticle = climbParticle;
         }
 
         private void Execute(UseAction action, UseTargets targets)
@@ -84,9 +98,7 @@ namespace FlameBlame.Firefighter.Components
                     targets.ValveSource.IsOpen = !targets.ValveSource.IsOpen;
                     break;
                 case UseAction.Tie:
-                    var held = _grabber.HeldParticle;
-                    _grabber.Drop();
-                    _tie.Tie(held, targets.TieTarget);
+                    TieHeld(targets.TieTarget);
                     break;
                 case UseAction.Untie:
                     _tie.Untie(targets.TieTarget.Body);
@@ -98,6 +110,13 @@ namespace FlameBlame.Firefighter.Components
                     _climber.Stop();
                     break;
             }
+        }
+
+        private void TieHeld(HoseTie.TieTarget target)
+        {
+            var held = _grabber.HeldParticle;
+            _grabber.Drop();
+            _tie.Tie(held, target);
         }
 
         private HoseEndRef FindHeldEnd(out bool hasHeldEnd)

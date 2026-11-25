@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FlameBlame.Firefighter.Config;
+using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Simulation;
 using UnityEngine;
@@ -8,7 +9,6 @@ namespace FlameBlame.Firefighter.Components
 {
     public class HoseTie : MonoBehaviour
     {
-        private const float PullSmoothingSeconds = 0.15f;
         private const float SurfaceClearanceMultiplier = 1.2f;
 
         [SerializeField] private FirefighterConfigSO _config;
@@ -25,15 +25,8 @@ namespace FlameBlame.Firefighter.Components
                 _network.World.SetGripTarget(tie.Grip, Vector3.Lerp(tie.StartPosition, anchor, tie.Blend));
                 if (tie.Blend < 1f) continue;
 
-                tie.Pull = Vector3.Lerp(tie.Pull, _network.World.GripTension(tie.Grip), Time.fixedDeltaTime / PullSmoothingSeconds);
-                var horizontalPull = new Vector3(tie.Pull.x, 0f, tie.Pull.z);
-                var excess = Mathf.Max(0f, horizontalPull.magnitude - _config.TieMinTension);
-                var isPulled = _network.World.HasOtherGrip(tie.Grip);
-                var speed = isPulled ? Mathf.Min(excess * _config.TieSpeedMultiplier, _config.MaxTieSpeed) : 0f;
-                var desired = horizontalPull.normalized * speed;
-                var velocity = tie.Body.linearVelocity;
-                var horizontal = Vector3.MoveTowards(new Vector3(velocity.x, 0f, velocity.z), desired, _config.TieAcceleration * Time.fixedDeltaTime);
-                tie.Body.linearVelocity = new Vector3(horizontal.x, velocity.y, horizontal.z);
+                var isPulled = _network.World.IsGripShared(tie.Grip);
+                tie.Body.linearVelocity = tie.Drag.Step(_network.World.GripTension(tie.Grip), isPulled, tie.Body.linearVelocity, Time.fixedDeltaTime);
                 tie.Body.angularVelocity = Vector3.zero;
             }
         }
@@ -58,7 +51,7 @@ namespace FlameBlame.Firefighter.Components
             var start = _network.World.ParticlePosition(particle);
             var clearance = _network.HoseOf(particle.Rope).Config.ParticleRadius * SurfaceClearanceMultiplier;
             var anchor = target.Body.transform.InverseTransformPoint(target.Point + target.Normal * clearance);
-            _ties.Add(new TieBinding(grip, target.Body, anchor, start));
+            _ties.Add(new TieBinding(grip, target.Body, anchor, start, new TieDrag(_config.CreateTieDragSettings())));
         }
 
         public void Untie(Rigidbody body)
@@ -89,11 +82,12 @@ namespace FlameBlame.Firefighter.Components
             public Rigidbody Body { get; }
             public Vector3 LocalAnchor { get; }
             public Vector3 StartPosition { get; }
+            public TieDrag Drag { get; }
             public float Blend { get; set; }
-            public Vector3 Pull { get; set; }
 
-            public TieBinding(int grip, Rigidbody body, Vector3 localAnchor, Vector3 startPosition)
+            public TieBinding(int grip, Rigidbody body, Vector3 localAnchor, Vector3 startPosition, TieDrag drag)
             {
+                Drag = drag;
                 Grip = grip;
                 Body = body;
                 LocalAnchor = localAnchor;

@@ -6,15 +6,12 @@ namespace FlameBlame.Firefighter.Simulation
     public class RopeClimb
     {
         private const float TopTolerance = 1e-3f;
-        private const float LookaheadMeters = 0.5f;
-        private const float MinRiseMeters = 0.15f;
 
         private readonly float _metersPerSecond;
+        private float _approachSign = 1f;
 
         public float Index { get; private set; }
         public bool IsAtTop { get; private set; }
-
-        private float _approachSign = 1f;
 
         public RopeClimb(float metersPerSecond)
         {
@@ -77,53 +74,8 @@ namespace FlameBlame.Firefighter.Simulation
 
         private static bool Crosses(float from, float to, int crest) => (from - crest) * (to - crest) < 0f;
 
-        private int CrestIndex(IReadOnlyList<Vector3> positions)
-        {
-            var crest = Mathf.Clamp(Mathf.RoundToInt(Index), 0, positions.Count - 1);
-            var peak = PeakIndex(positions);
-            if (peak == crest) return crest;
-
-            var start = crest;
-            var step = peak > crest ? 1 : -1;
-            var climbed = Rises(positions, crest - step, step);
-            while (crest != peak)
-            {
-                var rises = Rises(positions, crest, step);
-                if (climbed && !rises) break;
-
-                climbed |= rises;
-                crest += step;
-            }
-
-            return climbed ? crest : start;
-        }
-
-        private static int PeakIndex(IReadOnlyList<Vector3> positions)
-        {
-            var peak = 0;
-            for (var index = 1; index < positions.Count; index++)
-            {
-                if (positions[index].y > positions[peak].y)
-                    peak = index;
-            }
-
-            return peak;
-        }
-
-        private static bool Rises(IReadOnlyList<Vector3> positions, int from, int step)
-        {
-            if (from < 0 || from >= positions.Count) return false;
-
-            var best = positions[from].y;
-            var distance = 0f;
-            for (var index = from + step; index >= 0 && index < positions.Count && distance < LookaheadMeters; index += step)
-            {
-                distance += (positions[index] - positions[index - step]).magnitude;
-                best = Mathf.Max(best, positions[index].y);
-            }
-
-            return best - positions[from].y >= MinRiseMeters;
-        }
+        private int CrestIndex(IReadOnlyList<Vector3> positions) =>
+            RopeCrest.Find(positions, Mathf.Clamp(Mathf.RoundToInt(Index), 0, positions.Count - 1));
 
         private int LowerIndex(IReadOnlyList<Vector3> positions) => Mathf.Clamp(Mathf.FloorToInt(Index), 0, positions.Count - 2);
     }

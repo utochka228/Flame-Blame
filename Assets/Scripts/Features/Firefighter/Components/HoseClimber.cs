@@ -12,8 +12,7 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseNetwork _network;
 
-        private const float MantleClearanceMeters = 0.2f;
-        private const float MantleMaxSeconds = 1f;
+        private readonly ClimbMantle _mantle = new ClimbMantle();
 
         private Rigidbody _body;
         private Collider _collider;
@@ -21,8 +20,6 @@ namespace FlameBlame.Firefighter.Components
         private HoseSegment _hose;
         private float _climbInput;
         private bool _isMantling;
-        private float _mantleTopY;
-        private float _mantleSeconds;
 
         public bool IsClimbing => _hose;
 
@@ -89,16 +86,13 @@ namespace FlameBlame.Firefighter.Components
 
         private void Mantle()
         {
-            _mantleTopY = _climb.Position(_hose.Rope.Positions).y;
-            _mantleSeconds = 0f;
+            _mantle.Begin(_climb.Position(_hose.Rope.Positions).y);
             _isMantling = true;
         }
 
         private void StepMantle()
         {
-            _mantleSeconds += Time.fixedDeltaTime;
-            var isClear = _collider.bounds.min.y >= _mantleTopY + MantleClearanceMeters;
-            if (!isClear && _mantleSeconds < MantleMaxSeconds)
+            if (!_mantle.Step(_collider.bounds.min.y, Time.fixedDeltaTime))
             {
                 _body.linearVelocity = Vector3.up * _config.JumpSpeed;
                 return;

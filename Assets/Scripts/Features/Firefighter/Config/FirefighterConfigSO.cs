@@ -1,4 +1,5 @@
 using FlameBlame.Core.Extensions;
+using FlameBlame.Firefighter.Simulation;
 using UnityEngine;
 
 namespace FlameBlame.Firefighter.Config
@@ -38,5 +39,13 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(0.5f, 10f)] public float MaxTieSpeed { get; private set; } = 3f;
 
         public float ClimbMaxPressureFraction => ClimbMaxPressurePercent.ToFraction();
+
+        public TieDragSettings CreateTieDragSettings() => new TieDragSettings
+        {
+            MinTension = TieMinTension,
+            SpeedMultiplier = TieSpeedMultiplier,
+            MaxSpeed = MaxTieSpeed,
+            Acceleration = TieAcceleration
+        };
     }
 }

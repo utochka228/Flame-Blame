@@ -73,7 +73,7 @@ namespace FlameBlame.Hose.Simulation
             return slot;
         }
 
-        public bool HasOtherGrip(int grip)
+        public bool IsGripShared(int grip)
         {
             var rope = _grips[grip].Particle.Rope;
             for (var index = 0; index < _grips.Count; index++)
