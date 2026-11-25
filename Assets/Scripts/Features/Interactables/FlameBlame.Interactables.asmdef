@@ -1,0 +1,17 @@
+{
+    "name": "FlameBlame.Interactables",
+    "rootNamespace": "FlameBlame.Interactables",
+    "references": [
+        "FlameBlame.Core",
+        "FlameBlame.Hose"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

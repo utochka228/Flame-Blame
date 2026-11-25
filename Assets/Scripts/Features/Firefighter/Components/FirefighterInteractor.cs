@@ -2,6 +2,7 @@ using FlameBlame.Firefighter.Config;
 using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Simulation;
+using FlameBlame.Interactables.Components;
 using FlameBlame.Pressure.Components;
 using UnityEngine;
 
@@ -33,6 +34,7 @@ namespace FlameBlame.Firefighter.Components
             var targets = FindTargets();
             var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve)
                 .WithTie(targets.CanTie, targets.TiedInReach)
+                .WithDoor(targets.HasDoor)
                 .WithClimb(targets.CanClimb, _climber.IsClimbing);
             Execute(UseResolver.Resolve(context), targets);
         }
@@ -42,9 +44,9 @@ namespace FlameBlame.Firefighter.Components
             var eye = _firefighter.Eye.transform;
             var targets = new UseTargets
             {
-                Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters),
-                ValveSource = FindValve(eye)
+                Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters)
             };
+            FindInteractables(eye, ref targets);
             _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst, out var breachIndex);
             targets.BurstMonitor = burst;
             targets.BreachIndex = breachIndex;
@@ -98,6 +100,9 @@ namespace FlameBlame.Firefighter.Components
                 case UseAction.ToggleValve:
                     targets.ValveSource.IsOpen = !targets.ValveSource.IsOpen;
                     break;
+                case UseAction.ToggleDoor:
+                    targets.Door.Toggle();
+                    break;
                 case UseAction.Tie:
                     TieHeld(targets.TieTarget);
                     break;
@@ -129,12 +134,13 @@ namespace FlameBlame.Firefighter.Components
             return hasHeldEnd ? new HoseEndRef(hose, held.Index == 0 ? RopeEndKind.Start : RopeEndKind.Tail) : default;
         }
 
-        private PressureSource FindValve(Transform eye)
+        private void FindInteractables(Transform eye, ref UseTargets targets)
         {
             if (!Physics.Raycast(eye.position, eye.forward, out var hit, _config.ReachMeters, _config.InteractLayers, QueryTriggerInteraction.Ignore))
-                return null;
+                return;
 
-            return hit.collider.GetComponentInParent<PressureSource>();
+            targets.ValveSource = hit.collider.GetComponentInParent<PressureSource>();
+            targets.Door = hit.collider.GetComponentInParent<Door>();
         }
 
         private struct UseTargets
@@ -146,6 +152,7 @@ namespace FlameBlame.Firefighter.Components
             public int BreachIndex { get; set; }
             public int Joint { get; set; }
             public PressureSource ValveSource { get; set; }
+            public Door Door { get; set; }
             public HoseTie.TieTarget TieTarget { get; set; }
             public bool CanTie { get; set; }
             public bool TiedInReach { get; set; }
@@ -154,6 +161,7 @@ namespace FlameBlame.Firefighter.Components
 
             public bool Burst => BurstMonitor;
             public bool Valve => ValveSource;
+            public bool HasDoor => Door;
         }
     }
 }

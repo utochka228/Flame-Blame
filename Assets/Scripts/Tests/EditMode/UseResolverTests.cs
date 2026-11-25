@@ -44,5 +44,15 @@ namespace FlameBlame.Tests.EditMode
             Assert.AreEqual(UseAction.ToggleValve, UseResolver.Resolve(new UseContext(false, false, false, true).WithClimb(true, false)));
             Assert.AreEqual(UseAction.StopClimb, UseResolver.Resolve(new UseContext(true, true, true, true).WithClimb(true, true)));
         }
+
+        [Test]
+        public void Resolve_DoorComesAfterValveAndBeforeClimb()
+        {
+            var door = new UseContext(false, false, false, false).WithDoor(true);
+
+            Assert.AreEqual(UseAction.ToggleDoor, UseResolver.Resolve(door));
+            Assert.AreEqual(UseAction.ToggleValve, UseResolver.Resolve(new UseContext(false, false, false, true).WithDoor(true)));
+            Assert.AreEqual(UseAction.ToggleDoor, UseResolver.Resolve(door.WithClimb(true, false)));
+        }
     }
 }

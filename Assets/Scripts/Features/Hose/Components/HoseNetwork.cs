@@ -23,6 +23,7 @@ namespace FlameBlame.Hose.Components
         private static readonly ILogger<HoseNetwork> Logger = Loggers.For<HoseNetwork>();
 
         [SerializeField] private PressureSource _source;
+        [SerializeField] private HeatField _heatField;
         [SerializeField] private HoseSegment _sourceHose;
         [SerializeField] private HoseSegment[] _hoses;
         [SerializeField] private HoseJoint[] _joints;
@@ -36,6 +37,7 @@ namespace FlameBlame.Hose.Components
         private readonly List<float> _pinchPositions = new List<float>();
 
         private readonly List<int> _splitterParts = new List<int>();
+        private readonly Dictionary<int, BurnTimer> _couplingBurns = new Dictionary<int, BurnTimer>();
 
         private RopeWorld _world;
         private RopeJoints _ropeJoints;
@@ -43,6 +45,7 @@ namespace FlameBlame.Hose.Components
         private HoseBurstMonitor[] _monitors;
         private Nozzle[] _nozzles;
         private float[][] _profiles;
+        private float _secondsSinceCouplingCheck;
         private int _sourceHoseIndex;
 
         private void Start()
@@ -62,6 +65,7 @@ namespace FlameBlame.Hose.Components
         private void FixedUpdate()
         {
             _world.Step(Time.fixedDeltaTime);
+            BurnCouplings();
         }
 
         public RopeWorld World => _world;
@@ -164,6 +168,52 @@ namespace FlameBlame.Hose.Components
         public void Disconnect(int joint)
         {
             _ropeJoints.Remove(joint);
+            _couplingBurns.Remove(joint);
+        }
+
+        public void Slam(Bounds bounds)
+        {
+            for (var joint = 0; joint < _ropeJoints.Count; joint++)
+            {
+                if (_ropeJoints.IsLive(joint) && bounds.Contains(_ropeJoints.Position(joint)))
+                    Disconnect(joint);
+            }
+        }
+
+        private void BurnCouplings()
+        {
+            if (!_heatField) return;
+
+            var config = _hoses[0].Config;
+            _secondsSinceCouplingCheck += Time.fixedDeltaTime;
+            if (_secondsSinceCouplingCheck < 1f / config.HeatChecksPerSecond) return;
+
+            var elapsed = _secondsSinceCouplingCheck;
+            _secondsSinceCouplingCheck = 0f;
+            for (var joint = 0; joint < _ropeJoints.Count; joint++)
+            {
+                if (_ropeJoints.IsLive(joint))
+                    StepCouplingBurn(joint, elapsed);
+            }
+        }
+
+        private void StepCouplingBurn(int joint, float elapsed)
+        {
+            var config = _hoses[0].Config;
+            var isHeated = _heatField.Sample(_ropeJoints.Position(joint)) >= config.BurnHeatThresholdFraction;
+            if (BurnTimerFor(joint, config.CouplingBurnSeconds).Step(isHeated, elapsed))
+                Disconnect(joint);
+        }
+
+        private BurnTimer BurnTimerFor(int joint, float seconds)
+        {
+            if (!_couplingBurns.TryGetValue(joint, out var timer))
+            {
+                timer = new BurnTimer(seconds);
+                _couplingBurns[joint] = timer;
+            }
+
+            return timer;
         }
 
         private void BuildWorld()

@@ -4,6 +4,7 @@
     "references": [
         "FlameBlame.Core",
         "FlameBlame.Hose",
+        "FlameBlame.Interactables",
         "FlameBlame.Pressure",
         "FlameBlame.Water",
         "Unity.InputSystem"

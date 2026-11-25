@@ -11,6 +11,7 @@ namespace FlameBlame.Firefighter.Simulation
             if (context.TiedInReach) return UseAction.Untie;
             if (context.JointInReach) return UseAction.Disconnect;
             if (context.ValveInReach) return UseAction.ToggleValve;
+            if (context.DoorInReach) return UseAction.ToggleDoor;
             if (context.RopeInReach) return UseAction.Climb;
             return UseAction.None;
         }

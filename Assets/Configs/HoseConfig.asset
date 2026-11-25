@@ -32,7 +32,7 @@ MonoBehaviour:
     m_Bits: 311
   <PinchLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   <PinchChecksPerSecond>k__BackingField: 10
   <PinchSquashPercent>k__BackingField: 60
   <BurstOverloadSeconds>k__BackingField: 1.5
