@@ -153,5 +153,27 @@ namespace FlameBlame.Tests.EditMode
         {
             return Vector3.Distance(builder.Centers[ring], builder.Vertices[ring * Sides]);
         }
+
+        [Test]
+        public void Uvs_RunFromZeroToOneAlongTheTube()
+        {
+            var builder = CreateBuilder(5);
+            var ringCount = (5 - 1) * Samples + 1;
+
+            Assert.That(builder.Uvs.Length, Is.EqualTo(builder.Vertices.Length));
+            Assert.That(builder.Uvs[0].x, Is.EqualTo(0f));
+            Assert.That(builder.Uvs[(ringCount / 2) * Sides].x, Is.EqualTo(0.5f).Within(1e-5f));
+            Assert.That(builder.Uvs[(ringCount - 1) * Sides].x, Is.EqualTo(1f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Uvs_GoAroundTheRingInV()
+        {
+            var builder = CreateBuilder(5);
+
+            Assert.That(builder.Uvs[0].y, Is.EqualTo(0f));
+            Assert.That(builder.Uvs[Sides / 2].y, Is.EqualTo(0.5f).Within(1e-5f));
+            Assert.That(builder.Uvs[Sides].y, Is.EqualTo(0f));
+        }
     }
 }

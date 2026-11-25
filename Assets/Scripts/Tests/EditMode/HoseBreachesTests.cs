@@ -163,5 +163,110 @@ namespace FlameBlame.Tests.EditMode
             Assert.That(_burned.Count, Is.EqualTo(2));
             Assert.That(_breaches.Breaches[0].IsTaped, Is.False);
         }
+
+        [Test]
+        public void HeatOverAStretch_BurnsOneLeakCoveringIt()
+        {
+            for (var particle = 2; particle <= 5; particle++)
+                Heat(particle, 0.8f);
+
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(1));
+            Assert.That(_breaches.Breaches[0].FirstIndex, Is.EqualTo(2));
+            Assert.That(_breaches.Breaches[0].LastIndex, Is.EqualTo(5));
+            Assert.That(_breaches.Breaches[0].Index, Is.EqualTo(3));
+            Assert.That(_breaches.Breaches[0].Loss, Is.EqualTo(BurstLoss));
+            Assert.That(_burned.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SeparateHotSpots_BurnSeparateLeaks()
+        {
+            Heat(1, 0.8f);
+            Heat(6, 0.8f);
+
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void HeatNextToAnOpenLeak_GrowsItInsteadOfStartingAnother()
+        {
+            Heat(2, 0.8f);
+            Run(1.5f, 0.5f);
+
+            Heat(3, 0.8f);
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(1));
+            Assert.That(_breaches.Breaches[0].FirstIndex, Is.EqualTo(2));
+            Assert.That(_breaches.Breaches[0].LastIndex, Is.EqualTo(3));
+            Assert.That(_burned.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void HeatBridgingTwoLeaks_JoinsThemIntoOne()
+        {
+            Heat(2, 0.8f);
+            Heat(4, 0.8f);
+            Run(1.5f, 0.5f);
+
+            Heat(3, 0.8f);
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(1));
+            Assert.That(_breaches.Breaches[0].FirstIndex, Is.EqualTo(2));
+            Assert.That(_breaches.Breaches[0].LastIndex, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void Tape_AnywhereOnTheStretch_RepairsTheWholeLeak()
+        {
+            for (var particle = 2; particle <= 5; particle++)
+                Heat(particle, 0.8f);
+            Run(1.5f, 0.5f);
+
+            var changed = _breaches.Tape(5);
+
+            Assert.That(changed, Is.True);
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(1));
+            Assert.That(_breaches.Breaches[0].IsTaped, Is.True);
+            Assert.That(_breaches.Breaches[0].Loss, Is.EqualTo(TapeLoss));
+            Assert.That(_breaches.Breaches[0].FirstIndex, Is.EqualTo(2));
+            Assert.That(_breaches.Breaches[0].LastIndex, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void Tape_JustOutsideTheStretch_DoesNothing()
+        {
+            for (var particle = 2; particle <= 5; particle++)
+                Heat(particle, 0.8f);
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Tape(6), Is.False);
+            Assert.That(_breaches.Breaches[0].IsTaped, Is.False);
+        }
+
+        [Test]
+        public void TapedStretch_BurnsOpenAgainWhenAnyPartOfItIsHot()
+        {
+            for (var particle = 2; particle <= 5; particle++)
+                Heat(particle, 0.8f);
+            Run(1.5f, 0.5f);
+            _breaches.Tape(3);
+            for (var particle = 2; particle <= 5; particle++)
+                Heat(particle, 0f);
+            Heat(4, 0.8f);
+
+            Run(1.5f, 0.5f);
+
+            Assert.That(_breaches.Breaches.Count, Is.EqualTo(1));
+            Assert.That(_breaches.Breaches[0].IsTaped, Is.False);
+            Assert.That(_breaches.Breaches[0].FirstIndex, Is.EqualTo(2));
+            Assert.That(_breaches.Breaches[0].LastIndex, Is.EqualTo(5));
+            Assert.That(_burned.Count, Is.EqualTo(2));
+        }
     }
 }

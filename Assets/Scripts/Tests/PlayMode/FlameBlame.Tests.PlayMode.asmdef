@@ -3,8 +3,10 @@
     "rootNamespace": "FlameBlame.Tests.PlayMode",
     "references": [
         "FlameBlame.Core",
+        "FlameBlame.Fire",
         "FlameBlame.Hose",
         "FlameBlame.Pressure",
+        "FlameBlame.Water",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
