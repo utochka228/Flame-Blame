@@ -29,6 +29,39 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void Step_LookingDownAndPressingForward_ClimbsDown()
+        {
+            var climb = new RopeClimb(1f);
+            climb.Begin(2);
+
+            climb.Step(HangingRope(), 1f, 0.5f, Vector3.down);
+
+            Assert.AreEqual(3f, climb.Index, 1e-4f);
+        }
+
+        [Test]
+        public void Step_LookingUpAndPressingBackward_ClimbsDown()
+        {
+            var climb = new RopeClimb(1f);
+            climb.Begin(2);
+
+            climb.Step(HangingRope(), -1f, 0.5f, Vector3.up);
+
+            Assert.AreEqual(3f, climb.Index, 1e-4f);
+        }
+
+        [Test]
+        public void Step_LookingAcrossTheRope_ForwardStillClimbsUp()
+        {
+            var climb = new RopeClimb(1f);
+            climb.Begin(3);
+
+            climb.Step(HangingRope(), 1f, 0.5f, Vector3.forward);
+
+            Assert.AreEqual(2f, climb.Index, 1e-4f);
+        }
+
+        [Test]
         public void Step_BackwardInput_DescendsTowardLowerEnd()
         {
             var climb = new RopeClimb(1f);

@@ -7,70 +7,72 @@ namespace FlameBlame.Tests.EditMode
     public class TieDragTests
     {
         private const float Step = 0.02f;
+        private const float Mass = 10f;
 
         private static TieDrag Drag() => new TieDrag(new TieDragSettings
         {
             MinTension = 500f,
-            SpeedMultiplier = 0.001f,
-            MaxSpeed = 3f,
-            Acceleration = 100f
+            ForceMultiplier = 0.1f,
+            MaxForce = 200f,
+            MaxSpeed = 2f,
+            BrakeSeconds = 0.5f
         });
 
-        private static Vector3 Settle(TieDrag drag, Vector3 tension, bool isPulled, Vector3 start)
+        private static Vector3 Settle(TieDrag drag, Vector3 tension, bool isPulled, Vector3 velocity)
         {
-            var velocity = start;
+            var force = Vector3.zero;
             for (var index = 0; index < 200; index++)
-                velocity = drag.Step(tension, isPulled, velocity, Step);
+                force = drag.Step(tension, isPulled, velocity, Mass, Step);
 
-            return velocity;
+            return force;
         }
 
         [Test]
-        public void Step_TensionBelowTheDeadZone_DoesNotMove()
+        public void Step_TensionBelowTheDeadZone_AppliesNoForce()
         {
-            var velocity = Settle(Drag(), new Vector3(300f, 0f, 0f), true, Vector3.zero);
+            var force = Settle(Drag(), new Vector3(300f, 0f, 0f), true, Vector3.zero);
 
-            Assert.AreEqual(0f, velocity.magnitude, 1e-4f);
+            Assert.AreEqual(0f, force.magnitude, 1e-4f);
         }
 
         [Test]
         public void Step_PullAboveTheDeadZone_ScalesWithTheExcess()
         {
-            var velocity = Settle(Drag(), new Vector3(1500f, 0f, 0f), true, Vector3.zero);
+            var force = Settle(Drag(), new Vector3(1500f, 0f, 0f), true, Vector3.zero);
 
-            Assert.AreEqual(1f, velocity.x, 0.01f);
+            Assert.AreEqual(100f, force.x, 0.5f);
         }
 
         [Test]
-        public void Step_StrongPull_IsCappedAtMaxSpeed()
+        public void Step_StrongPull_IsCappedAtMaxForce()
         {
-            var velocity = Settle(Drag(), new Vector3(0f, 0f, 50000f), true, Vector3.zero);
+            var force = Settle(Drag(), new Vector3(0f, 0f, 50000f), true, Vector3.zero);
 
-            Assert.AreEqual(3f, velocity.z, 0.01f);
+            Assert.AreEqual(200f, force.z, 0.5f);
         }
 
         [Test]
-        public void Step_NobodyHoldingTheHose_BrakesTheBox()
+        public void Step_AlreadyAtMaxSpeed_AppliesNoMoreForce()
         {
-            var velocity = Settle(Drag(), new Vector3(5000f, 0f, 0f), false, new Vector3(2f, 0f, 0f));
+            var force = Settle(Drag(), new Vector3(5000f, 0f, 0f), true, new Vector3(2f, 0f, 0f));
 
-            Assert.AreEqual(0f, velocity.x, 1e-4f);
+            Assert.AreEqual(0f, force.magnitude, 1e-4f);
         }
 
         [Test]
-        public void Step_KeepsTheVerticalVelocity()
+        public void Step_NobodyHoldingTheHose_BrakesAgainstTheMotion()
         {
-            var velocity = Drag().Step(new Vector3(5000f, 0f, 0f), true, new Vector3(0f, -4f, 0f), Step);
+            var force = Drag().Step(new Vector3(5000f, 0f, 0f), false, new Vector3(1f, 0f, 0f), Mass, Step);
 
-            Assert.AreEqual(-4f, velocity.y, 1e-4f);
+            Assert.AreEqual(-Mass / 0.5f, force.x, 1e-3f);
         }
 
         [Test]
-        public void Step_LimitsAccelerationPerStep()
+        public void Step_IgnoresTheVerticalPullAndVelocity()
         {
-            var velocity = Drag().Step(new Vector3(50000f, 0f, 0f), true, Vector3.zero, Step);
+            var force = Drag().Step(new Vector3(0f, 5000f, 0f), true, new Vector3(0f, -4f, 0f), Mass, Step);
 
-            Assert.LessOrEqual(velocity.x, 100f * Step + 1e-4f);
+            Assert.AreEqual(0f, force.magnitude, 1e-4f);
         }
     }
 }

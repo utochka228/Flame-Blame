@@ -7,6 +7,7 @@
         "FlameBlame.Firefighter",
         "FlameBlame.Hose",
         "FlameBlame.Interactables",
+        "FlameBlame.Level",
         "FlameBlame.Pressure",
         "FlameBlame.Water",
         "UnityEngine.TestRunner",

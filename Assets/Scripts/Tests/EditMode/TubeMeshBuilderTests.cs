@@ -54,7 +54,7 @@ namespace FlameBlame.Tests.EditMode
             var ringCount = 9 * Samples + 1;
             Assert.AreEqual(ringCount * Sides, builder.Vertices.Length);
             Assert.AreEqual(builder.Vertices.Length, builder.Normals.Length);
-            Assert.AreEqual((ringCount - 1) * Sides * 6, builder.Triangles.Length);
+            Assert.AreEqual((ringCount - 1) * Sides * 6 + (Sides - 2) * 3 * 2, builder.Triangles.Length);
         }
 
         [Test]
@@ -64,7 +64,8 @@ namespace FlameBlame.Tests.EditMode
 
             builder.Build(StraightLine(10), Radius);
 
-            for (var index = 0; index < builder.Triangles.Length; index += 3)
+            var sideTriangleLength = (9 * Samples) * Sides * 6;
+            for (var index = 0; index < sideTriangleLength; index += 3)
             {
                 var first = builder.Vertices[builder.Triangles[index]];
                 var second = builder.Vertices[builder.Triangles[index + 1]];
@@ -73,6 +74,26 @@ namespace FlameBlame.Tests.EditMode
                 var radial = (first + second + third) / 3f;
                 radial.x = 0f;
                 Assert.Greater(Vector3.Dot(faceNormal, radial), 0f, "Triangle {0} faces inward", index / 3);
+            }
+        }
+
+        [Test]
+        public void Build_EndCapsFaceAlongTheTube()
+        {
+            var builder = CreateBuilder(10);
+
+            builder.Build(StraightLine(10), Radius);
+
+            var capStart = (9 * Samples) * Sides * 6;
+            var capTriangleLength = (Sides - 2) * 3;
+            for (var index = 0; index < capTriangleLength * 2; index += 3)
+            {
+                var first = builder.Vertices[builder.Triangles[capStart + index]];
+                var second = builder.Vertices[builder.Triangles[capStart + index + 1]];
+                var third = builder.Vertices[builder.Triangles[capStart + index + 2]];
+                var faceNormal = Vector3.Cross(second - first, third - first);
+                var expected = index / 3 % 2 == 0 ? -1f : 1f;
+                Assert.Greater(faceNormal.x * expected, 0f, "Cap triangle {0} faces the wrong way", index / 3);
             }
         }
 

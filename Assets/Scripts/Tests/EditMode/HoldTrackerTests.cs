@@ -62,5 +62,15 @@ namespace FlameBlame.Tests.EditMode
             Assert.IsFalse(_tracker.IsTooFar(Vector3.zero, new Vector3(0f, 0f, MaxDistance)));
             Assert.IsTrue(_tracker.IsTooFar(Vector3.zero, new Vector3(0f, 0f, MaxDistance + 0.01f)));
         }
+
+        [Test]
+        public void Velocity_FollowingAMovingHoldPoint_PointsTowardTheTarget()
+        {
+            _tracker.Begin(Vector3.zero, Vector3.forward);
+
+            StepFor(0.1f, new Vector3(5f, 0f, 0f), Vector3.forward);
+
+            Assert.Greater(_tracker.Velocity.x, 0f);
+        }
     }
 }
