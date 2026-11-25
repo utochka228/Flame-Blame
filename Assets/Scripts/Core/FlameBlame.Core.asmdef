@@ -1,7 +1,9 @@
 {
     "name": "FlameBlame.Core",
     "rootNamespace": "FlameBlame.Core",
-    "references": [],
+    "references": [
+        "NaughtyAttributes.Core"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
