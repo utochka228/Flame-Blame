@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FlameBlame.Hose.Config;
 using FlameBlame.Hose.Simulation;
+using FlameBlame.Water.Components;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Components
@@ -13,6 +14,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HoseSegment _hose;
         [SerializeField] private HoseNetwork _network;
         [SerializeField] private ParticleSystem _jet;
+        [SerializeField] private PuddleField _puddles;
         [SerializeField] private RopeEndKind _tip = RopeEndKind.Tail;
 
         private NozzleModel _model;
@@ -73,10 +75,14 @@ namespace FlameBlame.Hose.Components
             if (_output.FlowFraction < MinVisibleFlowFraction) return;
 
             if (!Physics.SphereCast(origin, _config.PushRadius, direction, out var hit, _output.JetLength, _config.PushLayers,
-                    QueryTriggerInteraction.Ignore) || !hit.rigidbody)
+                    QueryTriggerInteraction.Ignore))
                 return;
 
-            hit.rigidbody.AddForceAtPosition(direction * (_config.PushForce * _output.FlowFraction), hit.point);
+            if (_puddles)
+                _puddles.AddWater(hit.point, _config.JetPuddleVolumePerSecond * _output.FlowFraction * Time.fixedDeltaTime);
+
+            if (hit.rigidbody)
+                hit.rigidbody.AddForceAtPosition(direction * (_config.PushForce * _output.FlowFraction), hit.point);
         }
 
         private void DriveParticles()

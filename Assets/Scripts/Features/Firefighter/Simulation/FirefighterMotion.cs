@@ -19,10 +19,12 @@ namespace FlameBlame.Firefighter.Simulation
             _airControlFraction = airControlFraction;
         }
 
-        public Vector3 Step(Vector3 velocity, Vector2 move, Quaternion facing, float deltaTime, bool isGrounded = true, float speedScale = 1f)
+        public Vector3 Step(Vector3 velocity, Vector2 move, Quaternion facing, float deltaTime,
+            bool isGrounded = true, float speedScale = 1f, float traction = 1f)
         {
             var target = facing * new Vector3(move.x, 0f, move.y) * (_moveSpeed * speedScale);
-            var rate = (move.sqrMagnitude > 0f ? _acceleration : _deceleration) * (isGrounded ? 1f : _airControlFraction);
+            var rate = (move.sqrMagnitude > 0f ? _acceleration : _deceleration) *
+                       (isGrounded ? 1f : _airControlFraction) * traction;
             var horizontal = Vector3.MoveTowards(new Vector3(velocity.x, 0f, velocity.z), target, rate * deltaTime);
             return new Vector3(horizontal.x, velocity.y, horizontal.z);
         }

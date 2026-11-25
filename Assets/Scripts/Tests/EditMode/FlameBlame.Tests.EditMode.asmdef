@@ -6,6 +6,7 @@
         "FlameBlame.Firefighter",
         "FlameBlame.Hose",
         "FlameBlame.Pressure",
+        "FlameBlame.Water",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

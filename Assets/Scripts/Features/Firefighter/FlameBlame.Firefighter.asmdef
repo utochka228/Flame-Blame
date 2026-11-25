@@ -5,6 +5,7 @@
         "FlameBlame.Core",
         "FlameBlame.Hose",
         "FlameBlame.Pressure",
+        "FlameBlame.Water",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

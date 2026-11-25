@@ -81,6 +81,32 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void Step_LowTraction_AcceleratesSlower()
+        {
+            var velocity = _motion.Step(Vector3.zero, Vector2.up, Quaternion.identity, 0.1f, true, 1f, 0.25f);
+
+            Assert.That(velocity.z, Is.EqualTo(Acceleration * 0.1f * 0.25f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Step_LowTraction_NoInput_SlidesLonger()
+        {
+            var velocity = _motion.Step(new Vector3(0f, 0f, MoveSpeed), Vector2.zero, Quaternion.identity, 0.1f, true, 1f, 0.25f);
+
+            Assert.That(velocity.z, Is.EqualTo(MoveSpeed - Deceleration * 0.1f * 0.25f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Step_TractionStacksWithAirControl()
+        {
+            var motion = new FirefighterMotion(MoveSpeed, Acceleration, Deceleration, JumpSpeed, 0.5f);
+
+            var velocity = motion.Step(Vector3.zero, Vector2.up, Quaternion.identity, 0.1f, false, 1f, 0.5f);
+
+            Assert.That(velocity.z, Is.EqualTo(Acceleration * 0.1f * 0.5f * 0.5f).Within(1e-4f));
+        }
+
+        [Test]
         public void Jump_SetsVerticalSpeed_KeepsHorizontal()
         {
             var velocity = _motion.Jump(new Vector3(2f, -1f, 3f));

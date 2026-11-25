@@ -1,6 +1,7 @@
 using System;
 using FlameBlame.Firefighter.Config;
 using FlameBlame.Firefighter.Simulation;
+using FlameBlame.Water.Components;
 using UnityEngine;
 
 namespace FlameBlame.Firefighter.Components
@@ -10,6 +11,7 @@ namespace FlameBlame.Firefighter.Components
     {
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private Camera _eye;
+        [SerializeField] private PuddleField _puddles;
 
         private Rigidbody _body;
         private CapsuleCollider _capsule;
@@ -40,7 +42,8 @@ namespace FlameBlame.Firefighter.Components
             if (IsMotionOverridden) return;
 
             var isGrounded = IsGrounded();
-            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, isGrounded, MoveSpeedScale);
+            var traction = _puddles ? _puddles.TractionAt(transform.position) : 1f;
+            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, isGrounded, MoveSpeedScale, traction);
             if (_jumpRequested && isGrounded)
                 velocity = _motion.Jump(velocity);
 

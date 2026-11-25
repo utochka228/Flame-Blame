@@ -3,7 +3,8 @@
     "rootNamespace": "FlameBlame.Hose",
     "references": [
         "FlameBlame.Core",
-        "FlameBlame.Pressure"
+        "FlameBlame.Pressure",
+        "FlameBlame.Water"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -47,6 +47,7 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldFreeDampingMultiplier { get; private set; } = 0.7f;
         [field: SerializeField] [field: Range(0f, 100f)] public float BridgePressurePercent { get; private set; } = 60f;
         [field: SerializeField] [field: Range(0.05f, 0.4f)] public float BridgeRadiusMeters { get; private set; } = 0.18f;
+        [field: SerializeField] [field: Min(0f)] public float LeakPuddleVolumePerSecond { get; private set; } = 0.4f;
         [field: SerializeField] [field: Range(10f, 100f)] public float SoloCarrySpeedPercent { get; private set; } = 100f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
