@@ -16,6 +16,7 @@ MonoBehaviour:
   <Acceleration>k__BackingField: 40
   <Deceleration>k__BackingField: 10
   <JumpSpeed>k__BackingField: 6
+  <AirControlPercent>k__BackingField: 15
   <LookDegreesPerPixel>k__BackingField: 0.1
   <PitchLimitDegrees>k__BackingField: 85
   <GroundCheckDistance>k__BackingField: 0.1
@@ -26,7 +27,7 @@ MonoBehaviour:
   <ConnectRadiusMeters>k__BackingField: 0.6
   <InteractLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 4294965759
+    m_Bits: 311
   <GripCompliance>k__BackingField: 0.0000001
   <AimGripCompliance>k__BackingField: 0.00001
   <GripFollowSeconds>k__BackingField: 0.12
@@ -35,14 +36,19 @@ MonoBehaviour:
   <RecoilTransferMultiplier>k__BackingField: 1
   <MaxSpeed>k__BackingField: 20
   <ThrowSpeed>k__BackingField: 12
+  <ThrowInheritMultiplier>k__BackingField: 1
+  <ThrowSpreadParticles>k__BackingField: 6
+  <PullSmoothingSeconds>k__BackingField: 0.15
   <GroundLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 1335
   <ClimbSpeed>k__BackingField: 2
   <ClimbStandOffMeters>k__BackingField: 0.25
   <ClimbMaxPressurePercent>k__BackingField: 20
-  <TieSpeedMultiplier>k__BackingField: 0.0005
+  <TieForceMultiplier>k__BackingField: 0.04
+  <MaxTieForce>k__BackingField: 300
   <TieMinTension>k__BackingField: 500
   <TieBlendSeconds>k__BackingField: 0.6
-  <TieAcceleration>k__BackingField: 60
-  <MaxTieSpeed>k__BackingField: 3
+  <TieGrabToleranceParticles>k__BackingField: 2
+  <TieBrakeSeconds>k__BackingField: 0.25
+  <MaxTieSpeed>k__BackingField: 2

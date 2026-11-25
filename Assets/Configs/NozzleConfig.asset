@@ -18,6 +18,7 @@ MonoBehaviour:
   <RecoilAcceleration>k__BackingField: 25
   <ThumbBoostPercent>k__BackingField: 50
   <PushForce>k__BackingField: 40
+  <JetWaterPerSecond>k__BackingField: 0.3
   <PushRadius>k__BackingField: 0.15
   <PushLayers>k__BackingField:
     serializedVersion: 2

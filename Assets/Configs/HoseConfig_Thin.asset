@@ -19,6 +19,7 @@ MonoBehaviour:
   <FloppyBendCompliance>k__BackingField: 1
   <RigidBendCompliance>k__BackingField: 0.000001
   <Damping>k__BackingField: 2.5
+  <RigidDampingMultiplier>k__BackingField: 3
   <GroundFriction>k__BackingField: 0.3
   <MaxSpeed>k__BackingField: 20
   <MaxStretchFraction>k__BackingField: 0.1
@@ -38,6 +39,10 @@ MonoBehaviour:
   <BurstOverloadSeconds>k__BackingField: 1.5
   <BurstRecoverSeconds>k__BackingField: 1
   <BurstWeakPointPercent>k__BackingField: 50
+  <HeatChecksPerSecond>k__BackingField: 10
+  <BurnHeatThresholdPercent>k__BackingField: 50
+  <BurnSeconds>k__BackingField: 3
+  <CouplingBurnSeconds>k__BackingField: 2
   <BalloonPercent>k__BackingField: 120
   <BalloonWidthParticles>k__BackingField: 6
   <ShakeAmplitude>k__BackingField: 0.04
@@ -45,9 +50,20 @@ MonoBehaviour:
   <MaxPressure>k__BackingField: 100
   <LossPerMeter>k__BackingField: 2
   <BurstLeakLoss>k__BackingField: 40
+  <TapeLeakLoss>k__BackingField: 8
+  <OpenEndLeakLoss>k__BackingField: 40
+  <OpenEndRecoilAcceleration>k__BackingField: 6
   <HeldUpstreamRigidityPercent>k__BackingField: 50
   <HeldFreeRigidityPercent>k__BackingField: 5
   <HeldUpstreamDampingMultiplier>k__BackingField: 2.5
   <HeldFreeDampingMultiplier>k__BackingField: 0.7
+  <BridgePressurePercent>k__BackingField: 60
+  <BridgeRadiusMeters>k__BackingField: 0.18
+  <BridgeMaxSpanSpeed>k__BackingField: 2.5
+  <LeakPuddleVolumePerSecond>k__BackingField: 0.4
+  <SoloCarrySpeedPercent>k__BackingField: 100
+  <BurnedColor>k__BackingField: {r: 0.06, g: 0.05, b: 0.05, a: 1}
+  <TapedColor>k__BackingField: {r: 0, g: 0.3333335, b: 1, a: 1}
+  <BreachFeatherParticles>k__BackingField: 0.6
   <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
   <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}
