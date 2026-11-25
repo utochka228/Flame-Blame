@@ -11,6 +11,7 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(1f, 100f)] public float Acceleration { get; private set; } = 40f;
         [field: SerializeField, Range(1f, 100f)] public float Deceleration { get; private set; } = 10f;
         [field: SerializeField, Range(1f, 15f)] public float JumpSpeed { get; private set; } = 6f;
+        [field: SerializeField, Range(0f, 100f)] public float AirControlPercent { get; private set; } = 15f;
         [field: SerializeField, Range(0.01f, 0.5f)] public float LookDegreesPerPixel { get; private set; } = 0.1f;
         [field: SerializeField, Range(30f, 89f)] public float PitchLimitDegrees { get; private set; } = 85f;
         [field: SerializeField, Range(0.01f, 0.5f)] public float GroundCheckDistance { get; private set; } = 0.1f;
@@ -38,6 +39,7 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(1f, 100f)] public float TieAcceleration { get; private set; } = 60f;
         [field: SerializeField, Range(0.5f, 10f)] public float MaxTieSpeed { get; private set; } = 3f;
 
+        public float AirControlFraction => AirControlPercent.ToFraction();
         public float ClimbMaxPressureFraction => ClimbMaxPressurePercent.ToFraction();
 
         public TieDragSettings CreateTieDragSettings() => new TieDragSettings

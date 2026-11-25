@@ -13,12 +13,12 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseNetwork _network;
-        [SerializeField] private Nozzle _nozzle;
 
         private Rigidbody _body;
         private int _grip = NoGrip;
         private int _aimGrip = NoGrip;
         private HoseSegment _heldHose;
+        private Nozzle _heldNozzle;
         private HoldTracker _hold;
 
         public RopeParticle HeldParticle => IsHolding ? _network.World.GripParticle(_grip) : RopeParticle.None;
@@ -47,7 +47,8 @@ namespace FlameBlame.Firefighter.Components
             if (!IsHolding) return;
 
             var eye = _firefighter.Eye.transform;
-            var heldPosition = _heldHose.Rope.Positions[_network.World.GripParticle(_grip).Index];
+            var heldParticle = _network.World.GripParticle(_grip);
+            var heldPosition = _heldHose.Rope.Positions[heldParticle.Index];
             if (_hold.IsTooFar(heldPosition, eye.position))
             {
                 ReleaseGrips();
@@ -58,9 +59,12 @@ namespace FlameBlame.Firefighter.Components
             _network.World.SetGripTarget(_grip, _hold.Position);
             if (IsHoldingNozzle)
             {
-                _network.World.SetGripTarget(_aimGrip, _hold.Position - _hold.AimDirection * _nozzle.Spacing);
-                _body.AddForce(_nozzle.RecoilAcceleration * _config.RecoilTransferMultiplier, ForceMode.Acceleration);
+                _network.World.SetGripTarget(_aimGrip, _hold.Position - _hold.AimDirection * _heldNozzle.Spacing);
+                _body.AddForce(_heldNozzle.RecoilAcceleration * _config.RecoilTransferMultiplier, ForceMode.Acceleration);
             }
+
+            var gripsOnHose = _network.World.ActiveGripCount(heldParticle.Rope);
+            _firefighter.MoveSpeedScale = CarryLoad.SpeedScale(gripsOnHose, IsHoldingNozzle, _heldHose.Config.SoloCarrySpeedFraction);
 
             var pull = _network.World.GripTension(_grip) * _config.PullAccelerationMultiplier;
             _body.AddForce(Vector3.ClampMagnitude(pull, _config.MaxPullAcceleration), ForceMode.Acceleration);
@@ -74,7 +78,9 @@ namespace FlameBlame.Firefighter.Components
 
         private void OnDriven(FirefighterCommands commands)
         {
-            _nozzle.ThumbFraction = IsHoldingNozzle && commands.IsHeld(FirefighterButtons.Thumb) ? 1f : 0f;
+            if (IsHoldingNozzle)
+                _heldNozzle.ThumbFraction = commands.IsHeld(FirefighterButtons.Thumb) ? 1f : 0f;
+
             if (commands.WasPressed(FirefighterButtons.Throw) && IsHolding)
                 Throw();
             else if (commands.WasPressed(FirefighterButtons.Grab))
@@ -91,25 +97,29 @@ namespace FlameBlame.Firefighter.Components
 
             var eye = _firefighter.Eye.transform;
             var found = FindTarget(eye);
-            if (found.IsNone) return;
+            if (found.IsNone) 
+                return;
 
             _grip = _network.World.AddGrip(found, _config.GripCompliance);
             _heldHose = _network.HoseOf(found.Rope);
             _heldHose.SetHeld(found.Index);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], eye.forward);
-            if (!_nozzle.IsTip(found)) return;
+            var nozzle = _network.NozzleOf(found.Rope);
+            
+            if (!nozzle || !nozzle.IsTip(found))
+                return;
 
-            _aimGrip = _network.World.AddGrip(_nozzle.InnerParticle, _config.AimGripCompliance);
-            _hold.Begin(_heldHose.Rope.Positions[found.Index], _nozzle.CurrentDirection);
+            _heldNozzle = nozzle;
+            _aimGrip = _network.World.AddGrip(nozzle.InnerParticle, _config.AimGripCompliance);
+            _hold.Begin(_heldHose.Rope.Positions[found.Index], nozzle.CurrentDirection);
         }
 
         private RopeParticle FindTarget(Transform eye)
         {
-            var tip = _nozzle.TipParticle;
-            if (_network.World.IsAlongRay(tip, eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters))
-                return tip;
-
-            return _network.World.FindAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
+            return _network.TryFindNozzleTip(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters,
+                out var nozzle)
+                ? nozzle.TipParticle
+                : _network.World.FindAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
         }
 
         private void Throw()
@@ -124,10 +134,13 @@ namespace FlameBlame.Firefighter.Components
             _network.World.Release(_grip);
             _grip = NoGrip;
             _heldHose.ClearHeld();
+            _firefighter.MoveSpeedScale = 1f;
             if (!IsHoldingNozzle) return;
 
             _network.World.Release(_aimGrip);
             _aimGrip = NoGrip;
+            _heldNozzle.ThumbFraction = 0f;
+            _heldNozzle = null;
         }
     }
 }

@@ -70,6 +70,22 @@ namespace FlameBlame.Hose.Components
 
         public HoseSegment HoseOf(int ropeIndex) => _hoses[ropeIndex];
 
+        public Nozzle NozzleOf(int ropeIndex) => _nozzles[ropeIndex];
+
+        public bool TryFindNozzleTip(Vector3 origin, Vector3 direction, float reach, float aimRadius, out Nozzle found)
+        {
+            foreach (var nozzle in _nozzles)
+            {
+                if (!nozzle || !_world.IsAlongRay(nozzle.TipParticle, origin, direction, reach, aimRadius)) continue;
+
+                found = nozzle;
+                return true;
+            }
+
+            found = null;
+            return false;
+        }
+
         public Vector3 JointPosition(int jointIndex) => _ropeJoints.Position(jointIndex);
 
         public bool IsEndFree(HoseEndRef end) => _ropeJoints.IsEndFree(ToRopeEnd(end));

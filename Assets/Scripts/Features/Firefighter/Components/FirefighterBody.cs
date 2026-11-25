@@ -20,6 +20,7 @@ namespace FlameBlame.Firefighter.Components
 
         public Camera Eye => _eye;
         public bool IsMotionOverridden { get; set; }
+        public float MoveSpeedScale { get; set; } = 1f;
 
         public event Action<FirefighterCommands> Driven;
 
@@ -29,7 +30,7 @@ namespace FlameBlame.Firefighter.Components
             _capsule = GetComponent<CapsuleCollider>();
             _body.freezeRotation = true;
             _look = new LookState(_config.LookDegreesPerPixel, _config.PitchLimitDegrees, transform.eulerAngles.y);
-            _motion = new FirefighterMotion(_config.MoveSpeed, _config.Acceleration, _config.Deceleration, _config.JumpSpeed);
+            _motion = new FirefighterMotion(_config.MoveSpeed, _config.Acceleration, _config.Deceleration, _config.JumpSpeed, _config.AirControlFraction);
         }
 
         private void FixedUpdate()
@@ -38,8 +39,9 @@ namespace FlameBlame.Firefighter.Components
             _body.MoveRotation(facing);
             if (IsMotionOverridden) return;
 
-            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime);
-            if (_jumpRequested && IsGrounded())
+            var isGrounded = IsGrounded();
+            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, isGrounded, MoveSpeedScale);
+            if (_jumpRequested && isGrounded)
                 velocity = _motion.Jump(velocity);
 
             _jumpRequested = false;
@@ -59,7 +61,8 @@ namespace FlameBlame.Firefighter.Components
         {
             var bounds = _capsule.bounds;
             var origin = new Vector3(bounds.center.x, bounds.min.y + _capsule.radius, bounds.center.z);
-            return Physics.CheckSphere(origin + Vector3.down * _config.GroundCheckDistance, _capsule.radius * 0.9f, _config.GroundLayers,
+            return Physics.CheckSphere(origin + Vector3.down * _config.GroundCheckDistance, _capsule.radius * 0.9f,
+                _config.GroundLayers,
                 QueryTriggerInteraction.Ignore);
         }
     }

@@ -85,6 +85,18 @@ namespace FlameBlame.Hose.Simulation
             return false;
         }
 
+        public int ActiveGripCount(int rope)
+        {
+            var count = 0;
+            foreach (var grip in _grips)
+            {
+                if (grip.IsActive && grip.Particle.Rope == rope)
+                    count++;
+            }
+
+            return count;
+        }
+
         public Vector3 ParticlePosition(RopeParticle particle) => _ropes[particle.Rope].Positions[particle.Index];
 
         public RopeParticle GripParticle(int grip) => _grips[grip].Particle;

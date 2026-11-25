@@ -49,5 +49,6 @@ MonoBehaviour:
   <HeldFreeRigidityPercent>k__BackingField: 5
   <HeldUpstreamDampingMultiplier>k__BackingField: 2.5
   <HeldFreeDampingMultiplier>k__BackingField: 0.7
+  <SoloCarrySpeedPercent>k__BackingField: 40
   <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
   <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}
