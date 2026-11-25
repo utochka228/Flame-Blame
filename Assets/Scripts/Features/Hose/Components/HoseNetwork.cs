@@ -136,11 +136,18 @@ namespace FlameBlame.Hose.Components
             {
                 foreach (var breach in _monitors[index].Breaches)
                 {
-                    if (breach.IsTaped || !_world.IsAlongRay(new RopeParticle(index, breach.Index), origin, direction, reach, aimRadius)) continue;
+                    if (breach.IsTaped) 
+                        continue;
 
-                    found = _monitors[index];
-                    breachIndex = breach.Index;
-                    return true;
+                    for (var particle = breach.FirstIndex; particle <= breach.LastIndex; particle++)
+                    {
+                        if (!_world.IsAlongRay(new RopeParticle(index, particle), origin, direction, reach, aimRadius)) 
+                            continue;
+
+                        found = _monitors[index];
+                        breachIndex = particle;
+                        return true;
+                    }
                 }
             }
 

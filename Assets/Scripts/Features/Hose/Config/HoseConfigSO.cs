@@ -31,6 +31,7 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Range(0.2f, 10f)] public float BurstOverloadSeconds { get; private set; } = 1.5f;
         [field: SerializeField] [field: Range(0.2f, 10f)] public float BurstRecoverSeconds { get; private set; } = 1f;
         [field: SerializeField] [field: Range(0f, 100f)] public float BurstWeakPointPercent { get; private set; } = 50f;
+        [field: SerializeField] [field: Range(1, 30)] public int HeatChecksPerSecond { get; private set; } = 10;
         [field: SerializeField] [field: Range(0f, 100f)] public float BurnHeatThresholdPercent { get; private set; } = 50f;
         [field: SerializeField] [field: Range(0.2f, 20f)] public float BurnSeconds { get; private set; } = 3f;
         [field: SerializeField] [field: Range(0f, 300f)] public float BalloonPercent { get; private set; } = 120f;
@@ -49,6 +50,9 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Range(0.05f, 0.4f)] public float BridgeRadiusMeters { get; private set; } = 0.18f;
         [field: SerializeField] [field: Min(0f)] public float LeakPuddleVolumePerSecond { get; private set; } = 0.4f;
         [field: SerializeField] [field: Range(10f, 100f)] public float SoloCarrySpeedPercent { get; private set; } = 100f;
+        [field: SerializeField] public Color BurnedColor { get; private set; } = new Color(0.06f, 0.05f, 0.05f);
+        [field: SerializeField] public Color TapedColor { get; private set; } = new Color(0.78f, 0.8f, 0.84f);
+        [field: SerializeField] [field: Range(0f, 3f)] public float BreachFeatherParticles { get; private set; } = 0.6f;
         [field: SerializeField] public Color RelaxedColor { get; private set; } = new Color(0.9f, 0.2f, 0.15f);
         [field: SerializeField] public Color StrainedColor { get; private set; } = new Color(1f, 0.6f, 0.1f);
 

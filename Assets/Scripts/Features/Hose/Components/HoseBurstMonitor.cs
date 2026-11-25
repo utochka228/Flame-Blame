@@ -8,9 +8,11 @@ namespace FlameBlame.Hose.Components
     public class HoseBurstMonitor : MonoBehaviour
     {
         [SerializeField] private HoseSegment _hose;
+        [SerializeField] private HeatField _heatField;
 
         private HoseBreaches _breaches;
         private float[] _heat;
+        private float _secondsSinceHeatCheck;
 
         public int WeakPointIndex { get; private set; }
         public float ProgressFraction => _breaches.WeakPointProgressFraction;
@@ -39,7 +41,21 @@ namespace FlameBlame.Hose.Components
 
         private void FixedUpdate()
         {
+            SampleHeat();
             _breaches.Step(_hose.PressureFractions[WeakPointIndex], _heat, Time.fixedDeltaTime);
+        }
+
+        private void SampleHeat()
+        {
+            if (!_heatField) return;
+
+            _secondsSinceHeatCheck += Time.fixedDeltaTime;
+            if (_secondsSinceHeatCheck < 1f / _hose.Config.HeatChecksPerSecond) return;
+
+            _secondsSinceHeatCheck = 0f;
+            var positions = _hose.Rope.Positions;
+            for (var index = 0; index < _heat.Length; index++)
+                _heat[index] = _heatField.Sample(positions[index]);
         }
 
         public bool Tape(int index) => _breaches.Tape(index);

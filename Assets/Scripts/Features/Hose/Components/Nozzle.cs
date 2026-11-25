@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FlameBlame.Hose.Config;
 using FlameBlame.Hose.Simulation;
+using FlameBlame.Water;
 using FlameBlame.Water.Components;
 using UnityEngine;
 
@@ -78,8 +79,12 @@ namespace FlameBlame.Hose.Components
                     QueryTriggerInteraction.Ignore))
                 return;
 
+            var water = _config.JetWaterPerSecond * _output.FlowFraction * Time.fixedDeltaTime;
             if (_puddles)
-                _puddles.AddWater(hit.point, _config.JetPuddleVolumePerSecond * _output.FlowFraction * Time.fixedDeltaTime);
+                _puddles.AddWater(hit.point, water);
+
+            var wettable = hit.collider.GetComponentInParent<IWettable>();
+            wettable?.Soak(water);
 
             if (hit.rigidbody)
                 hit.rigidbody.AddForceAtPosition(direction * (_config.PushForce * _output.FlowFraction), hit.point);

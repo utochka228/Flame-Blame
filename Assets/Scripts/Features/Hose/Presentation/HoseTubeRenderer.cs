@@ -15,6 +15,7 @@ namespace FlameBlame.Hose.Presentation
         private const float ShakeSpeedZ = 0.9f;
 
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
 
         [SerializeField] private HoseSegment _hose;
         [SerializeField] private HosePinchSensor _pinchSensor;
@@ -25,6 +26,7 @@ namespace FlameBlame.Hose.Presentation
         private MaterialPropertyBlock _propertyBlock;
         private TubeMeshBuilder _builder;
         private HoseRadiusProfile _radiusProfile;
+        private HoseTubePaint _paint;
         private float[] _radii;
         private Vector3[] _shakenPositions;
 
@@ -46,7 +48,9 @@ namespace FlameBlame.Hose.Presentation
             _radii = new float[_hose.Positions.Count];
             _shakenPositions = new Vector3[_hose.Positions.Count];
             _mesh.vertices = _builder.Vertices;
+            _mesh.uv = _builder.Uvs;
             _mesh.triangles = _builder.Triangles;
+            _paint = new HoseTubePaint(config);
         }
 
         private void LateUpdate()
@@ -68,13 +72,17 @@ namespace FlameBlame.Hose.Presentation
             _mesh.normals = _builder.Normals;
             _mesh.RecalculateBounds();
 
-            _propertyBlock.SetColor(BaseColorId, Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.PressureFractions[_burstMonitor.WeakPointIndex]));
+            var tint = Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.PressureFractions[_burstMonitor.WeakPointIndex]);
+            _paint.Update(_burstMonitor.Breaches, tint);
+            _propertyBlock.SetColor(BaseColorId, Color.white);
+            _propertyBlock.SetTexture(BaseMapId, _paint.Texture);
             _meshRenderer.SetPropertyBlock(_propertyBlock);
         }
 
         private void OnDestroy()
         {
             Destroy(_mesh);
+            _paint.Destroy();
         }
 
         private void ApplyBulge(HoseConfigSO config, float burstProgress)

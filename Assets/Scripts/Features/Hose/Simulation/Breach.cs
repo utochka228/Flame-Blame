@@ -2,13 +2,17 @@ namespace FlameBlame.Hose.Simulation
 {
     public readonly struct Breach
     {
-        public int Index { get; }
+        public int FirstIndex { get; }
+        public int LastIndex { get; }
         public float Loss { get; }
         public bool IsTaped { get; }
 
-        public Breach(int index, float loss, bool isTaped)
+        public int Index => (FirstIndex + LastIndex) / 2;
+
+        public Breach(int firstIndex, int lastIndex, float loss, bool isTaped)
         {
-            Index = index;
+            FirstIndex = firstIndex;
+            LastIndex = lastIndex;
             Loss = loss;
             IsTaped = isTaped;
         }

@@ -13,7 +13,7 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField, Range(0f, 60f)] public float RecoilAcceleration { get; private set; } = 25f;
         [field: SerializeField, Range(0f, 100f)] public float ThumbBoostPercent { get; private set; } = 50f;
         [field: SerializeField, Range(0f, 200f)] public float PushForce { get; private set; } = 40f;
-        [field: SerializeField, Range(0f, 2f)] public float JetPuddleVolumePerSecond { get; private set; } = 0.3f;
+        [field: SerializeField, Range(0f, 2f)] public float JetWaterPerSecond { get; private set; } = 0.3f;
         [field: SerializeField, Range(0.02f, 0.5f)] public float PushRadius { get; private set; } = 0.15f;
         [field: SerializeField] public LayerMask PushLayers { get; private set; } = ~0;
         [field: SerializeField, Range(0.1f, 2f)] public float ParticleLifetime { get; private set; } = 0.6f;

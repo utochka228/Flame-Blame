@@ -15,6 +15,7 @@ namespace FlameBlame.Hose.Presentation
 
         public Vector3[] Vertices { get; }
         public Vector3[] Normals { get; }
+        public Vector2[] Uvs { get; }
         public int[] Triangles { get; }
         public IReadOnlyList<Vector3> Centers => _centers;
 
@@ -29,7 +30,9 @@ namespace FlameBlame.Hose.Presentation
             _centers = new Vector3[ringCount];
             Vertices = new Vector3[ringCount * ringSides];
             Normals = new Vector3[Vertices.Length];
+            Uvs = new Vector2[Vertices.Length];
             Triangles = BuildTriangles(ringCount, ringSides);
+            FillUvs(ringCount, ringSides);
         }
 
         public void Build(IReadOnlyList<Vector3> points, float radius)
@@ -44,6 +47,15 @@ namespace FlameBlame.Hose.Presentation
         {
             SampleCenters(points);
             BuildRings(radii);
+        }
+
+        private void FillUvs(int ringCount, int ringSides)
+        {
+            for (var ring = 0; ring < ringCount; ring++)
+            {
+                for (var side = 0; side < ringSides; side++)
+                    Uvs[ring * ringSides + side] = new Vector2((float)ring / (ringCount - 1), (float)side / ringSides);
+            }
         }
 
         private static int[] BuildTriangles(int ringCount, int ringSides)
