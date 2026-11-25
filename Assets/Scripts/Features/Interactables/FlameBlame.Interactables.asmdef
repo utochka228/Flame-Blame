@@ -3,7 +3,8 @@
     "rootNamespace": "FlameBlame.Interactables",
     "references": [
         "FlameBlame.Core",
-        "FlameBlame.Hose"
+        "FlameBlame.Hose",
+        "NaughtyAttributes.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

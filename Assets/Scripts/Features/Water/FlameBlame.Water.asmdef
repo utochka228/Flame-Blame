@@ -2,7 +2,8 @@
     "name": "FlameBlame.Water",
     "rootNamespace": "FlameBlame.Water",
     "references": [
-        "FlameBlame.Core"
+        "FlameBlame.Core",
+        "NaughtyAttributes.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

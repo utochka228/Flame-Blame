@@ -4,7 +4,8 @@
     "references": [
         "FlameBlame.Core",
         "FlameBlame.Pressure",
-        "FlameBlame.Water"
+        "FlameBlame.Water",
+        "NaughtyAttributes.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
