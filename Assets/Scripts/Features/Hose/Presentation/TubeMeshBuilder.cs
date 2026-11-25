@@ -60,7 +60,8 @@ namespace FlameBlame.Hose.Presentation
 
         private static int[] BuildTriangles(int ringCount, int ringSides)
         {
-            var triangles = new int[(ringCount - 1) * ringSides * 6];
+            var capTriangleCount = (ringSides - 2) * 3;
+            var triangles = new int[(ringCount - 1) * ringSides * 6 + capTriangleCount * 2];
             var cursor = 0;
             for (var ring = 0; ring < ringCount - 1; ring++)
             {
@@ -75,6 +76,17 @@ namespace FlameBlame.Hose.Presentation
                     triangles[cursor++] = wrapped + ringSides;
                     triangles[cursor++] = current + ringSides;
                 }
+            }
+
+            var lastRingStart = (ringCount - 1) * ringSides;
+            for (var side = 1; side < ringSides - 1; side++)
+            {
+                triangles[cursor++] = 0;
+                triangles[cursor++] = side + 1;
+                triangles[cursor++] = side;
+                triangles[cursor++] = lastRingStart;
+                triangles[cursor++] = lastRingStart + side;
+                triangles[cursor++] = lastRingStart + side + 1;
             }
 
             return triangles;

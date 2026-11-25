@@ -10,6 +10,8 @@ namespace FlameBlame.Hose.Components
     {
         private const int MaxOverlaps = 32;
         private const float QueryMargin = 0.5f;
+        private const float SweepRadiusFraction = 0.1f;
+        private const float SweepProbeRadiusFraction = 0.9f;
 
         private static readonly ILogger<PhysicsRopeCollider> Logger = Loggers.For<PhysicsRopeCollider>();
 
@@ -44,7 +46,14 @@ namespace FlameBlame.Hose.Components
             Logger.LogWarning("Hose overlaps {Limit} or more colliders; extra colliders are ignored", MaxOverlaps);
         }
 
-        public Vector3 Resolve(Vector3 position, float radius)
+        public Vector3 Sweep(Vector3 from, Vector3 to, float radius)
+        {
+            if ((to - from).magnitude < radius * SweepRadiusFraction) return to;
+
+            return SphereSweep.Slide(from, to, radius * SweepProbeRadiusFraction, _layers);
+        }
+
+        public Vector3 Resolve(Vector3 position, Vector3 lastFreePosition, float radius)
         {
             if (!Mathf.Approximately(_probe.radius, radius))
                 _probe.radius = radius;
@@ -56,7 +65,9 @@ namespace FlameBlame.Hose.Components
                         candidate.transform.rotation, out var direction, out var distance))
                     continue;
 
-                position += direction * distance;
+                position = SurfaceSideResolver.ShouldExitOppositeSide(position, lastFreePosition, direction, distance, radius)
+                    ? SurfaceSideResolver.ExitOppositeSide(candidate, position, direction, radius)
+                    : position + direction * distance;
             }
 
             return position;

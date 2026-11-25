@@ -15,6 +15,7 @@ namespace FlameBlame.Hose.Simulation
         private readonly Vector3[] _positions;
         private readonly Vector3[] _previousStepPositions;
         private readonly Vector3[] _substepStartPositions;
+        private readonly Vector3[] _lastFreePositions;
         private readonly Vector3[] _velocities;
         private readonly float[] _particleRigidity;
         private readonly float[] _bendAlphas;
@@ -49,6 +50,7 @@ namespace FlameBlame.Hose.Simulation
             _positions = new Vector3[settings.ParticleCount];
             _previousStepPositions = new Vector3[settings.ParticleCount];
             _substepStartPositions = new Vector3[settings.ParticleCount];
+            _lastFreePositions = new Vector3[settings.ParticleCount];
             _velocities = new Vector3[settings.ParticleCount];
             _particleRigidity = new float[settings.ParticleCount];
             _bendAlphas = new float[settings.ParticleCount];
@@ -62,6 +64,7 @@ namespace FlameBlame.Hose.Simulation
                 _positions[index] = _anchorPosition + _anchorDirection * (index * settings.Spacing);
 
             Array.Copy(_positions, _previousStepPositions, _positions.Length);
+            Array.Copy(_positions, _lastFreePositions, _positions.Length);
         }
 
         public void SetAnchor(Vector3 position, Vector3 direction)
@@ -131,13 +134,14 @@ namespace FlameBlame.Hose.Simulation
 
         public void FinishSubstep()
         {
-            Collide();
+            CollideSubstep();
             UpdateVelocities();
         }
 
         public void EndStep()
         {
             RecoverStretch();
+            CollideAfterStretch();
 
             if (!IsFinite())
                 RestoreLastGoodState();
@@ -179,7 +183,8 @@ namespace FlameBlame.Hose.Simulation
                 _substepStartPositions[index] = _positions[index];
                 if (index < FirstFreeIndex) continue;
 
-                var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _dampingMultipliers[index] * _substepTime);
+                var rigidDamping = Mathf.Lerp(1f, _settings.RigidDampingMultiplier, _particleRigidity[index]);
+                var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _dampingMultipliers[index] * rigidDamping * _substepTime);
                 var velocity = (_velocities[index] + _settings.Gravity * _substepTime) * dampingFactor;
                 velocity = Vector3.ClampMagnitude(velocity, _settings.MaxSpeed);
                 _velocities[index] = velocity;
@@ -197,19 +202,51 @@ namespace FlameBlame.Hose.Simulation
             }
         }
 
-        private void Collide()
+        private void CollideSubstep()
+        {
+            CollideParticles(_substepStartPositions, _settings.GroundFriction);
+            CollideSegments();
+        }
+
+        private void CollideAfterStretch()
+        {
+            CollideParticles(_previousStepPositions, 0f);
+        }
+
+        private void CollideParticles(Vector3[] startPositions, float friction)
         {
             for (var index = FirstFreeIndex; index < _positions.Length; index++)
             {
-                var unresolved = _positions[index];
-                var resolved = _collider.Resolve(unresolved, _settings.ParticleRadius);
+                var unresolved = _collider.Sweep(startPositions[index], _positions[index], _settings.ParticleRadius);
+                _positions[index] = unresolved;
+                var resolved = _collider.Resolve(unresolved, _lastFreePositions[index], _settings.ParticleRadius);
                 var push = resolved - unresolved;
+                if (push.magnitude <= _settings.ParticleRadius)
+                    _lastFreePositions[index] = resolved;
+
                 if (push.sqrMagnitude < MinLength * MinLength) continue;
 
                 var normal = push.normalized;
-                var motion = resolved - _substepStartPositions[index];
+                var motion = resolved - startPositions[index];
                 var tangentialMotion = motion - normal * Vector3.Dot(motion, normal);
-                _positions[index] = resolved - tangentialMotion * _settings.GroundFriction;
+                _positions[index] = resolved - tangentialMotion * friction;
+            }
+        }
+
+        private void CollideSegments()
+        {
+            for (var index = Mathf.Max(FirstFreeIndex - 1, 0); index < _positions.Length - 1; index++)
+            {
+                var weightSum = InverseMass(index) + InverseMass(index + 1);
+                if (weightSum <= 0f) continue;
+
+                var midpoint = (_positions[index] + _positions[index + 1]) * 0.5f;
+                var reference = (_lastFreePositions[index] + _lastFreePositions[index + 1]) * 0.5f;
+                var push = _collider.Resolve(midpoint, reference, _settings.ParticleRadius) - midpoint;
+                if (push.sqrMagnitude < MinLength * MinLength) continue;
+
+                _positions[index] += push * (2f * InverseMass(index) / weightSum);
+                _positions[index + 1] += push * (2f * InverseMass(index + 1) / weightSum);
             }
         }
 

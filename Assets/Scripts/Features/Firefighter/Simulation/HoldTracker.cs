@@ -11,6 +11,7 @@ namespace FlameBlame.Firefighter.Simulation
 
         public Vector3 Position { get; private set; }
         public Vector3 AimDirection { get; private set; }
+        public Vector3 Velocity => _velocity;
 
         public HoldTracker(float followSeconds, float maxDistance)
         {
@@ -30,6 +31,12 @@ namespace FlameBlame.Firefighter.Simulation
             var position = Position;
             Position = Vector3.SmoothDamp(position, holdPoint, ref _velocity, _followSeconds, Mathf.Infinity, deltaTime);
             AimDirection = Vector3.Slerp(AimDirection, viewDirection, 1f - Mathf.Exp(-deltaTime / _followSeconds));
+        }
+
+        public void Constrain(Vector3 position)
+        {
+            Position = position;
+            _velocity = Vector3.zero;
         }
 
         public bool IsTooFar(Vector3 particlePosition, Vector3 holderPosition)

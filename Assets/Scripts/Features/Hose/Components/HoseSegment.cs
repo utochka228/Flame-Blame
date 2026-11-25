@@ -19,12 +19,14 @@ namespace FlameBlame.Hose.Components
         private float[] _rigidityCaps;
         private float[] _dampingMultipliers;
         private HeldHoseProfile _heldProfile;
+        private OpenEnd[] _openEnds;
 
         public IReadOnlyList<Vector3> Positions => _interpolatedPositions;
         public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
         public HoseConfigSO Config => _config;
         public XpbdRope Rope => _rope;
         public bool IsSteppedByNetwork { get; set; }
+        public IReadOnlyList<OpenEnd> OpenEnds => _openEnds;
 
         private void Awake()
         {
@@ -40,6 +42,12 @@ namespace FlameBlame.Hose.Components
             _rigidityCaps = new float[_rope.Positions.Count];
             _dampingMultipliers = new float[_rope.Positions.Count];
             _heldProfile = new HeldHoseProfile(_config.CreateHeldSettings());
+            var lastIndex = _rope.Positions.Count - 1;
+            _openEnds = new[]
+            {
+                new OpenEnd(RopeEndKind.Start, 0, 1),
+                new OpenEnd(RopeEndKind.Tail, lastIndex, lastIndex - 1)
+            };
             HeldHoseProfile.Clear(_rigidityCaps, _dampingMultipliers);
             Interpolate();
         }

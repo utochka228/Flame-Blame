@@ -40,13 +40,21 @@ namespace FlameBlame.Hose.Presentation
             var breach = LargestBreach();
             var leakIndex = breach.Index;
             var strength = StrengthOf(breach);
-            var pressureFraction = _hose.PressureFractions[leakIndex];
+            var pressureFraction = UpstreamPressureFraction(breach);
             _particles.transform.position = _hose.Positions[leakIndex];
             var hasFlow = pressureFraction > MinSprayPressureFraction;
             if (hasFlow)
                 AddPuddleWater(leakIndex, pressureFraction * strength);
 
             UpdateSpray(hasFlow, strength);
+        }
+
+        private float UpstreamPressureFraction(Breach breach)
+        {
+            var pressures = _hose.PressureFractions;
+            var before = pressures[Mathf.Max(breach.FirstIndex - 1, 0)];
+            var after = pressures[Mathf.Min(breach.LastIndex + 1, pressures.Count - 1)];
+            return Mathf.Max(before, after);
         }
 
         private float StrengthOf(Breach breach) => Mathf.Clamp01(breach.Loss / Mathf.Max(_hose.Config.BurstLeakLoss, MinBurstLoss));

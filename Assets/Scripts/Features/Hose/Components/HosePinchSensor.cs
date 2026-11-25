@@ -5,6 +5,8 @@ namespace FlameBlame.Hose.Components
 {
     public class HosePinchSensor : MonoBehaviour
     {
+        private const float SqueezeRadiusFraction = 0.8f;
+
         [SerializeField] private HoseSegment _hose;
 
         private bool[] _pinched;
@@ -31,7 +33,8 @@ namespace FlameBlame.Hose.Components
             var positions = _hose.Positions;
             var config = _hose.Config;
             for (var index = 0; index < _pinched.Length; index++)
-                _pinched[index] = Physics.CheckSphere(positions[index], config.ParticleRadius, config.PinchLayers, QueryTriggerInteraction.Ignore);
+                _pinched[index] = Physics.CheckSphere(positions[index], config.ParticleRadius * SqueezeRadiusFraction, config.PinchLayers,
+                    QueryTriggerInteraction.Ignore);
         }
     }
 }

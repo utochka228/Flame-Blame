@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FlameBlame.Core.Extensions;
 using UnityEngine;
@@ -12,6 +13,8 @@ namespace FlameBlame.Hose.Simulation
         private readonly List<Grip> _grips = new List<Grip>();
 
         public int JunctionIterations { get; set; } = 4;
+
+        public event Action<float> SubstepStarting;
 
         public RopeWorld(int substeps)
         {
@@ -154,6 +157,7 @@ namespace FlameBlame.Hose.Simulation
             var substepTime = deltaTime / _substeps;
             for (var substep = 0; substep < _substeps; substep++)
             {
+                SubstepStarting?.Invoke((substep + 1f) / _substeps);
                 foreach (var grip in _grips)
                     grip.Displacement = Vector3.zero;
 

@@ -29,15 +29,20 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField, Range(0f, 1f)] public float RecoilTransferMultiplier { get; private set; } = 1f;
         [field: SerializeField, Range(5f, 40f)] public float MaxSpeed { get; private set; } = 20f;
         [field: SerializeField, Range(1f, 30f)] public float ThrowSpeed { get; private set; } = 12f;
+        [field: SerializeField, Range(0f, 2f)] public float ThrowInheritMultiplier { get; private set; } = 1f;
+        [field: SerializeField, Range(0, 20)] public int ThrowSpreadParticles { get; private set; } = 6;
+        [field: SerializeField, Range(0.02f, 0.5f)] public float PullSmoothingSeconds { get; private set; } = 0.15f;
         [field: SerializeField] public LayerMask GroundLayers { get; private set; } = ~0;
         [field: SerializeField, Range(0.5f, 5f)] public float ClimbSpeed { get; private set; } = 2f;
         [field: SerializeField, Range(0f, 1f)] public float ClimbStandOffMeters { get; private set; } = 0.25f;
         [field: SerializeField, Range(0f, 100f)] public float ClimbMaxPressurePercent { get; private set; } = 20f;
-        [field: SerializeField, Range(0f, 0.01f)] public float TieSpeedMultiplier { get; private set; } = 0.0005f;
+        [field: SerializeField, Range(0f, 1f)] public float TieForceMultiplier { get; private set; } = 0.04f;
+        [field: SerializeField, Range(10f, 2000f)] public float MaxTieForce { get; private set; } = 300f;
         [field: SerializeField, Range(0f, 5000f)] public float TieMinTension { get; private set; } = 500f;
         [field: SerializeField, Range(0.1f, 3f)] public float TieBlendSeconds { get; private set; } = 0.6f;
-        [field: SerializeField, Range(1f, 100f)] public float TieAcceleration { get; private set; } = 60f;
-        [field: SerializeField, Range(0.5f, 10f)] public float MaxTieSpeed { get; private set; } = 3f;
+        [field: SerializeField, Range(0, 5)] public int TieGrabToleranceParticles { get; private set; } = 2;
+        [field: SerializeField, Range(0.05f, 2f)] public float TieBrakeSeconds { get; private set; } = 0.25f;
+        [field: SerializeField, Range(0.5f, 10f)] public float MaxTieSpeed { get; private set; } = 2f;
 
         public float AirControlFraction => AirControlPercent.ToFraction();
         public float ClimbMaxPressureFraction => ClimbMaxPressurePercent.ToFraction();
@@ -45,9 +50,10 @@ namespace FlameBlame.Firefighter.Config
         public TieDragSettings CreateTieDragSettings() => new TieDragSettings
         {
             MinTension = TieMinTension,
-            SpeedMultiplier = TieSpeedMultiplier,
+            ForceMultiplier = TieForceMultiplier,
+            MaxForce = MaxTieForce,
             MaxSpeed = MaxTieSpeed,
-            Acceleration = TieAcceleration
+            BrakeSeconds = TieBrakeSeconds
         };
     }
 }

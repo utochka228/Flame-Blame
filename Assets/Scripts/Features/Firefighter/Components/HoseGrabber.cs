@@ -15,11 +15,13 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private HoseNetwork _network;
 
         private Rigidbody _body;
+        private HoseTie _tie;
         private int _grip = NoGrip;
         private int _aimGrip = NoGrip;
         private HoseSegment _heldHose;
         private Nozzle _heldNozzle;
         private HoldTracker _hold;
+        private Vector3 _smoothedPull;
 
         public RopeParticle HeldParticle => IsHolding ? _network.World.GripParticle(_grip) : RopeParticle.None;
 
@@ -29,6 +31,7 @@ namespace FlameBlame.Firefighter.Components
         private void Awake()
         {
             _body = GetComponent<Rigidbody>();
+            _tie = GetComponent<HoseTie>();
             _hold = new HoldTracker(_config.GripFollowSeconds, _config.MaxGripDistanceMeters);
         }
 
@@ -47,15 +50,19 @@ namespace FlameBlame.Firefighter.Components
             if (!IsHolding) return;
 
             var eye = _firefighter.Eye.transform;
+            var eyePosition = PhysicsEyePosition(eye);
             var heldParticle = _network.World.GripParticle(_grip);
             var heldPosition = _heldHose.Rope.Positions[heldParticle.Index];
-            if (_hold.IsTooFar(heldPosition, eye.position))
+            if (_hold.IsTooFar(heldPosition, eyePosition))
             {
                 ReleaseGrips();
                 return;
             }
 
-            _hold.Step(eye.position + eye.forward * _config.HoldDistanceMeters, eye.forward, Time.fixedDeltaTime);
+            var previousHold = _hold.Position;
+            _hold.Step(HoldPoint(eyePosition, eye.forward), eye.forward, Time.fixedDeltaTime);
+            var radius = _heldHose.Config.ParticleRadius;
+            _hold.Constrain(SphereSweep.Slide(previousHold, _hold.Position, radius, _heldHose.Config.CollisionLayers));
             _network.World.SetGripTarget(_grip, _hold.Position);
             if (IsHoldingNozzle)
             {
@@ -67,7 +74,8 @@ namespace FlameBlame.Firefighter.Components
             _firefighter.MoveSpeedScale = CarryLoad.SpeedScale(gripsOnHose, IsHoldingNozzle, _heldHose.Config.SoloCarrySpeedFraction);
 
             var pull = _network.World.GripTension(_grip) * _config.PullAccelerationMultiplier;
-            _body.AddForce(Vector3.ClampMagnitude(pull, _config.MaxPullAcceleration), ForceMode.Acceleration);
+            _smoothedPull = Vector3.Lerp(_smoothedPull, pull, Time.fixedDeltaTime / _config.PullSmoothingSeconds);
+            _body.AddForce(Vector3.ClampMagnitude(_smoothedPull, _config.MaxPullAcceleration), ForceMode.Acceleration);
         }
 
         public void Drop()
@@ -97,8 +105,10 @@ namespace FlameBlame.Firefighter.Components
 
             var eye = _firefighter.Eye.transform;
             var found = FindTarget(eye);
-            if (found.IsNone) 
+            if (found.IsNone)
                 return;
+
+            _tie.UntieAt(found, _config.TieGrabToleranceParticles);
 
             _grip = _network.World.AddGrip(found, _config.GripCompliance);
             _heldHose = _network.HoseOf(found.Rope);
@@ -125,14 +135,46 @@ namespace FlameBlame.Firefighter.Components
         private void Throw()
         {
             var held = _network.World.GripParticle(_grip);
+            var velocity = _hold.Velocity * _config.ThrowInheritMultiplier + _firefighter.Eye.transform.forward * _config.ThrowSpeed;
             ReleaseGrips();
-            _network.World.AddImpulse(held, _firefighter.Eye.transform.forward * _config.ThrowSpeed);
+            ImpartVelocity(held, velocity);
+        }
+
+        private void ImpartVelocity(RopeParticle held, Vector3 velocity)
+        {
+            var spread = _config.ThrowSpreadParticles;
+            var count = _heldHose.Rope.Positions.Count;
+            for (var offset = -spread; offset <= spread; offset++)
+            {
+                var index = held.Index + offset;
+                if (index < 0 || index >= count) continue;
+
+                var weight = ThrowSpread.Weight(offset, spread);
+                _network.World.AddImpulse(new RopeParticle(held.Rope, index), velocity * weight);
+            }
+        }
+
+        private Vector3 PhysicsEyePosition(Transform eye)
+        {
+            return _body.position + (eye.position - transform.position);
+        }
+
+        private Vector3 HoldPoint(Vector3 eyePosition, Vector3 forward)
+        {
+            var distance = _config.HoldDistanceMeters;
+            var config = _heldHose.Config;
+            if (Physics.SphereCast(eyePosition, config.ParticleRadius, forward, out var hit, distance, config.CollisionLayers,
+                    QueryTriggerInteraction.Ignore))
+                distance = hit.distance;
+
+            return eyePosition + forward * distance;
         }
 
         private void ReleaseGrips()
         {
             _network.World.Release(_grip);
             _grip = NoGrip;
+            _smoothedPull = Vector3.zero;
             _heldHose.ClearHeld();
             _firefighter.MoveSpeedScale = 1f;
             if (!IsHoldingNozzle) return;

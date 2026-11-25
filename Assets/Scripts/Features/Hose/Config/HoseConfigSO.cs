@@ -16,6 +16,7 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] public float FloppyBendCompliance { get; private set; } = Defaults.FloppyBendCompliance;
         [field: SerializeField] public float RigidBendCompliance { get; private set; } = Defaults.RigidBendCompliance;
         [field: SerializeField, Range(0f, 5f)] public float Damping { get; private set; } = Defaults.Damping;
+        [field: SerializeField, Range(1f, 10f)] public float RigidDampingMultiplier { get; private set; } = 3f;
         [field: SerializeField, Range(0f, 1f)] public float GroundFriction { get; private set; } = Defaults.GroundFriction;
         [field: SerializeField, Range(5f, 40f)] public float MaxSpeed { get; private set; } = Defaults.MaxSpeed;
         [field: SerializeField, Range(0.02f, 0.5f)] public float MaxStretchFraction { get; private set; } = Defaults.MaxStretchFraction;
@@ -43,12 +44,15 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Min(0f)] public float LossPerMeter { get; private set; } = 2f;
         [field: SerializeField] [field: Min(0f)] public float BurstLeakLoss { get; private set; } = 40f;
         [field: SerializeField] [field: Min(0f)] public float TapeLeakLoss { get; private set; } = 8f;
+        [field: SerializeField] [field: Min(0f)] public float OpenEndLeakLoss { get; private set; } = 40f;
+        [field: SerializeField] [field: Min(0f)] public float OpenEndRecoilAcceleration { get; private set; } = 6f;
         [field: SerializeField] [field: Range(0f, 100f)] public float HeldUpstreamRigidityPercent { get; private set; } = 50f;
         [field: SerializeField] [field: Range(0f, 100f)] public float HeldFreeRigidityPercent { get; private set; } = 5f;
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldUpstreamDampingMultiplier { get; private set; } = 2.5f;
         [field: SerializeField] [field: Range(0.1f, 10f)] public float HeldFreeDampingMultiplier { get; private set; } = 0.7f;
         [field: SerializeField] [field: Range(0f, 100f)] public float BridgePressurePercent { get; private set; } = 60f;
         [field: SerializeField] [field: Range(0.05f, 0.4f)] public float BridgeRadiusMeters { get; private set; } = 0.18f;
+        [field: SerializeField] [field: Range(0.5f, 10f)] public float BridgeMaxSpanSpeed { get; private set; } = 2.5f;
         [field: SerializeField] [field: Min(0f)] public float LeakPuddleVolumePerSecond { get; private set; } = 0.4f;
         [field: SerializeField] [field: Range(10f, 100f)] public float SoloCarrySpeedPercent { get; private set; } = 100f;
         [field: SerializeField] public Color BurnedColor { get; private set; } = new Color(0.06f, 0.05f, 0.05f);
@@ -96,6 +100,7 @@ namespace FlameBlame.Hose.Config
             FloppyBendCompliance = FloppyBendCompliance,
             RigidBendCompliance = RigidBendCompliance,
             Damping = Damping,
+            RigidDampingMultiplier = RigidDampingMultiplier,
             GroundFriction = GroundFriction,
             MaxSpeed = MaxSpeed,
             MaxStretchFraction = MaxStretchFraction

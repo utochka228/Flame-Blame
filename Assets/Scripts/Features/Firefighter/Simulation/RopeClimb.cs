@@ -6,12 +6,14 @@ namespace FlameBlame.Firefighter.Simulation
     public class RopeClimb
     {
         private const float TopTolerance = 1e-3f;
+        private const float ViewDeadZone = 0.2f;
 
         private readonly float _metersPerSecond;
         private float _approachSign = 1f;
 
         public float Index { get; private set; }
         public bool IsAtTop { get; private set; }
+        public float EffectiveInput { get; private set; }
 
         public RopeClimb(float metersPerSecond)
         {
@@ -24,13 +26,15 @@ namespace FlameBlame.Firefighter.Simulation
             IsAtTop = false;
         }
 
-        public Vector3 Step(IReadOnlyList<Vector3> positions, float input, float deltaTime)
+        public Vector3 Step(IReadOnlyList<Vector3> positions, float input, float deltaTime, Vector3 viewForward = default)
         {
             var crest = CrestIndex(positions);
             var lower = LowerIndex(positions);
             var length = Mathf.Max((positions[lower + 1] - positions[lower]).magnitude, 1e-4f);
-            var direction = ClimbDirection(positions, crest, input);
-            var next = Index + direction * input * _metersPerSecond * deltaTime / length;
+            var effectiveInput = input * ViewSign(positions, lower, crest, viewForward);
+            EffectiveInput = effectiveInput;
+            var direction = ClimbDirection(positions, crest, effectiveInput);
+            var next = Index + direction * effectiveInput * _metersPerSecond * deltaTime / length;
             var previous = Index;
             Index = Mathf.Clamp(Crosses(Index, next, crest) ? crest : next, 0f, positions.Count - 1);
             if (!Mathf.Approximately(Index, previous))
@@ -56,6 +60,15 @@ namespace FlameBlame.Firefighter.Simulation
             var across = positions[far] - positions[crest];
             across.y = 0f;
             return across.normalized;
+        }
+
+        private float ViewSign(IReadOnlyList<Vector3> positions, int lower, int crest, Vector3 viewForward)
+        {
+            if (viewForward.sqrMagnitude < 1e-6f) return 1f;
+
+            var towardCrest = Index < crest - TopTolerance ? 1f : Index > crest + TopTolerance ? -1f : _approachSign;
+            var tangent = (positions[lower + 1] - positions[lower]).normalized * towardCrest;
+            return Vector3.Dot(tangent, viewForward.normalized) < -ViewDeadZone ? -1f : 1f;
         }
 
         private float ClimbDirection(IReadOnlyList<Vector3> positions, int crest, float input)

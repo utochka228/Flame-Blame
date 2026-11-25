@@ -28,7 +28,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HoseSegment[] _hoses;
         [SerializeField] private HoseJoint[] _joints;
         [SerializeField] [Range(2, 64)] private int _maxPieces = 16;
-        [SerializeField] [Min(0.1f)] private float _junctionBreakDistance = 1f;
+        [SerializeField] [Min(0.1f)] private float _junctionBreakDistance = 0.25f;
         [SerializeField] [Range(1, 30)] private int _solvesPerSecond = 10;
         [SerializeField] [Range(1, 8)] private int _junctionIterations = 4;
 
@@ -65,10 +65,13 @@ namespace FlameBlame.Hose.Components
         private void FixedUpdate()
         {
             _world.Step(Time.fixedDeltaTime);
+            WhipOpenEnds();
             BurnCouplings();
         }
 
         public RopeWorld World => _world;
+
+        public event Action<float> SubstepStarting;
 
         public int RopeIndex(HoseSegment hose) => HoseIndex(hose);
 
@@ -93,6 +96,8 @@ namespace FlameBlame.Hose.Components
         public Vector3 JointPosition(int jointIndex) => _ropeJoints.Position(jointIndex);
 
         public bool IsEndFree(HoseEndRef end) => _ropeJoints.IsEndFree(ToRopeEnd(end));
+
+        public bool IsOpenEnd(HoseEndRef end) => IsEndFree(end) && !IsNozzleEnd(end);
 
         public bool IsNozzleEnd(HoseEndRef end)
         {
@@ -180,6 +185,26 @@ namespace FlameBlame.Hose.Components
             }
         }
 
+        private void WhipOpenEnds()
+        {
+            for (var index = 0; index < _hoses.Length; index++)
+            {
+                foreach (var end in _hoses[index].OpenEnds)
+                {
+                    if (end.IsOpen)
+                        WhipOpenEnd(index, _hoses[index], end);
+                }
+            }
+        }
+
+        private void WhipOpenEnd(int ropeIndex, HoseSegment hose, OpenEnd end)
+        {
+            var positions = hose.Rope.Positions;
+            var outward = (positions[end.ParticleIndex] - positions[end.InnerIndex]).normalized;
+            var acceleration = outward * (hose.Config.OpenEndRecoilAcceleration * hose.PressureFractions[end.ParticleIndex]);
+            _world.AddImpulse(new RopeParticle(ropeIndex, end.ParticleIndex), -acceleration * Time.fixedDeltaTime);
+        }
+
         private void BurnCouplings()
         {
             if (!_heatField) return;
@@ -219,6 +244,7 @@ namespace FlameBlame.Hose.Components
         private void BuildWorld()
         {
             _world = new RopeWorld(_hoses[0].Config.Substeps) { JunctionIterations = _junctionIterations };
+            _world.SubstepStarting += fraction => SubstepStarting?.Invoke(fraction);
             _sensors = new HosePinchSensor[_hoses.Length];
             _monitors = new HoseBurstMonitor[_hoses.Length];
             _nozzles = new Nozzle[_hoses.Length];
@@ -315,7 +341,17 @@ namespace FlameBlame.Hose.Components
                 var lastParticle = _hoses[index].Config.ParticleCount - 1;
                 foreach (var breach in _monitors[index].Breaches)
                     _graph.Leak(partId, (float)breach.Index / lastParticle, breach.Loss);
+
+                foreach (var end in _hoses[index].OpenEnds)
+                    AddOpenEndLeak(_hoses[index], partId, end);
             }
+        }
+
+        private void AddOpenEndLeak(HoseSegment hose, int partId, OpenEnd end)
+        {
+            end.IsOpen = IsOpenEnd(new HoseEndRef(hose, end.Kind));
+            if (end.IsOpen)
+                _graph.Leak(partId, end.Kind == RopeEndKind.Start ? 0f : 1f, hose.Config.OpenEndLeakLoss);
         }
 
         private void AddThumbs()

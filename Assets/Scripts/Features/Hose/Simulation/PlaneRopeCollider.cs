@@ -16,7 +16,9 @@ namespace FlameBlame.Hose.Simulation
         {
         }
 
-        public Vector3 Resolve(Vector3 position, float radius)
+        public Vector3 Sweep(Vector3 from, Vector3 to, float radius) => to;
+
+        public Vector3 Resolve(Vector3 position, Vector3 lastFreePosition, float radius)
         {
             position.y = Mathf.Max(position.y, _height + radius);
             return position;

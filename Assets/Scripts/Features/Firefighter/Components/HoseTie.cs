@@ -26,8 +26,8 @@ namespace FlameBlame.Firefighter.Components
                 if (tie.Blend < 1f) continue;
 
                 var isPulled = _network.World.IsGripShared(tie.Grip);
-                tie.Body.linearVelocity = tie.Drag.Step(_network.World.GripTension(tie.Grip), isPulled, tie.Body.linearVelocity, Time.fixedDeltaTime);
-                tie.Body.angularVelocity = Vector3.zero;
+                var force = tie.Drag.Step(_network.World.GripTension(tie.Grip), isPulled, tie.Body.linearVelocity, tie.Body.mass, Time.fixedDeltaTime);
+                tie.Body.AddForceAtPosition(force, anchor);
             }
         }
 
@@ -52,6 +52,19 @@ namespace FlameBlame.Firefighter.Components
             var clearance = _network.HoseOf(particle.Rope).Config.ParticleRadius * SurfaceClearanceMultiplier;
             var anchor = target.Body.transform.InverseTransformPoint(target.Point + target.Normal * clearance);
             _ties.Add(new TieBinding(grip, target.Body, anchor, start, new TieDrag(_config.CreateTieDragSettings())));
+        }
+
+        public bool UntieAt(RopeParticle particle, int toleranceParticles)
+        {
+            var tie = _ties.Find(binding =>
+            {
+                var tied = _network.World.GripParticle(binding.Grip);
+                return tied.Rope == particle.Rope && Mathf.Abs(tied.Index - particle.Index) <= toleranceParticles;
+            });
+            if (tie == null) return false;
+
+            Untie(tie.Body);
+            return true;
         }
 
         public void Untie(Rigidbody body)

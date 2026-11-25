@@ -50,8 +50,8 @@ namespace FlameBlame.Firefighter.Components
                 return;
             }
 
-            var point = _climb.Step(_hose.Rope.Positions, _climbInput, Time.fixedDeltaTime);
-            if (_climb.IsAtTop && _climbInput > 0f)
+            var point = _climb.Step(_hose.Rope.Positions, _climbInput, Time.fixedDeltaTime, _firefighter.Eye.transform.forward);
+            if (_climb.IsAtTop && _climb.EffectiveInput > 0f)
             {
                 Mantle();
                 return;

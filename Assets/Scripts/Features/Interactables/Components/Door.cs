@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace FlameBlame.Interactables.Components
 {
+    [DefaultExecutionOrder(-10)]
     [RequireComponent(typeof(Rigidbody))]
     public class Door : MonoBehaviour
     {
@@ -16,6 +17,8 @@ namespace FlameBlame.Interactables.Components
         private Rigidbody _body;
         private Quaternion _closedRotation;
         private bool _isSlamPending;
+        private float _fromAngle;
+        private float _toAngle;
 
         public bool IsOpen => _model.IsOpen;
 
@@ -30,11 +33,13 @@ namespace FlameBlame.Interactables.Components
         private void OnEnable()
         {
             _model.Slammed += OnSlammed;
+            _network.SubstepStarting += OnSubstepStarting;
         }
 
         private void OnDisable()
         {
             _model.Slammed -= OnSlammed;
+            _network.SubstepStarting -= OnSubstepStarting;
         }
 
         private void FixedUpdate()
@@ -60,8 +65,20 @@ namespace FlameBlame.Interactables.Components
 
         private void Move()
         {
+            _fromAngle = _toAngle;
             _model.Step(Time.fixedDeltaTime);
-            _body.MoveRotation(_closedRotation * Quaternion.AngleAxis(_model.Angle, Vector3.up));
+            _toAngle = _model.Angle;
+            _body.MoveRotation(RotationAt(_toAngle));
+        }
+
+        private Quaternion RotationAt(float angle) => _closedRotation * Quaternion.AngleAxis(angle, Vector3.up);
+
+        private void OnSubstepStarting(float fraction)
+        {
+            if (Mathf.Approximately(_fromAngle, _toAngle)) return;
+
+            transform.rotation = RotationAt(Mathf.Lerp(_fromAngle, _toAngle, fraction));
+            Physics.SyncTransforms();
         }
 
         private void OnSlammed()
