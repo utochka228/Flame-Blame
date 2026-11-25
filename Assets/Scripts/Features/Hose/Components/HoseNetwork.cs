@@ -90,6 +90,12 @@ namespace FlameBlame.Hose.Components
 
         public bool IsEndFree(HoseEndRef end) => _ropeJoints.IsEndFree(ToRopeEnd(end));
 
+        public bool IsNozzleEnd(HoseEndRef end)
+        {
+            var nozzle = _nozzles[HoseIndex(end.Hose)];
+            return nozzle && nozzle.TipEnd == end.End;
+        }
+
         public Vector3 EndPosition(HoseEndRef end)
         {
             var positions = end.Hose.Rope.Positions;
@@ -106,7 +112,7 @@ namespace FlameBlame.Hose.Components
                 {
                     var candidate = new HoseEndRef(hose, kind);
                     if (hose == except.Hose && kind == except.End) continue;
-                    if (!IsEndFree(candidate)) continue;
+                    if (!IsEndFree(candidate) || IsNozzleEnd(candidate)) continue;
 
                     var distance = Vector3.Distance(EndPosition(candidate), point);
                     if (distance >= bestDistance) continue;
@@ -124,20 +130,22 @@ namespace FlameBlame.Hose.Components
             return _ropeJoints.FindAlongRay(origin, direction, reach, aimRadius);
         }
 
-        public bool TryFindBurst(Vector3 origin, Vector3 direction, float reach, float aimRadius, out HoseBurstMonitor found)
+        public bool TryFindBurst(Vector3 origin, Vector3 direction, float reach, float aimRadius, out HoseBurstMonitor found, out int breachIndex)
         {
             for (var index = 0; index < _hoses.Length; index++)
             {
-                if (!_monitors[index].HasBurst) continue;
+                foreach (var breach in _monitors[index].Breaches)
+                {
+                    if (breach.IsTaped || !_world.IsAlongRay(new RopeParticle(index, breach.Index), origin, direction, reach, aimRadius)) continue;
 
-                var weakPoint = new RopeParticle(index, _monitors[index].WeakPointIndex);
-                if (!_world.IsAlongRay(weakPoint, origin, direction, reach, aimRadius)) continue;
-
-                found = _monitors[index];
-                return true;
+                    found = _monitors[index];
+                    breachIndex = breach.Index;
+                    return true;
+                }
             }
 
             found = null;
+            breachIndex = -1;
             return false;
         }
 
@@ -247,11 +255,9 @@ namespace FlameBlame.Hose.Components
                 foreach (var position in _pinchPositions)
                     _graph.Pinch(partId, position);
 
-                if (_monitors[index].IsLeaking)
-                {
-                    var config = _hoses[index].Config;
-                    _graph.Leak(partId, config.BurstWeakPointFraction, _monitors[index].HasBurst ? config.BurstLeakLoss : config.TapeLeakLoss);
-                }
+                var lastParticle = _hoses[index].Config.ParticleCount - 1;
+                foreach (var breach in _monitors[index].Breaches)
+                    _graph.Leak(partId, (float)breach.Index / lastParticle, breach.Loss);
             }
         }
 

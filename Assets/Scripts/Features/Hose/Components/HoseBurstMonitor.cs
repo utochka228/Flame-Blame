@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FlameBlame.Hose.Simulation;
 using UnityEngine;
 
@@ -8,36 +9,42 @@ namespace FlameBlame.Hose.Components
     {
         [SerializeField] private HoseSegment _hose;
 
-        private BurstSequence _sequence;
+        private HoseBreaches _breaches;
+        private float[] _heat;
 
         public int WeakPointIndex { get; private set; }
-        public float ProgressFraction => _sequence.ProgressFraction;
-        public bool HasBurst => _sequence.HasBurst;
-        public bool IsTaped { get; private set; }
-        public bool IsLeaking => HasBurst || IsTaped;
+        public float ProgressFraction => _breaches.WeakPointProgressFraction;
+        public IReadOnlyList<Breach> Breaches => _breaches.Breaches;
+        public bool IsLeaking => Breaches.Count > 0;
 
         public event Action Popped;
 
         private void Awake()
         {
-            var config = _hose.Config;
-            WeakPointIndex = Mathf.RoundToInt(config.BurstWeakPointFraction * (config.ParticleCount - 1));
-            _sequence = new BurstSequence(config.BurstOverloadSeconds, config.BurstRecoverSeconds);
-            _sequence.Popped += OnSequencePopped;
+            var settings = _hose.Config.CreateBreachSettings();
+            WeakPointIndex = settings.WeakPointIndex;
+            _heat = new float[settings.ParticleCount];
+            _breaches = new HoseBreaches(settings);
+        }
+
+        private void OnEnable()
+        {
+            _breaches.Popped += OnPopped;
+        }
+
+        private void OnDisable()
+        {
+            _breaches.Popped -= OnPopped;
         }
 
         private void FixedUpdate()
         {
-            _sequence.Update(_hose.PressureFractions[WeakPointIndex], Time.fixedDeltaTime);
+            _breaches.Step(_hose.PressureFractions[WeakPointIndex], _heat, Time.fixedDeltaTime);
         }
 
-        public void Tape()
-        {
-            _sequence.Repair();
-            IsTaped = true;
-        }
+        public bool Tape(int index) => _breaches.Tape(index);
 
-        private void OnSequencePopped()
+        private void OnPopped()
         {
             Popped?.Invoke();
         }

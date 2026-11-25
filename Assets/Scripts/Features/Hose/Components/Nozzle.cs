@@ -23,6 +23,8 @@ namespace FlameBlame.Hose.Components
         public float ThumbBoostFraction => _config.ThumbBoostFraction;
         public Vector3 RecoilAcceleration { get; private set; }
         public float Spacing => _hose.Config.Spacing;
+        public RopeEndKind TipEnd => _tip;
+        public Vector3 TipPosition => _hose.Positions[TipIndex];
         public Vector3 CurrentDirection => JetDirection(_hose.Rope.Positions);
         public RopeParticle TipParticle => new RopeParticle(_network.RopeIndex(_hose), TipIndex);
         public RopeParticle InnerParticle => new RopeParticle(_network.RopeIndex(_hose), InnerIndex);

@@ -111,6 +111,44 @@ namespace FlameBlame.Tests.PlayMode
             Assert.IsFalse(_first.IsSteppedByNetwork);
         }
 
+        [UnityTest]
+        public IEnumerator NozzleTip_IsNotOfferedAsAFreeEnd()
+        {
+            AddNozzle(_second);
+            StartNetwork();
+
+            yield return null;
+
+            var tipPosition = _network.EndPosition(new HoseEndRef(_second, RopeEndKind.Tail));
+            Assert.IsTrue(_network.IsNozzleEnd(new HoseEndRef(_second, RopeEndKind.Tail)));
+            Assert.IsFalse(_network.TryFindFreeEnd(tipPosition, 1f, default, out _));
+        }
+
+        [UnityTest]
+        public IEnumerator PlainFreeEnd_IsOfferedAsAFreeEnd()
+        {
+            StartNetwork();
+
+            yield return null;
+
+            var tipPosition = _network.EndPosition(new HoseEndRef(_second, RopeEndKind.Tail));
+            Assert.IsTrue(_network.TryFindFreeEnd(tipPosition, 1f, default, out var found));
+            Assert.AreEqual(_second, found.Hose);
+        }
+
+        private void AddNozzle(HoseSegment hose)
+        {
+            hose.gameObject.SetActive(false);
+            var nozzle = hose.gameObject.AddComponent<Nozzle>();
+            var jet = new GameObject("Jet");
+            jet.transform.SetParent(hose.transform);
+            SetField(nozzle, "_config", ScriptableObject.CreateInstance<NozzleConfigSO>());
+            SetField(nozzle, "_hose", hose);
+            SetField(nozzle, "_network", _network);
+            SetField(nozzle, "_jet", jet.AddComponent<ParticleSystem>());
+            hose.gameObject.SetActive(true);
+        }
+
         private void StartNetwork()
         {
             _network.gameObject.SetActive(true);

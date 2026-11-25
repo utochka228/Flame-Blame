@@ -26,9 +26,9 @@ namespace FlameBlame.Hose.Presentation
         {
             if (!_burstMonitor.IsLeaking) return;
 
-            var weakPointIndex = _burstMonitor.WeakPointIndex;
-            _particles.transform.position = _hose.Positions[weakPointIndex];
-            var hasFlow = _hose.PressureFractions[weakPointIndex] > MinSprayPressureFraction;
+            var leakIndex = _burstMonitor.Breaches[0].Index;
+            _particles.transform.position = _hose.Positions[leakIndex];
+            var hasFlow = _hose.PressureFractions[leakIndex] > MinSprayPressureFraction;
             if (hasFlow && !_particles.isEmitting)
                 _particles.Play();
             else if (!hasFlow && _particles.isEmitting)

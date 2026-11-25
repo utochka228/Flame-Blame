@@ -45,8 +45,9 @@ namespace FlameBlame.Firefighter.Components
                 Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters),
                 ValveSource = FindValve(eye)
             };
-            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst);
+            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst, out var breachIndex);
             targets.BurstMonitor = burst;
+            targets.BreachIndex = breachIndex;
             FindConnectTargets(ref targets);
             FindTieTargets(eye, ref targets);
             FindClimbTargets(eye, ref targets);
@@ -56,7 +57,7 @@ namespace FlameBlame.Firefighter.Components
         private void FindConnectTargets(ref UseTargets targets)
         {
             targets.HeldEnd = FindHeldEnd(out var hasHeldEnd);
-            if (!hasHeldEnd || !_network.IsEndFree(targets.HeldEnd)) return;
+            if (!hasHeldEnd || _network.IsNozzleEnd(targets.HeldEnd) || !_network.IsEndFree(targets.HeldEnd)) return;
 
             var heldPosition = _network.EndPosition(targets.HeldEnd);
             targets.CanConnect = _network.TryFindFreeEnd(heldPosition, _config.ConnectRadiusMeters, targets.HeldEnd, out var connectTarget);
@@ -89,7 +90,7 @@ namespace FlameBlame.Firefighter.Components
                     _network.Connect(targets.HeldEnd, targets.ConnectTarget);
                     break;
                 case UseAction.Tape:
-                    targets.BurstMonitor.Tape();
+                    targets.BurstMonitor.Tape(targets.BreachIndex);
                     break;
                 case UseAction.Disconnect:
                     _network.Disconnect(targets.Joint);
@@ -142,6 +143,7 @@ namespace FlameBlame.Firefighter.Components
             public HoseEndRef HeldEnd { get; set; }
             public HoseEndRef ConnectTarget { get; set; }
             public HoseBurstMonitor BurstMonitor { get; set; }
+            public int BreachIndex { get; set; }
             public int Joint { get; set; }
             public PressureSource ValveSource { get; set; }
             public HoseTie.TieTarget TieTarget { get; set; }
