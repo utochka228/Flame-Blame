@@ -20,7 +20,7 @@ namespace FlameBlame.Firefighter.Components
         {
             foreach (var tie in _ties)
             {
-                tie.Blend = Mathf.MoveTowards(tie.Blend, 1f, Time.fixedDeltaTime / _config.TieBlendSeconds);
+                tie.Blend = Mathf.MoveTowards(tie.Blend, 1f, Time.fixedDeltaTime / _config.Tie.BlendSeconds);
                 var anchor = tie.Body.transform.TransformPoint(tie.LocalAnchor);
                 _network.World.SetGripTarget(tie.Grip, Vector3.Lerp(tie.StartPosition, anchor, tie.Blend));
                 if (tie.Blend < 1f) continue;
@@ -34,7 +34,7 @@ namespace FlameBlame.Firefighter.Components
         public bool TryFindTarget(Transform eye, out TieTarget target)
         {
             target = default;
-            if (!Physics.Raycast(eye.position, eye.forward, out var hit, _config.ReachMeters, _config.InteractLayers, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(eye.position, eye.forward, out var hit, _config.Interaction.ReachMeters, _config.Interaction.Layers, QueryTriggerInteraction.Ignore))
                 return false;
 
             if (!hit.rigidbody || hit.rigidbody.isKinematic) return false;
@@ -47,11 +47,11 @@ namespace FlameBlame.Firefighter.Components
 
         public void Tie(RopeParticle particle, TieTarget target)
         {
-            var grip = _network.World.AddGrip(particle, _config.GripCompliance);
+            var grip = _network.World.AddGrip(particle, _config.Grip.Compliance);
             var start = _network.World.ParticlePosition(particle);
-            var clearance = _network.HoseOf(particle.Rope).Config.ParticleRadius * SurfaceClearanceMultiplier;
+            var clearance = _network.HoseOf(particle.Rope).Config.Rope.ParticleRadius * SurfaceClearanceMultiplier;
             var anchor = target.Body.transform.InverseTransformPoint(target.Point + target.Normal * clearance);
-            _ties.Add(new TieBinding(grip, target.Body, anchor, start, new TieDrag(_config.CreateTieDragSettings())));
+            _ties.Add(new TieBinding(grip, target.Body, anchor, start, new TieDrag(_config.Tie.CreateDragSettings())));
         }
 
         public bool UntieAt(RopeParticle particle, int toleranceParticles)

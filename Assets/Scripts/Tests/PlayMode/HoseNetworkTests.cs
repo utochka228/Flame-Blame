@@ -69,8 +69,8 @@ namespace FlameBlame.Tests.PlayMode
 
             var config = _first.Config;
             var inlet = SourceFraction * SourceMaxPressure;
-            var expectedFirstInlet = inlet / config.MaxPressure;
-            var expectedSecondTip = Mathf.Max(0f, inlet - 2f * config.Length * config.LossPerMeter - config.OpenEndLeakLoss) / config.MaxPressure;
+            var expectedFirstInlet = inlet / config.Pressure.MaxPressure;
+            var expectedSecondTip = Mathf.Max(0f, inlet - 2f * config.Length * config.Pressure.LossPerMeter - config.Pressure.OpenEndLeakLoss) / config.Pressure.MaxPressure;
             Assert.AreEqual(expectedFirstInlet, _first.PressureFractions[0], Tolerance);
             Assert.AreEqual(expectedSecondTip, _second.PressureFractions[_second.PressureFractions.Count - 1], Tolerance);
         }

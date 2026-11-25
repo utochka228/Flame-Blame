@@ -29,8 +29,8 @@ namespace FlameBlame.Tests.PlayMode
         {
             var config = ScriptableObject.CreateInstance<HoseConfigSO>();
             var hose = BuildScene(config);
-            var restLength = (config.ParticleCount - 1) * config.Spacing;
-            var maxLength = restLength * (1f + config.MaxStretchFraction) + 0.05f;
+            var restLength = (config.ParticleCount - 1) * config.Rope.Spacing;
+            var maxLength = restLength * (1f + config.Rope.MaxStretchFraction) + 0.05f;
             Random.InitState(1234);
 
             var elapsed = 0f;

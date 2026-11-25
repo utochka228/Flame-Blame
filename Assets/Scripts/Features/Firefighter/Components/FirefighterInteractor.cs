@@ -44,10 +44,10 @@ namespace FlameBlame.Firefighter.Components
             var eye = _firefighter.Eye.transform;
             var targets = new UseTargets
             {
-                Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters)
+                Joint = _network.FindJointAlongRay(eye.position, eye.forward, _config.Interaction.ReachMeters, _config.Interaction.AimRadiusMeters)
             };
             FindInteractables(eye, ref targets);
-            _network.TryFindBurst(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters, out var burst, out var breachIndex);
+            _network.TryFindBurst(eye.position, eye.forward, _config.Interaction.ReachMeters, _config.Interaction.AimRadiusMeters, out var burst, out var breachIndex);
             targets.BurstMonitor = burst;
             targets.BreachIndex = breachIndex;
             FindConnectTargets(ref targets);
@@ -62,7 +62,7 @@ namespace FlameBlame.Firefighter.Components
             if (!hasHeldEnd || _network.IsNozzleEnd(targets.HeldEnd) || !_network.IsEndFree(targets.HeldEnd)) return;
 
             var heldPosition = _network.EndPosition(targets.HeldEnd);
-            targets.CanConnect = _network.TryFindFreeEnd(heldPosition, _config.ConnectRadiusMeters, targets.HeldEnd, out var connectTarget);
+            targets.CanConnect = _network.TryFindFreeEnd(heldPosition, _config.Interaction.ConnectRadiusMeters, targets.HeldEnd, out var connectTarget);
             targets.ConnectTarget = connectTarget;
         }
 
@@ -136,7 +136,7 @@ namespace FlameBlame.Firefighter.Components
 
         private void FindInteractables(Transform eye, ref UseTargets targets)
         {
-            if (!Physics.Raycast(eye.position, eye.forward, out var hit, _config.ReachMeters, _config.InteractLayers, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(eye.position, eye.forward, out var hit, _config.Interaction.ReachMeters, _config.Interaction.Layers, QueryTriggerInteraction.Ignore))
                 return;
 
             targets.ValveSource = hit.collider.GetComponentInParent<PressureSource>();

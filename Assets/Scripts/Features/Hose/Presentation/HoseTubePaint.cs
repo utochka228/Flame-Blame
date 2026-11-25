@@ -11,7 +11,7 @@ namespace FlameBlame.Hose.Presentation
         private const int TexelsPerParticle = 8;
         private const float ChangeTolerance = 1f / 512f;
 
-        private readonly BreachPaint _paint;
+        private BreachPaint _paint;
         private readonly Color[] _texels;
         private readonly Color[] _uploaded;
         private readonly int _particleCount;
@@ -21,7 +21,7 @@ namespace FlameBlame.Hose.Presentation
         public HoseTubePaint(HoseConfigSO config)
         {
             _particleCount = config.ParticleCount;
-            _paint = new BreachPaint(config.BurnedColor, config.TapedColor, config.BreachFeatherParticles);
+            ApplyColors(config);
             _texels = new Color[_particleCount * TexelsPerParticle];
             _uploaded = new Color[_texels.Length];
             Texture = new Texture2D(_texels.Length, 1, TextureFormat.RGBA32, false)
@@ -30,6 +30,11 @@ namespace FlameBlame.Hose.Presentation
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Bilinear
             };
+        }
+
+        public void ApplyColors(HoseConfigSO config)
+        {
+            _paint = new BreachPaint(config.Colors.BurnedColor, config.Colors.TapedColor, config.Colors.BreachFeatherParticles);
         }
 
         public void Update(IReadOnlyList<Breach> breaches, Color baseColor)

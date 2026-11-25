@@ -33,12 +33,14 @@ namespace FlameBlame.Interactables.Components
         private void OnEnable()
         {
             _model.Slammed += OnSlammed;
+            _config.Changed += OnConfigChanged;
             _network.SubstepStarting += OnSubstepStarting;
         }
 
         private void OnDisable()
         {
             _model.Slammed -= OnSlammed;
+            _config.Changed -= OnConfigChanged;
             _network.SubstepStarting -= OnSubstepStarting;
         }
 
@@ -79,6 +81,11 @@ namespace FlameBlame.Interactables.Components
 
             transform.rotation = RotationAt(Mathf.Lerp(_fromAngle, _toAngle, fraction));
             Physics.SyncTransforms();
+        }
+
+        private void OnConfigChanged()
+        {
+            _config.ApplyTo(_model);
         }
 
         private void OnSlammed()

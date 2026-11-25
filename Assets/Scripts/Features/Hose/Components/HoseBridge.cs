@@ -26,7 +26,7 @@ namespace FlameBlame.Hose.Components
 
         private void FixedUpdate()
         {
-            var threshold = _hose.Config.BridgePressureFraction;
+            var threshold = _hose.Config.Bridge.PressureFraction;
             for (var index = 0; index < _spans.Length; index++)
             {
                 var isWalkable = Mathf.Min(_hose.PressureFractions[index], _hose.PressureFractions[index + 1]) >= threshold;
@@ -47,8 +47,8 @@ namespace FlameBlame.Hose.Components
             span.transform.SetParent(transform, false);
             var capsule = span.AddComponent<CapsuleCollider>();
             capsule.direction = CapsuleAlongZ;
-            capsule.radius = config.BridgeRadiusMeters;
-            capsule.height = config.Spacing + capsule.radius * 2f;
+            capsule.radius = config.Bridge.RadiusMeters;
+            capsule.height = config.Rope.Spacing + capsule.radius * 2f;
             var body = span.AddComponent<Rigidbody>();
             body.isKinematic = true;
             span.SetActive(false);
@@ -61,7 +61,7 @@ namespace FlameBlame.Hose.Components
             var speed = _hasLastCenter[index] ? (center - _lastCenters[index]).magnitude / Time.fixedDeltaTime : 0f;
             _lastCenters[index] = center;
             _hasLastCenter[index] = true;
-            return speed <= _hose.Config.BridgeMaxSpanSpeed;
+            return speed <= _hose.Config.Bridge.MaxSpanSpeed;
         }
 
         private Vector3 CenterOf(int index)

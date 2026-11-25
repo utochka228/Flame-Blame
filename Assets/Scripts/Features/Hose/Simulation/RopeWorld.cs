@@ -11,6 +11,7 @@ namespace FlameBlame.Hose.Simulation
         private readonly List<XpbdRope> _ropes = new List<XpbdRope>();
         private readonly List<Junction> _junctions = new List<Junction>();
         private readonly List<Grip> _grips = new List<Grip>();
+        private bool _hasStepped;
 
         public int JunctionIterations { get; set; } = 4;
 
@@ -29,7 +30,7 @@ namespace FlameBlame.Hose.Simulation
 
         public int AddJunction(float breakDistance)
         {
-            var junction = new Junction(breakDistance);
+            var junction = new Junction(breakDistance) { IsFresh = _hasStepped };
             var slot = _junctions.FindIndex(existing => existing.IsFree);
             if (slot < 0)
             {
@@ -151,6 +152,7 @@ namespace FlameBlame.Hose.Simulation
 
         public void Step(float deltaTime)
         {
+            _hasStepped = true;
             foreach (var rope in _ropes)
                 rope.BeginStep(deltaTime, _substeps);
 
@@ -184,6 +186,9 @@ namespace FlameBlame.Hose.Simulation
 
             foreach (var rope in _ropes)
                 rope.EndStep();
+
+            foreach (var junction in _junctions)
+                junction.IsFresh = false;
         }
 
         private void SolveGrips(float substepTime)
@@ -206,7 +211,7 @@ namespace FlameBlame.Hose.Simulation
             if (junction.IsBroken || junction.Ends.Count == 0) return;
 
             var target = JunctionTarget(junction);
-            if (IsStretchedPastBreakDistance(junction, target))
+            if (!junction.IsFresh && IsStretchedPastBreakDistance(junction, target))
             {
                 junction.IsBroken = true;
                 return;
@@ -289,6 +294,7 @@ namespace FlameBlame.Hose.Simulation
             public float BreakDistance { get; }
             public bool IsBroken { get; set; }
             public bool IsFree { get; set; }
+            public bool IsFresh { get; set; }
             public List<RopeEnd> Ends { get; } = new List<RopeEnd>();
 
             public Junction(float breakDistance)

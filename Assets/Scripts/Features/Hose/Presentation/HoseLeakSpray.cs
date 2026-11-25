@@ -57,7 +57,7 @@ namespace FlameBlame.Hose.Presentation
             return Mathf.Max(before, after);
         }
 
-        private float StrengthOf(Breach breach) => Mathf.Clamp01(breach.Loss / Mathf.Max(_hose.Config.BurstLeakLoss, MinBurstLoss));
+        private float StrengthOf(Breach breach) => Mathf.Clamp01(breach.Loss / Mathf.Max(_hose.Config.Burst.LeakLoss, MinBurstLoss));
 
         private Breach LargestBreach()
         {
@@ -76,7 +76,7 @@ namespace FlameBlame.Hose.Presentation
         {
             if (!_puddles) return;
 
-            var volume = _hose.Config.LeakPuddleVolumePerSecond * pressureFraction * Time.deltaTime;
+            var volume = _hose.Config.Pressure.LeakPuddleVolumePerSecond * pressureFraction * Time.deltaTime;
             _puddles.AddWater(_hose.Positions[leakIndex], volume);
         }
 

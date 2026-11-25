@@ -12,6 +12,8 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private bool _anchoredToOutlet = true;
 
         private XpbdRope _rope;
+        private RopeSettings _ropeSettings;
+        private HeldHoseSettings _heldSettings;
         private Vector3[] _interpolatedPositions;
         private float[] _targetPressureFractions;
         private float[] _smoothedPressureFractions;
@@ -30,8 +32,10 @@ namespace FlameBlame.Hose.Components
 
         private void Awake()
         {
-            _rope = new XpbdRope(_config.CreateRopeSettings(), _outlet.position, _outlet.forward,
-                new PhysicsRopeCollider(_config.CollisionLayers, transform))
+            _ropeSettings = _config.CreateRopeSettings();
+            _heldSettings = _config.CreateHeldSettings();
+            _rope = new XpbdRope(_ropeSettings, _outlet.position, _outlet.forward,
+                new PhysicsRopeCollider(_config.Rope.CollisionLayers, transform))
             {
                 IsPinned = _anchoredToOutlet
             };
@@ -41,7 +45,7 @@ namespace FlameBlame.Hose.Components
             _rigidityProfile = new float[_rope.Positions.Count];
             _rigidityCaps = new float[_rope.Positions.Count];
             _dampingMultipliers = new float[_rope.Positions.Count];
-            _heldProfile = new HeldHoseProfile(_config.CreateHeldSettings());
+            _heldProfile = new HeldHoseProfile(_heldSettings);
             var lastIndex = _rope.Positions.Count - 1;
             _openEnds = new[]
             {
@@ -52,9 +56,19 @@ namespace FlameBlame.Hose.Components
             Interpolate();
         }
 
+        private void OnEnable()
+        {
+            _config.Changed += OnConfigChanged;
+        }
+
+        private void OnDisable()
+        {
+            _config.Changed -= OnConfigChanged;
+        }
+
         private void FixedUpdate()
         {
-            var maxDelta = _config.PressureSmoothingFractionPerSecond * Time.fixedDeltaTime;
+            var maxDelta = _config.Pressure.SmoothingFractionPerSecond * Time.fixedDeltaTime;
             for (var index = 0; index < _smoothedPressureFractions.Length; index++)
                 _smoothedPressureFractions[index] = Mathf.MoveTowards(_smoothedPressureFractions[index], _targetPressureFractions[index], maxDelta);
 
@@ -95,6 +109,12 @@ namespace FlameBlame.Hose.Components
         {
             for (var index = 0; index < _targetPressureFractions.Length; index++)
                 SetTarget(index, pressureFractions[index]);
+        }
+
+        private void OnConfigChanged()
+        {
+            _config.Rope.ApplyTo(_ropeSettings);
+            _config.Held.ApplyTo(_heldSettings);
         }
 
         private void Interpolate()

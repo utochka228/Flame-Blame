@@ -201,7 +201,7 @@ namespace FlameBlame.Hose.Components
         {
             var positions = hose.Rope.Positions;
             var outward = (positions[end.ParticleIndex] - positions[end.InnerIndex]).normalized;
-            var acceleration = outward * (hose.Config.OpenEndRecoilAcceleration * hose.PressureFractions[end.ParticleIndex]);
+            var acceleration = outward * (hose.Config.Pressure.OpenEndRecoilAcceleration * hose.PressureFractions[end.ParticleIndex]);
             _world.AddImpulse(new RopeParticle(ropeIndex, end.ParticleIndex), -acceleration * Time.fixedDeltaTime);
         }
 
@@ -211,7 +211,7 @@ namespace FlameBlame.Hose.Components
 
             var config = _hoses[0].Config;
             _secondsSinceCouplingCheck += Time.fixedDeltaTime;
-            if (_secondsSinceCouplingCheck < 1f / config.HeatChecksPerSecond) return;
+            if (_secondsSinceCouplingCheck < 1f / config.Heat.ChecksPerSecond) return;
 
             var elapsed = _secondsSinceCouplingCheck;
             _secondsSinceCouplingCheck = 0f;
@@ -225,8 +225,8 @@ namespace FlameBlame.Hose.Components
         private void StepCouplingBurn(int joint, float elapsed)
         {
             var config = _hoses[0].Config;
-            var isHeated = _heatField.Sample(_ropeJoints.Position(joint)) >= config.BurnHeatThresholdFraction;
-            if (BurnTimerFor(joint, config.CouplingBurnSeconds).Step(isHeated, elapsed))
+            var isHeated = _heatField.Sample(_ropeJoints.Position(joint)) >= config.Heat.BurnThresholdFraction;
+            if (BurnTimerFor(joint, config.Heat.CouplingBurnSeconds).Step(isHeated, elapsed))
                 Disconnect(joint);
         }
 
@@ -243,7 +243,7 @@ namespace FlameBlame.Hose.Components
 
         private void BuildWorld()
         {
-            _world = new RopeWorld(_hoses[0].Config.Substeps) { JunctionIterations = _junctionIterations };
+            _world = new RopeWorld(_hoses[0].Config.Rope.Substeps) { JunctionIterations = _junctionIterations };
             _world.SubstepStarting += fraction => SubstepStarting?.Invoke(fraction);
             _sensors = new HosePinchSensor[_hoses.Length];
             _monitors = new HoseBurstMonitor[_hoses.Length];
@@ -284,7 +284,7 @@ namespace FlameBlame.Hose.Components
             foreach (var hose in _hoses)
             {
                 var config = hose.Config;
-                _graph.AddHose(config.Length, config.LossPerMeter);
+                _graph.AddHose(config.Length, config.Pressure.LossPerMeter);
             }
 
             _splitterParts.Clear();
@@ -351,7 +351,7 @@ namespace FlameBlame.Hose.Components
         {
             end.IsOpen = IsOpenEnd(new HoseEndRef(hose, end.Kind));
             if (end.IsOpen)
-                _graph.Leak(partId, end.Kind == RopeEndKind.Start ? 0f : 1f, hose.Config.OpenEndLeakLoss);
+                _graph.Leak(partId, end.Kind == RopeEndKind.Start ? 0f : 1f, hose.Config.Pressure.OpenEndLeakLoss);
         }
 
         private void AddThumbs()
@@ -368,7 +368,7 @@ namespace FlameBlame.Hose.Components
             for (var index = 0; index < _hoses.Length; index++)
             {
                 if (_nozzles[index])
-                    _nozzles[index].SetTipPressureFraction(_result.TipPressure(HosePartId(index)) / _hoses[index].Config.MaxPressure);
+                    _nozzles[index].SetTipPressureFraction(_result.TipPressure(HosePartId(index)) / _hoses[index].Config.Pressure.MaxPressure);
             }
         }
 
@@ -376,7 +376,7 @@ namespace FlameBlame.Hose.Components
         {
             for (var index = 0; index < _hoses.Length; index++)
             {
-                var maxPressure = _hoses[index].Config.MaxPressure;
+                var maxPressure = _hoses[index].Config.Pressure.MaxPressure;
                 var profile = _profiles[index];
                 for (var particle = 0; particle < profile.Length; particle++)
                     profile[particle] = _result.Sample(HosePartId(index), (float)particle / (profile.Length - 1)) / maxPressure;

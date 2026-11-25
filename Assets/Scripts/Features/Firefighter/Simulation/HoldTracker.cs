@@ -4,8 +4,8 @@ namespace FlameBlame.Firefighter.Simulation
 {
     public class HoldTracker
     {
-        private readonly float _followSeconds;
-        private readonly float _maxDistance;
+        private float _followSeconds;
+        private float _maxDistance;
 
         private Vector3 _velocity;
 
@@ -14,6 +14,11 @@ namespace FlameBlame.Firefighter.Simulation
         public Vector3 Velocity => _velocity;
 
         public HoldTracker(float followSeconds, float maxDistance)
+        {
+            Configure(followSeconds, maxDistance);
+        }
+
+        public void Configure(float followSeconds, float maxDistance)
         {
             _followSeconds = followSeconds;
             _maxDistance = maxDistance;

@@ -11,6 +11,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HeatField _heatField;
 
         private HoseBreaches _breaches;
+        private BreachSettings _settings;
         private float[] _heat;
         private float _secondsSinceHeatCheck;
 
@@ -23,20 +24,22 @@ namespace FlameBlame.Hose.Components
 
         private void Awake()
         {
-            var settings = _hose.Config.CreateBreachSettings();
-            WeakPointIndex = settings.WeakPointIndex;
-            _heat = new float[settings.ParticleCount];
-            _breaches = new HoseBreaches(settings);
+            _settings = _hose.Config.CreateBreachSettings();
+            WeakPointIndex = _settings.WeakPointIndex;
+            _heat = new float[_settings.ParticleCount];
+            _breaches = new HoseBreaches(_settings);
         }
 
         private void OnEnable()
         {
             _breaches.Popped += OnPopped;
+            _hose.Config.Changed += OnConfigChanged;
         }
 
         private void OnDisable()
         {
             _breaches.Popped -= OnPopped;
+            _hose.Config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -50,7 +53,7 @@ namespace FlameBlame.Hose.Components
             if (!_heatField) return;
 
             _secondsSinceHeatCheck += Time.fixedDeltaTime;
-            if (_secondsSinceHeatCheck < 1f / _hose.Config.HeatChecksPerSecond) return;
+            if (_secondsSinceHeatCheck < 1f / _hose.Config.Heat.ChecksPerSecond) return;
 
             _secondsSinceHeatCheck = 0f;
             var positions = _hose.Rope.Positions;
@@ -59,6 +62,12 @@ namespace FlameBlame.Hose.Components
         }
 
         public bool Tape(int index) => _breaches.Tape(index);
+
+        private void OnConfigChanged()
+        {
+            _hose.Config.ApplyTo(_settings);
+            WeakPointIndex = _settings.WeakPointIndex;
+        }
 
         private void OnPopped()
         {

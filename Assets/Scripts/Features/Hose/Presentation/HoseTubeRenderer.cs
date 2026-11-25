@@ -40,17 +40,34 @@ namespace FlameBlame.Hose.Presentation
             transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
+        private void OnEnable()
+        {
+            _hose.Config.Changed += OnConfigChanged;
+        }
+
+        private void OnDisable()
+        {
+            _hose.Config.Changed -= OnConfigChanged;
+        }
+
         private void Start()
         {
             var config = _hose.Config;
-            _builder = new TubeMeshBuilder(_hose.Positions.Count, config.TubeSamplesPerSegment, config.TubeRingSides, config.TubeMiterLimit);
-            _radiusProfile = new HoseRadiusProfile(config.ParticleRadius, config.SwellFraction, config.PinchSquashFraction);
+            _builder = new TubeMeshBuilder(_hose.Positions.Count, config.Tube.SamplesPerSegment, config.Tube.RingSides, config.Tube.MiterLimit);
+            _radiusProfile = new HoseRadiusProfile(config.Rope.ParticleRadius, config.Tube.SwellFraction, config.Pinch.SquashFraction);
             _radii = new float[_hose.Positions.Count];
             _shakenPositions = new Vector3[_hose.Positions.Count];
             _mesh.vertices = _builder.Vertices;
             _mesh.uv = _builder.Uvs;
             _mesh.triangles = _builder.Triangles;
             _paint = new HoseTubePaint(config);
+        }
+
+        private void OnConfigChanged()
+        {
+            var config = _hose.Config;
+            _radiusProfile = new HoseRadiusProfile(config.Rope.ParticleRadius, config.Tube.SwellFraction, config.Pinch.SquashFraction);
+            _paint.ApplyColors(config);
         }
 
         private void LateUpdate()
@@ -72,7 +89,7 @@ namespace FlameBlame.Hose.Presentation
             _mesh.normals = _builder.Normals;
             _mesh.RecalculateBounds();
 
-            var tint = Color.Lerp(config.RelaxedColor, config.StrainedColor, _hose.PressureFractions[_burstMonitor.WeakPointIndex]);
+            var tint = Color.Lerp(config.Colors.RelaxedColor, config.Colors.StrainedColor, _hose.PressureFractions[_burstMonitor.WeakPointIndex]);
             _paint.Update(_burstMonitor.Breaches, tint);
             _propertyBlock.SetColor(BaseColorId, Color.white);
             _propertyBlock.SetTexture(BaseMapId, _paint.Texture);
@@ -87,21 +104,21 @@ namespace FlameBlame.Hose.Presentation
 
         private void ApplyBulge(HoseConfigSO config, float burstProgress)
         {
-            _radiusProfile.AddBulge(_radii, _burstMonitor.WeakPointIndex, config.BalloonWidthParticles, config.BalloonFraction * burstProgress);
+            _radiusProfile.AddBulge(_radii, _burstMonitor.WeakPointIndex, config.Burst.BalloonWidthParticles, config.Burst.BalloonFraction * burstProgress);
         }
 
         private void ApplyShake(HoseConfigSO config, float burstProgress)
         {
             var center = _burstMonitor.WeakPointIndex;
-            var phase = Time.time * config.ShakeHertz * Mathf.PI * 2f;
+            var phase = Time.time * config.Burst.ShakeHertz * Mathf.PI * 2f;
             for (var index = 0; index < _shakenPositions.Length; index++)
             {
-                var weight = HoseRadiusProfile.FalloffWeight(index, center, config.BalloonWidthParticles);
+                var weight = HoseRadiusProfile.FalloffWeight(index, center, config.Burst.BalloonWidthParticles);
                 var jitter = new Vector3(
                     Mathf.Sin(phase + index * ShakePhaseStepX),
                     Mathf.Sin(phase * ShakeSpeedY + index * ShakePhaseStepY),
                     Mathf.Sin(phase * ShakeSpeedZ + index * ShakePhaseStepZ));
-                _shakenPositions[index] = _hose.Positions[index] + jitter * (config.ShakeAmplitude * burstProgress * weight);
+                _shakenPositions[index] = _hose.Positions[index] + jitter * (config.Burst.ShakeAmplitude * burstProgress * weight);
             }
         }
     }

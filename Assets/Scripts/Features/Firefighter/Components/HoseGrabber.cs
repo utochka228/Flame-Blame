@@ -16,6 +16,7 @@ namespace FlameBlame.Firefighter.Components
 
         private Rigidbody _body;
         private HoseTie _tie;
+        private HoseClimber _climber;
         private int _grip = NoGrip;
         private int _aimGrip = NoGrip;
         private HoseSegment _heldHose;
@@ -32,17 +33,20 @@ namespace FlameBlame.Firefighter.Components
         {
             _body = GetComponent<Rigidbody>();
             _tie = GetComponent<HoseTie>();
-            _hold = new HoldTracker(_config.GripFollowSeconds, _config.MaxGripDistanceMeters);
+            _climber = GetComponent<HoseClimber>();
+            _hold = new HoldTracker(_config.Grip.FollowSeconds, _config.Grip.MaxDistanceMeters);
         }
 
         private void OnEnable()
         {
             _firefighter.Driven += OnDriven;
+            _config.Changed += OnConfigChanged;
         }
 
         private void OnDisable()
         {
             _firefighter.Driven -= OnDriven;
+            _config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -61,27 +65,32 @@ namespace FlameBlame.Firefighter.Components
 
             var previousHold = _hold.Position;
             _hold.Step(HoldPoint(eyePosition, eye.forward), eye.forward, Time.fixedDeltaTime);
-            var radius = _heldHose.Config.ParticleRadius;
-            _hold.Constrain(SphereSweep.Slide(previousHold, _hold.Position, radius, _heldHose.Config.CollisionLayers));
+            var radius = _heldHose.Config.Rope.ParticleRadius;
+            _hold.Constrain(SphereSweep.Slide(previousHold, _hold.Position, radius, _heldHose.Config.Rope.CollisionLayers));
             _network.World.SetGripTarget(_grip, _hold.Position);
             if (IsHoldingNozzle)
             {
                 _network.World.SetGripTarget(_aimGrip, _hold.Position - _hold.AimDirection * _heldNozzle.Spacing);
-                _body.AddForce(_heldNozzle.RecoilAcceleration * _config.RecoilTransferMultiplier, ForceMode.Acceleration);
+                _body.AddForce(_heldNozzle.RecoilAcceleration * _config.Grip.RecoilTransferMultiplier, ForceMode.Acceleration);
             }
 
             var gripsOnHose = _network.World.ActiveGripCount(heldParticle.Rope);
-            _firefighter.MoveSpeedScale = CarryLoad.SpeedScale(gripsOnHose, IsHoldingNozzle, _heldHose.Config.SoloCarrySpeedFraction);
+            _firefighter.MoveSpeedScale = CarryLoad.SpeedScale(gripsOnHose, IsHoldingNozzle, _heldHose.Config.Held.SoloCarrySpeedFraction);
 
-            var pull = _network.World.GripTension(_grip) * _config.PullAccelerationMultiplier;
-            _smoothedPull = Vector3.Lerp(_smoothedPull, pull, Time.fixedDeltaTime / _config.PullSmoothingSeconds);
-            _body.AddForce(Vector3.ClampMagnitude(_smoothedPull, _config.MaxPullAcceleration), ForceMode.Acceleration);
+            var pull = _network.World.GripTension(_grip) * _config.Grip.PullAccelerationMultiplier;
+            _smoothedPull = Vector3.Lerp(_smoothedPull, pull, Time.fixedDeltaTime / _config.Grip.PullSmoothingSeconds);
+            _body.AddForce(Vector3.ClampMagnitude(_smoothedPull, _config.Grip.MaxPullAcceleration), ForceMode.Acceleration);
         }
 
         public void Drop()
         {
             if (IsHolding)
                 ReleaseGrips();
+        }
+
+        private void OnConfigChanged()
+        {
+            _hold.Configure(_config.Grip.FollowSeconds, _config.Grip.MaxDistanceMeters);
         }
 
         private void OnDriven(FirefighterCommands commands)
@@ -103,14 +112,17 @@ namespace FlameBlame.Firefighter.Components
                 return;
             }
 
+            if (_climber.IsClimbing)
+                _climber.Stop();
+
             var eye = _firefighter.Eye.transform;
             var found = FindTarget(eye);
             if (found.IsNone)
                 return;
 
-            _tie.UntieAt(found, _config.TieGrabToleranceParticles);
+            _tie.UntieAt(found, _config.Tie.GrabToleranceParticles);
 
-            _grip = _network.World.AddGrip(found, _config.GripCompliance);
+            _grip = _network.World.AddGrip(found, _config.Grip.Compliance);
             _heldHose = _network.HoseOf(found.Rope);
             _heldHose.SetHeld(found.Index);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], eye.forward);
@@ -120,29 +132,29 @@ namespace FlameBlame.Firefighter.Components
                 return;
 
             _heldNozzle = nozzle;
-            _aimGrip = _network.World.AddGrip(nozzle.InnerParticle, _config.AimGripCompliance);
+            _aimGrip = _network.World.AddGrip(nozzle.InnerParticle, _config.Grip.AimCompliance);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], nozzle.CurrentDirection);
         }
 
         private RopeParticle FindTarget(Transform eye)
         {
-            return _network.TryFindNozzleTip(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters,
+            return _network.TryFindNozzleTip(eye.position, eye.forward, _config.Interaction.ReachMeters, _config.Interaction.AimRadiusMeters,
                 out var nozzle)
                 ? nozzle.TipParticle
-                : _network.World.FindAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
+                : _network.World.FindAlongRay(eye.position, eye.forward, _config.Interaction.ReachMeters, _config.Interaction.AimRadiusMeters);
         }
 
         private void Throw()
         {
             var held = _network.World.GripParticle(_grip);
-            var velocity = _hold.Velocity * _config.ThrowInheritMultiplier + _firefighter.Eye.transform.forward * _config.ThrowSpeed;
+            var velocity = _hold.Velocity * _config.Throw.InheritMultiplier + _firefighter.Eye.transform.forward * _config.Throw.Speed;
             ReleaseGrips();
             ImpartVelocity(held, velocity);
         }
 
         private void ImpartVelocity(RopeParticle held, Vector3 velocity)
         {
-            var spread = _config.ThrowSpreadParticles;
+            var spread = _config.Throw.SpreadParticles;
             var count = _heldHose.Rope.Positions.Count;
             for (var offset = -spread; offset <= spread; offset++)
             {
@@ -161,9 +173,9 @@ namespace FlameBlame.Firefighter.Components
 
         private Vector3 HoldPoint(Vector3 eyePosition, Vector3 forward)
         {
-            var distance = _config.HoldDistanceMeters;
+            var distance = _config.Grip.HoldDistanceMeters;
             var config = _heldHose.Config;
-            if (Physics.SphereCast(eyePosition, config.ParticleRadius, forward, out var hit, distance, config.CollisionLayers,
+            if (Physics.SphereCast(eyePosition, config.Rope.ParticleRadius, forward, out var hit, distance, config.Rope.CollisionLayers,
                     QueryTriggerInteraction.Ignore))
                 distance = hit.distance;
 

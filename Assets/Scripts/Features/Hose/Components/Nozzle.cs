@@ -25,7 +25,7 @@ namespace FlameBlame.Hose.Components
         public float ThumbFraction { get; set; }
         public float ThumbBoostFraction => _config.ThumbBoostFraction;
         public Vector3 RecoilAcceleration { get; private set; }
-        public float Spacing => _hose.Config.Spacing;
+        public float Spacing => _hose.Config.Rope.Spacing;
         public RopeEndKind TipEnd => _tip;
         public Vector3 TipPosition => _hose.Positions[TipIndex];
         public Vector3 CurrentDirection => JetDirection(_hose.Rope.Positions);
@@ -38,6 +38,16 @@ namespace FlameBlame.Hose.Components
         private void Awake()
         {
             _model = _config.CreateModel();
+        }
+
+        private void OnEnable()
+        {
+            _config.Changed += OnConfigChanged;
+        }
+
+        private void OnDisable()
+        {
+            _config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -64,6 +74,11 @@ namespace FlameBlame.Hose.Components
         public bool IsTip(RopeParticle particle)
         {
             return particle.Rope == _network.RopeIndex(_hose) && particle.Index == TipIndex;
+        }
+
+        private void OnConfigChanged()
+        {
+            _model = _config.CreateModel();
         }
 
         private Vector3 JetDirection(IReadOnlyList<Vector3> positions)

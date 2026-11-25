@@ -31,8 +31,18 @@ namespace FlameBlame.Firefighter.Components
             _body = GetComponent<Rigidbody>();
             _capsule = GetComponent<CapsuleCollider>();
             _body.freezeRotation = true;
-            _look = new LookState(_config.LookDegreesPerPixel, _config.PitchLimitDegrees, transform.eulerAngles.y);
-            _motion = new FirefighterMotion(_config.MoveSpeed, _config.Acceleration, _config.Deceleration, _config.JumpSpeed, _config.AirControlFraction);
+            _look = new LookState(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, transform.eulerAngles.y);
+            _motion = new FirefighterMotion(_config.Movement.MoveSpeed, _config.Movement.Acceleration, _config.Movement.Deceleration, _config.Movement.JumpSpeed, _config.Movement.AirControlFraction);
+        }
+
+        private void OnEnable()
+        {
+            _config.Changed += OnConfigChanged;
+        }
+
+        private void OnDisable()
+        {
+            _config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -48,7 +58,7 @@ namespace FlameBlame.Firefighter.Components
                 velocity = _motion.Jump(velocity);
 
             _jumpRequested = false;
-            _body.linearVelocity = Vector3.ClampMagnitude(velocity, _config.MaxSpeed);
+            _body.linearVelocity = Vector3.ClampMagnitude(velocity, _config.Movement.MaxSpeed);
         }
 
         public void Drive(FirefighterCommands commands)
@@ -60,12 +70,20 @@ namespace FlameBlame.Firefighter.Components
             Driven?.Invoke(commands);
         }
 
+        private void OnConfigChanged()
+        {
+            var movement = _config.Movement;
+            _look.Configure(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees);
+            _motion = new FirefighterMotion(movement.MoveSpeed, movement.Acceleration, movement.Deceleration, movement.JumpSpeed,
+                movement.AirControlFraction);
+        }
+
         private bool IsGrounded()
         {
             var bounds = _capsule.bounds;
             var origin = new Vector3(bounds.center.x, bounds.min.y + _capsule.radius, bounds.center.z);
-            return Physics.CheckSphere(origin + Vector3.down * _config.GroundCheckDistance, _capsule.radius * 0.9f,
-                _config.GroundLayers,
+            return Physics.CheckSphere(origin + Vector3.down * _config.Movement.GroundCheckDistance, _capsule.radius * 0.9f,
+                _config.Movement.GroundLayers,
                 QueryTriggerInteraction.Ignore);
         }
     }

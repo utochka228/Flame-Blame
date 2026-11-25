@@ -27,17 +27,19 @@ namespace FlameBlame.Firefighter.Components
         {
             _body = GetComponent<Rigidbody>();
             _collider = GetComponentInChildren<Collider>();
-            _climb = new RopeClimb(_config.ClimbSpeed);
+            _climb = new RopeClimb(_config.Climb.Speed);
         }
 
         private void OnEnable()
         {
             _firefighter.Driven += OnDriven;
+            _config.Changed += OnConfigChanged;
         }
 
         private void OnDisable()
         {
             _firefighter.Driven -= OnDriven;
+            _config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -57,14 +59,14 @@ namespace FlameBlame.Firefighter.Components
                 return;
             }
 
-            var target = point - transform.forward * _config.ClimbStandOffMeters;
-            _body.linearVelocity = Vector3.ClampMagnitude((target - _body.position) / Time.fixedDeltaTime, _config.MaxSpeed);
+            var target = point - transform.forward * _config.Climb.StandOffMeters;
+            _body.linearVelocity = Vector3.ClampMagnitude((target - _body.position) / Time.fixedDeltaTime, _config.Movement.MaxSpeed);
         }
 
         public bool TryFindRope(Transform eye, out RopeParticle particle)
         {
-            particle = _network.World.FindAlongRay(eye.position, eye.forward, _config.ReachMeters, _config.AimRadiusMeters);
-            return !particle.IsNone && _network.HoseOf(particle.Rope).PressureFractions[particle.Index] <= _config.ClimbMaxPressureFraction;
+            particle = _network.World.FindAlongRay(eye.position, eye.forward, _config.Interaction.ReachMeters, _config.Interaction.AimRadiusMeters);
+            return !particle.IsNone && _network.HoseOf(particle.Rope).PressureFractions[particle.Index] <= _config.Climb.MaxPressureFraction;
         }
 
         public void Begin(RopeParticle particle)
@@ -94,12 +96,17 @@ namespace FlameBlame.Firefighter.Components
         {
             if (!_mantle.Step(_collider.bounds.min.y, Time.fixedDeltaTime))
             {
-                _body.linearVelocity = Vector3.up * _config.JumpSpeed;
+                _body.linearVelocity = Vector3.up * _config.Movement.JumpSpeed;
                 return;
             }
 
             Stop();
-            _body.linearVelocity = transform.forward * _config.MoveSpeed;
+            _body.linearVelocity = transform.forward * _config.Movement.MoveSpeed;
+        }
+
+        private void OnConfigChanged()
+        {
+            _climb.Configure(_config.Climb.Speed);
         }
 
         private void OnDriven(FirefighterCommands commands)

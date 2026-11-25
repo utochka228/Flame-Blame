@@ -47,7 +47,7 @@ namespace FlameBlame.Hose.Presentation
                 EmitOne(origin, outward, pressureFraction);
 
             if (_puddles)
-                _puddles.AddWater(origin, _hose.Config.LeakPuddleVolumePerSecond * pressureFraction * Time.deltaTime);
+                _puddles.AddWater(origin, _hose.Config.Pressure.LeakPuddleVolumePerSecond * pressureFraction * Time.deltaTime);
         }
 
         private void EmitOne(Vector3 origin, Vector3 outward, float pressureFraction)

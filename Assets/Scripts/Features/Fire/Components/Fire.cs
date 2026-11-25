@@ -15,6 +15,7 @@ namespace FlameBlame.Fire.Components
         [SerializeField] private HeatField _heatField;
 
         private FireModel _model;
+        private FireSettings _settings;
         private Collider _body;
 
         public float Intensity => _model.Intensity;
@@ -23,19 +24,22 @@ namespace FlameBlame.Fire.Components
 
         private void Awake()
         {
-            _model = new FireModel(_config.CreateSettings());
+            _settings = _config.CreateSettings();
+            _model = new FireModel(_settings);
             _body = GetComponent<Collider>();
         }
 
         private void OnEnable()
         {
             _model.Extinguished += OnExtinguished;
+            _config.Changed += OnConfigChanged;
             _heatField.Register(this);
         }
 
         private void OnDisable()
         {
             _model.Extinguished -= OnExtinguished;
+            _config.Changed -= OnConfigChanged;
             _heatField.Unregister(this);
         }
 
@@ -45,6 +49,11 @@ namespace FlameBlame.Fire.Components
         }
 
         public float HeatAt(Vector3 point) => _model.HeatAt(Vector3.Distance(transform.position, point));
+
+        private void OnConfigChanged()
+        {
+            _config.ApplyTo(_settings);
+        }
 
         private void OnExtinguished()
         {

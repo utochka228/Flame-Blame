@@ -162,5 +162,23 @@ namespace FlameBlame.Tests.EditMode
 
             Assert.Less(worstGap, GapTolerance);
         }
+
+        [Test]
+        public void AddJunction_AfterTheWorldHasStepped_SurvivesItsFirstStepWhenEndsStartApart()
+        {
+            var first = CreateRope(0f, true);
+            var second = CreateRope(TailX + 0.5f, false);
+            var world = new RopeWorld(Substeps);
+            var firstIndex = world.AddRope(first);
+            var secondIndex = world.AddRope(second);
+            world.Step(FixedStep);
+
+            var junction = world.AddJunction(0.25f);
+            world.Attach(junction, new RopeEnd(firstIndex, RopeEndKind.Tail));
+            world.Attach(junction, new RopeEnd(secondIndex, RopeEndKind.Start));
+            world.Step(FixedStep);
+
+            Assert.IsTrue(world.IsIntact(junction));
+        }
     }
 }

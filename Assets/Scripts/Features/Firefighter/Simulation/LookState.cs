@@ -4,17 +4,22 @@ namespace FlameBlame.Firefighter.Simulation
 {
     public class LookState
     {
-        private readonly float _degreesPerPixel;
-        private readonly float _pitchLimitDegrees;
+        private float _degreesPerPixel;
+        private float _pitchLimitDegrees;
 
         public float Yaw { get; private set; }
         public float Pitch { get; private set; }
 
         public LookState(float degreesPerPixel, float pitchLimitDegrees, float initialYaw)
         {
+            Configure(degreesPerPixel, pitchLimitDegrees);
+            Yaw = initialYaw;
+        }
+
+        public void Configure(float degreesPerPixel, float pitchLimitDegrees)
+        {
             _degreesPerPixel = degreesPerPixel;
             _pitchLimitDegrees = pitchLimitDegrees;
-            Yaw = initialYaw;
         }
 
         public void Apply(Vector2 lookDelta)

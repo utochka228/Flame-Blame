@@ -12,13 +12,25 @@ namespace FlameBlame.Water.Components
         [SerializeField] private PuddleConfigSO _config;
 
         private PuddleSet _puddles;
+        private PuddleSettings _settings;
 
         public IReadOnlyList<Puddle> Puddles => _puddles.Puddles;
         public int Capacity => _config.Capacity;
 
         private void Awake()
         {
-            _puddles = new PuddleSet(_config.CreateSettings());
+            _settings = _config.CreateSettings();
+            _puddles = new PuddleSet(_settings);
+        }
+
+        private void OnEnable()
+        {
+            _config.Changed += OnConfigChanged;
+        }
+
+        private void OnDisable()
+        {
+            _config.Changed -= OnConfigChanged;
         }
 
         private void FixedUpdate()
@@ -36,5 +48,10 @@ namespace FlameBlame.Water.Components
         }
 
         public float TractionAt(Vector3 point) => _puddles.TractionAt(point);
+
+        private void OnConfigChanged()
+        {
+            _config.ApplyTo(_settings);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace FlameBlame.Firefighter.Simulation
         private const float TopTolerance = 1e-3f;
         private const float ViewDeadZone = 0.2f;
 
-        private readonly float _metersPerSecond;
+        private float _metersPerSecond;
         private float _approachSign = 1f;
 
         public float Index { get; private set; }
@@ -16,6 +16,11 @@ namespace FlameBlame.Firefighter.Simulation
         public float EffectiveInput { get; private set; }
 
         public RopeClimb(float metersPerSecond)
+        {
+            Configure(metersPerSecond);
+        }
+
+        public void Configure(float metersPerSecond)
         {
             _metersPerSecond = metersPerSecond;
         }
