@@ -12,43 +12,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5c75af06b1ab4fc384441ebab3452a5, type: 3}
   m_Name: FirefighterConfig
   m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Config.FirefighterConfigSO
-  <MoveSpeed>k__BackingField: 5
-  <Acceleration>k__BackingField: 40
-  <Deceleration>k__BackingField: 10
-  <JumpSpeed>k__BackingField: 6
-  <AirControlPercent>k__BackingField: 15
-  <LookDegreesPerPixel>k__BackingField: 0.1
-  <PitchLimitDegrees>k__BackingField: 85
-  <GroundCheckDistance>k__BackingField: 0.1
-  <ReachMeters>k__BackingField: 3
-  <AimRadiusMeters>k__BackingField: 0.4
-  <HoldDistanceMeters>k__BackingField: 1.5
-  <MaxGripDistanceMeters>k__BackingField: 3.5
-  <ConnectRadiusMeters>k__BackingField: 0.6
-  <InteractLayers>k__BackingField:
-    serializedVersion: 2
-    m_Bits: 311
-  <GripCompliance>k__BackingField: 0.0000001
-  <AimGripCompliance>k__BackingField: 0.00001
-  <GripFollowSeconds>k__BackingField: 0.12
-  <PullAccelerationMultiplier>k__BackingField: 0.05
-  <MaxPullAcceleration>k__BackingField: 6
-  <RecoilTransferMultiplier>k__BackingField: 1
-  <MaxSpeed>k__BackingField: 20
-  <ThrowSpeed>k__BackingField: 12
-  <ThrowInheritMultiplier>k__BackingField: 1
-  <ThrowSpreadParticles>k__BackingField: 6
-  <PullSmoothingSeconds>k__BackingField: 0.15
-  <GroundLayers>k__BackingField:
-    serializedVersion: 2
-    m_Bits: 1335
-  <ClimbSpeed>k__BackingField: 2
-  <ClimbStandOffMeters>k__BackingField: 0.25
-  <ClimbMaxPressurePercent>k__BackingField: 20
-  <TieForceMultiplier>k__BackingField: 0.04
-  <MaxTieForce>k__BackingField: 300
-  <TieMinTension>k__BackingField: 500
-  <TieBlendSeconds>k__BackingField: 0.6
-  <TieGrabToleranceParticles>k__BackingField: 2
-  <TieBrakeSeconds>k__BackingField: 0.25
-  <MaxTieSpeed>k__BackingField: 2
+  _liveTuning: 1
+  <Movement>k__BackingField:
+    <MoveSpeed>k__BackingField: 5
+    <Acceleration>k__BackingField: 40
+    <Deceleration>k__BackingField: 10
+    <MaxSpeed>k__BackingField: 20
+    <JumpSpeed>k__BackingField: 6
+    <AirControlPercent>k__BackingField: 15
+    <GroundCheckDistance>k__BackingField: 0.1
+    <GroundLayers>k__BackingField:
+      serializedVersion: 2
+      m_Bits: 1335
+  <Look>k__BackingField:
+    <DegreesPerPixel>k__BackingField: 0.1
+    <PitchLimitDegrees>k__BackingField: 85
+  <Interaction>k__BackingField:
+    <ReachMeters>k__BackingField: 3
+    <AimRadiusMeters>k__BackingField: 0.4
+    <ConnectRadiusMeters>k__BackingField: 0.6
+    <Layers>k__BackingField:
+      serializedVersion: 2
+      m_Bits: 311
+  <Grip>k__BackingField:
+    <HoldDistanceMeters>k__BackingField: 1.128
+    <MaxDistanceMeters>k__BackingField: 3.5
+    <FollowSeconds>k__BackingField: 0.046
+    <Compliance>k__BackingField: 0.0000001
+    <AimCompliance>k__BackingField: 0.00001
+    <PullAccelerationMultiplier>k__BackingField: 0.05
+    <MaxPullAcceleration>k__BackingField: 6
+    <PullSmoothingSeconds>k__BackingField: 0.15
+    <RecoilTransferMultiplier>k__BackingField: 1
+  <Throw>k__BackingField:
+    <Speed>k__BackingField: 26.8
+    <InheritMultiplier>k__BackingField: 1
+    <SpreadParticles>k__BackingField: 10
+  <Climb>k__BackingField:
+    <Speed>k__BackingField: 2
+    <StandOffMeters>k__BackingField: 0.25
+    <MaxPressurePercent>k__BackingField: 20
+  <Tie>k__BackingField:
+    <BlendSeconds>k__BackingField: 0.6
+    <GrabToleranceParticles>k__BackingField: 2
+    <MinTension>k__BackingField: 500
+    <ForceMultiplier>k__BackingField: 0.04
+    <MaxForce>k__BackingField: 300
+    <MaxSpeed>k__BackingField: 2
+    <BrakeSeconds>k__BackingField: 0.25

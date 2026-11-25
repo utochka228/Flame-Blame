@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e606044197acc4105a05cf96bb50e856, type: 3}
   m_Name: NozzleConfig
   m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Config.NozzleConfigSO
-  <MaxJetLength>k__BackingField: 6
+  _liveTuning: 1
+  <MaxJetLength>k__BackingField: 15
   <BaseSpreadDegrees>k__BackingField: 6
   <ThumbSpreadDegrees>k__BackingField: 40
+  <ThumbBoostPercent>k__BackingField: 100
   <RecoilAcceleration>k__BackingField: 25
-  <ThumbBoostPercent>k__BackingField: 50
   <PushForce>k__BackingField: 40
   <JetWaterPerSecond>k__BackingField: 0.3
   <PushRadius>k__BackingField: 0.15
@@ -24,4 +25,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   <ParticleLifetime>k__BackingField: 0.6
-  <ParticlesPerSecondAtFullFlow>k__BackingField: 300
+  <ParticlesPerSecondAtFullFlow>k__BackingField: 433
