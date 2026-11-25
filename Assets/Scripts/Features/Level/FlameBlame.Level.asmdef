@@ -1,0 +1,17 @@
+{
+    "name": "FlameBlame.Level",
+    "rootNamespace": "FlameBlame.Level",
+    "references": [
+        "FlameBlame.Core",
+        "FlameBlame.Fire"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

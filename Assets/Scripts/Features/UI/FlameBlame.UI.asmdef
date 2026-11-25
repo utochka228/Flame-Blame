@@ -4,6 +4,7 @@
     "references": [
         "FlameBlame.Core",
         "FlameBlame.Hose",
+        "FlameBlame.Level",
         "FlameBlame.Pressure",
         "UnityEngine.UI"
     ],
