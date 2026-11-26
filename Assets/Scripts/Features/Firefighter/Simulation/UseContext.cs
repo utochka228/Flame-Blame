@@ -11,6 +11,8 @@ namespace FlameBlame.Firefighter.Simulation
         public bool RopeInReach { get; private set; }
         public bool IsClimbing { get; private set; }
         public bool DoorInReach { get; private set; }
+        public bool CanLatchHeld { get; private set; }
+        public bool LatchedInReach { get; private set; }
 
         public UseContext(bool canConnectHeldEnd, bool burstInReach, bool jointInReach, bool valveInReach)
         {
@@ -23,6 +25,8 @@ namespace FlameBlame.Firefighter.Simulation
             RopeInReach = false;
             IsClimbing = false;
             DoorInReach = false;
+            CanLatchHeld = false;
+            LatchedInReach = false;
         }
 
         public UseContext WithTie(bool canTieHeld, bool tiedInReach)
@@ -30,6 +34,14 @@ namespace FlameBlame.Firefighter.Simulation
             var copy = this;
             copy.CanTieHeld = canTieHeld;
             copy.TiedInReach = tiedInReach;
+            return copy;
+        }
+
+        public UseContext WithSocket(bool canLatchHeld, bool latchedInReach)
+        {
+            var copy = this;
+            copy.CanLatchHeld = canLatchHeld;
+            copy.LatchedInReach = latchedInReach;
             return copy;
         }
 

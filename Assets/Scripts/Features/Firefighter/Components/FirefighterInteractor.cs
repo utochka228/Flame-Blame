@@ -16,6 +16,7 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private HoseNetwork _network;
         [SerializeField] private HoseTie _tie;
         [SerializeField] private HoseClimber _climber;
+        [SerializeField] private HoseSockets _sockets;
 
         private void OnEnable()
         {
@@ -34,6 +35,7 @@ namespace FlameBlame.Firefighter.Components
             var targets = FindTargets();
             var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve)
                 .WithTie(targets.CanTie, targets.TiedInReach)
+                .WithSocket(targets.CanLatch, targets.LatchedInReach)
                 .WithDoor(targets.HasDoor)
                 .WithClimb(targets.CanClimb, _climber.IsClimbing);
             Execute(UseResolver.Resolve(context), targets);
@@ -52,6 +54,7 @@ namespace FlameBlame.Firefighter.Components
             targets.BreachIndex = breachIndex;
             FindConnectTargets(ref targets);
             FindTieTargets(eye, ref targets);
+            FindSocketTargets(eye, ref targets);
             FindClimbTargets(eye, ref targets);
             return targets;
         }
@@ -73,6 +76,16 @@ namespace FlameBlame.Firefighter.Components
             targets.TieTarget = tieTarget;
             targets.TiedInReach = _tie.IsTied(tieTarget.Body);
             targets.CanTie = !targets.TiedInReach && !_grabber.HeldParticle.IsNone;
+        }
+
+        private void FindSocketTargets(Transform eye, ref UseTargets targets)
+        {
+            if (!_sockets.TryFindInReach(eye, out var socket)) return;
+
+            var held = _grabber.HeldParticle;
+            targets.Socket = socket;
+            targets.LatchedInReach = socket.IsOccupied;
+            targets.CanLatch = !targets.LatchedInReach && !held.IsNone && _sockets.Accepts(socket, held);
         }
 
         private void FindClimbTargets(Transform eye, ref UseTargets targets)
@@ -109,6 +122,12 @@ namespace FlameBlame.Firefighter.Components
                 case UseAction.Untie:
                     _tie.Untie(targets.TieTarget.Body);
                     break;
+                case UseAction.Latch:
+                    LatchHeld(targets.Socket);
+                    break;
+                case UseAction.Unlatch:
+                    _sockets.Free(targets.Socket);
+                    break;
                 case UseAction.Climb:
                     _climber.Begin(targets.ClimbParticle);
                     break;
@@ -123,6 +142,13 @@ namespace FlameBlame.Firefighter.Components
             var held = _grabber.HeldParticle;
             _grabber.Drop();
             _tie.Tie(held, target);
+        }
+
+        private void LatchHeld(HoseSocket socket)
+        {
+            var held = _grabber.HeldParticle;
+            _grabber.Drop();
+            _sockets.Latch(socket, held);
         }
 
         private HoseEndRef FindHeldEnd(out bool hasHeldEnd)
@@ -156,6 +182,9 @@ namespace FlameBlame.Firefighter.Components
             public HoseTie.TieTarget TieTarget { get; set; }
             public bool CanTie { get; set; }
             public bool TiedInReach { get; set; }
+            public HoseSocket Socket { get; set; }
+            public bool CanLatch { get; set; }
+            public bool LatchedInReach { get; set; }
             public RopeParticle ClimbParticle { get; set; }
             public bool CanClimb { get; set; }
 

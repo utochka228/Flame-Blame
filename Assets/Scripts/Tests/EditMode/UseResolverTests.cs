@@ -37,6 +37,23 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void Resolve_LatchComesAfterTieAndUnlatchAfterUntie()
+        {
+            var socket = new UseContext(false, false, true, true).WithSocket(true, false);
+            Assert.AreEqual(UseAction.Latch, UseResolver.Resolve(socket));
+            Assert.AreEqual(UseAction.Tie, UseResolver.Resolve(socket.WithTie(true, false)));
+            Assert.AreEqual(UseAction.Untie, UseResolver.Resolve(socket.WithSocket(false, true).WithTie(false, true)));
+            Assert.AreEqual(UseAction.Unlatch, UseResolver.Resolve(socket.WithSocket(false, true)));
+        }
+
+        [Test]
+        public void Resolve_UnlatchBeatsClimb()
+        {
+            var hook = new UseContext(false, false, false, false).WithSocket(false, true).WithClimb(true, false);
+            Assert.AreEqual(UseAction.Unlatch, UseResolver.Resolve(hook));
+        }
+
+        [Test]
         public void Resolve_ClimbIsLastResortAndStopsFirst()
         {
             var nearRope = new UseContext(false, false, false, false).WithClimb(true, false);

@@ -11,6 +11,8 @@ namespace FlameBlame.Firefighter.Simulation
         Untie = 6,
         Climb = 7,
         StopClimb = 8,
-        ToggleDoor = 9
+        ToggleDoor = 9,
+        Latch = 10,
+        Unlatch = 11
     }
 }

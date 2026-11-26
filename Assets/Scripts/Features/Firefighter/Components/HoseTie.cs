@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using FlameBlame.Firefighter.Config;
-using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Simulation;
 using UnityEngine;
@@ -14,21 +13,12 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private HoseNetwork _network;
 
-        private readonly List<TieBinding> _ties = new List<TieBinding>();
+        private readonly List<AnchoredGrip> _ties = new List<AnchoredGrip>();
 
         private void FixedUpdate()
         {
             foreach (var tie in _ties)
-            {
-                tie.Blend = Mathf.MoveTowards(tie.Blend, 1f, Time.fixedDeltaTime / _config.Tie.BlendSeconds);
-                var anchor = tie.Body.transform.TransformPoint(tie.LocalAnchor);
-                _network.World.SetGripTarget(tie.Grip, Vector3.Lerp(tie.StartPosition, anchor, tie.Blend));
-                if (tie.Blend < 1f) continue;
-
-                var isPulled = _network.World.IsGripShared(tie.Grip);
-                var force = tie.Drag.Step(_network.World.GripTension(tie.Grip), isPulled, tie.Body.linearVelocity, tie.Body.mass, Time.fixedDeltaTime);
-                tie.Body.AddForceAtPosition(force, anchor);
-            }
+                tie.Step(_network.World, _config.Tie.BlendSeconds, Time.fixedDeltaTime);
         }
 
         public bool TryFindTarget(Transform eye, out TieTarget target)
@@ -48,19 +38,15 @@ namespace FlameBlame.Firefighter.Components
         public void Tie(RopeParticle particle, TieTarget target)
         {
             var grip = _network.World.AddGrip(particle, _config.Grip.Compliance);
-            var start = _network.World.ParticlePosition(particle);
             var clearance = _network.HoseOf(particle.Rope).Config.Rope.ParticleRadius * SurfaceClearanceMultiplier;
-            var anchor = target.Body.transform.InverseTransformPoint(target.Point + target.Normal * clearance);
-            _ties.Add(new TieBinding(grip, target.Body, anchor, start, new TieDrag(_config.Tie.CreateDragSettings())));
+            var bodyTransform = target.Body.transform;
+            var anchor = new GripAnchor(bodyTransform, bodyTransform.InverseTransformPoint(target.Point + target.Normal * clearance), target.Body);
+            _ties.Add(new AnchoredGrip(_network.World, grip, anchor, _config.Tie.CreateDragSettings()));
         }
 
         public bool UntieAt(RopeParticle particle, int toleranceParticles)
         {
-            var tie = _ties.Find(binding =>
-            {
-                var tied = _network.World.GripParticle(binding.Grip);
-                return tied.Rope == particle.Rope && Mathf.Abs(tied.Index - particle.Index) <= toleranceParticles;
-            });
+            var tie = _ties.Find(binding => binding.IsNear(_network.World, particle, toleranceParticles));
             if (tie == null) return false;
 
             Untie(tie.Body);
@@ -70,7 +56,7 @@ namespace FlameBlame.Firefighter.Components
         public void Untie(Rigidbody body)
         {
             foreach (var tie in _ties.FindAll(binding => binding.Body == body))
-                _network.World.Release(tie.Grip);
+                tie.Release(_network.World);
 
             _ties.RemoveAll(binding => binding.Body == body);
         }
@@ -86,25 +72,6 @@ namespace FlameBlame.Firefighter.Components
                 Body = body;
                 Point = point;
                 Normal = normal;
-            }
-        }
-
-        private class TieBinding
-        {
-            public int Grip { get; }
-            public Rigidbody Body { get; }
-            public Vector3 LocalAnchor { get; }
-            public Vector3 StartPosition { get; }
-            public TieDrag Drag { get; }
-            public float Blend { get; set; }
-
-            public TieBinding(int grip, Rigidbody body, Vector3 localAnchor, Vector3 startPosition, TieDrag drag)
-            {
-                Drag = drag;
-                Grip = grip;
-                Body = body;
-                LocalAnchor = localAnchor;
-                StartPosition = startPosition;
             }
         }
     }

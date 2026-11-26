@@ -13,6 +13,7 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private FirefighterBody _firefighter;
         [SerializeField] private HoseNetwork _network;
+        [SerializeField] private HoseSockets _sockets;
 
         private Rigidbody _body;
         private HoseTie _tie;
@@ -121,6 +122,8 @@ namespace FlameBlame.Firefighter.Components
                 return;
 
             _tie.UntieAt(found, _config.Tie.GrabToleranceParticles);
+            _sockets.FreeAt(found, _config.Tie.GrabToleranceParticles);
+            _sockets.Disarm(found.Rope);
 
             _grip = _network.World.AddGrip(found, _config.Grip.Compliance);
             _heldHose = _network.HoseOf(found.Rope);
@@ -150,6 +153,7 @@ namespace FlameBlame.Firefighter.Components
             var velocity = _hold.Velocity * _config.Throw.InheritMultiplier + _firefighter.Eye.transform.forward * _config.Throw.Speed;
             ReleaseGrips();
             ImpartVelocity(held, velocity);
+            _sockets.ArmCatch(held.Rope);
         }
 
         private void ImpartVelocity(RopeParticle held, Vector3 velocity)
