@@ -30,7 +30,7 @@ MonoBehaviour:
       m_Bits: 311
   <Pressure>k__BackingField:
     <MaxPressure>k__BackingField: 100
-    <LossPerMeter>k__BackingField: 2
+    <LossPerMeter>k__BackingField: 1
     <SmoothingPercentPerSecond>k__BackingField: 100
     <OpenEndLeakLoss>k__BackingField: 40
     <OpenEndRecoilAcceleration>k__BackingField: 6
@@ -45,6 +45,8 @@ MonoBehaviour:
     <FootHeightMeters>k__BackingField: 0.35
     <ChecksPerSecond>k__BackingField: 10
     <SquashPercent>k__BackingField: 20
+    <SurgePercent>k__BackingField: 40
+    <SlipSeconds>k__BackingField: 0.5
   <Burst>k__BackingField:
     <OverloadSeconds>k__BackingField: 1.5
     <RecoverSeconds>k__BackingField: 1
