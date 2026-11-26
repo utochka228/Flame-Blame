@@ -518,6 +518,7 @@ GameObject:
   - component: {fileID: 6504599276261592273}
   - component: {fileID: 7050778113903183589}
   - component: {fileID: 8656372044785476627}
+  - component: {fileID: 6972429669024272062}
   m_Layer: 0
   m_Name: Eye
   m_TagString: MainCamera
@@ -643,6 +644,20 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &6972429669024272062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5253789193272989016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00aa4676aa8b64a578bb99edad2dd724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Presentation.FirefighterEyeMotion
+  _body: {fileID: 4432599679487170533}
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
 --- !u!1 &5388023516003676135
 GameObject:
   m_ObjectHideFlags: 0

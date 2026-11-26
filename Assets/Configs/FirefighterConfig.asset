@@ -16,10 +16,15 @@ MonoBehaviour:
   <Movement>k__BackingField:
     <MoveSpeed>k__BackingField: 5
     <Acceleration>k__BackingField: 40
-    <Deceleration>k__BackingField: 10
+    <Deceleration>k__BackingField: 25
     <MaxSpeed>k__BackingField: 20
     <JumpSpeed>k__BackingField: 6
     <AirControlPercent>k__BackingField: 15
+    <FallGravityMultiplier>k__BackingField: 1.8
+    <ShortJumpGravityMultiplier>k__BackingField: 2.5
+    <JumpBufferSeconds>k__BackingField: 0.12
+    <CoyoteSeconds>k__BackingField: 0.1
+    <JumpLockoutSeconds>k__BackingField: 0.15
     <GroundCheckDistance>k__BackingField: 0.1
     <GroundLayers>k__BackingField:
       serializedVersion: 2
@@ -27,6 +32,30 @@ MonoBehaviour:
   <Look>k__BackingField:
     <DegreesPerPixel>k__BackingField: 0.1
     <PitchLimitDegrees>k__BackingField: 85
+    <IsInvertedY>k__BackingField: 0
+  <EyeMotion>k__BackingField:
+    <LandingMinFallSpeed>k__BackingField: 3
+    <LandingKickPerFallSpeed>k__BackingField: 0.35
+    <LandingMaxKick>k__BackingField: 5
+    <SpringAngularFrequency>k__BackingField: 18
+    <SpringDampingRatio>k__BackingField: 0.6
+    <BobStepLength>k__BackingField: 1.3
+    <BobVerticalAmplitude>k__BackingField: 0.03
+    <BobLateralAmplitude>k__BackingField: 0.015
+    <BobBlendSpeed>k__BackingField: 8
+    <StrafeTiltDegrees>k__BackingField: 1.5
+    <TiltBlendSpeed>k__BackingField: 8
+    <FovExtraDegrees>k__BackingField: 8
+    <FovFullSpeed>k__BackingField: 12
+    <FovBlendSpeed>k__BackingField: 5
+    <LandingShakeMinFallSpeed>k__BackingField: 10
+    <LandingTraumaPerFallSpeed>k__BackingField: 0.05
+    <TraumaDecay>k__BackingField: 1.5
+    <ShakeFrequency>k__BackingField: 25
+    <ShakeMaxOffset>k__BackingField: 0.05
+    <ShakeMaxRollDegrees>k__BackingField: 2
+    <ShakeStrengthPercent>k__BackingField: 100
+    <IsCameraMotionReduced>k__BackingField: 0
   <Interaction>k__BackingField:
     <ReachMeters>k__BackingField: 3
     <AimRadiusMeters>k__BackingField: 0.4
@@ -48,6 +77,8 @@ MonoBehaviour:
     <Speed>k__BackingField: 26.8
     <InheritMultiplier>k__BackingField: 1
     <SpreadParticles>k__BackingField: 10
+    <CatchWindowSeconds>k__BackingField: 1.5
+    <LatchBlendSeconds>k__BackingField: 0.1
   <Climb>k__BackingField:
     <Speed>k__BackingField: 2
     <StandOffMeters>k__BackingField: 0.25
