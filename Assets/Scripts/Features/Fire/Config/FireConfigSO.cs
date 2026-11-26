@@ -12,7 +12,9 @@ namespace FlameBlame.Fire.Config
         [field: SerializeField] [field: Range(0.5f, 8f)] public float HeatRadius { get; private set; } = 2.5f;
 
         [field: Header("Visuals")]
-        [field: SerializeField] [field: Range(0f, 500f)] public float FlameParticlesPerSecond { get; private set; } = 120f;
+        [field: SerializeField] [field: Range(0f, 1f)] public float MinFlameScaleFraction { get; private set; } = 0.35f;
+        [field: SerializeField] [field: Range(1f, 30f)] public float FlameFollowSharpness { get; private set; } = 6f;
+        [field: SerializeField] [field: Range(0.05f, 2f)] public float ExtinguishSeconds { get; private set; } = 0.6f;
 
         public FireSettings CreateSettings()
         {

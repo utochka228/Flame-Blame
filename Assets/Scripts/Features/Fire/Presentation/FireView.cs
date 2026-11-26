@@ -1,4 +1,4 @@
-using FlameBlame.Fire.Components;
+using System.Collections;
 using UnityEngine;
 
 namespace FlameBlame.Fire.Presentation
@@ -8,12 +8,60 @@ namespace FlameBlame.Fire.Presentation
         [SerializeField] private Components.Fire _fire;
         [SerializeField] private ParticleSystem _flames;
 
+        private Vector3 _restScale;
+        private AudioSource[] _crackles;
+        private float[] _restVolumes;
+        private float _shownIntensity = 1f;
+        private bool _collapsing;
+
+        private void Awake()
+        {
+            _restScale = _flames.transform.localScale;
+            _crackles = _flames.GetComponentsInChildren<AudioSource>();
+            _restVolumes = new float[_crackles.Length];
+            for (var i = 0; i < _crackles.Length; i++)
+                _restVolumes[i] = _crackles[i].volume;
+        }
+
         private void LateUpdate()
         {
-            var emission = _flames.emission;
-            emission.rateOverTime = _fire.Config.FlameParticlesPerSecond * _fire.Intensity;
-            if (_fire.IsOut && _flames.isEmitting)
-                _flames.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            if (_collapsing) return;
+
+            if (_fire.IsOut)
+            {
+                StartCoroutine(Collapse());
+                return;
+            }
+
+            var config = _fire.Config;
+            _shownIntensity = Mathf.Lerp(_shownIntensity, _fire.Intensity, 1f - Mathf.Exp(-config.FlameFollowSharpness * Time.deltaTime));
+            ApplySize(Mathf.Lerp(config.MinFlameScaleFraction, 1f, _shownIntensity));
+        }
+
+        private IEnumerator Collapse()
+        {
+            _collapsing = true;
+            _flames.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+            var from = _flames.transform.localScale.x / _restScale.x;
+            var duration = _fire.Config.ExtinguishSeconds;
+            for (var elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+            {
+                var t = elapsed / duration;
+                ApplySize(from * (1f - t * t * t));
+                yield return null;
+            }
+
+            ApplySize(0f);
+            foreach (var crackle in _crackles)
+                crackle.Stop();
+        }
+
+        private void ApplySize(float fraction)
+        {
+            _flames.transform.localScale = _restScale * fraction;
+            for (var i = 0; i < _crackles.Length; i++)
+                _crackles[i].volume = _restVolumes[i] * fraction;
         }
     }
 }
