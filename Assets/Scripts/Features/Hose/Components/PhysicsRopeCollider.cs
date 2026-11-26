@@ -16,6 +16,7 @@ namespace FlameBlame.Hose.Components
         private static readonly ILogger<PhysicsRopeCollider> Logger = Loggers.For<PhysicsRopeCollider>();
 
         private readonly Collider[] _candidates = new Collider[MaxOverlaps];
+        private readonly Bounds[] _candidateBounds = new Bounds[MaxOverlaps];
         private readonly LayerMask _layers;
         private readonly SphereCollider _probe;
         private int _candidateCount;
@@ -40,6 +41,12 @@ namespace FlameBlame.Hose.Components
             _candidateCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _candidates, Quaternion.identity, _layers,
                 QueryTriggerInteraction.Ignore);
 
+            for (var index = 0; index < _candidateCount; index++)
+            {
+                _candidateBounds[index] = _candidates[index].bounds;
+                _candidateBounds[index].Expand(2f * QueryMargin);
+            }
+
             if (_candidateCount < MaxOverlaps || _hasWarnedAboutOverflow) return;
 
             _hasWarnedAboutOverflow = true;
@@ -60,6 +67,8 @@ namespace FlameBlame.Hose.Components
 
             for (var index = 0; index < _candidateCount; index++)
             {
+                if (_candidateBounds[index].SqrDistance(position) > radius * radius) continue;
+
                 var candidate = _candidates[index];
                 if (!Physics.ComputePenetration(_probe, position, Quaternion.identity, candidate, candidate.transform.position,
                         candidate.transform.rotation, out var direction, out var distance))

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FlameBlame.Core.Extensions;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Simulation
@@ -9,6 +10,13 @@ namespace FlameBlame.Hose.Simulation
     {
         private const int AnchoredCount = 2;
         private const float MinLength = 1e-6f;
+
+        private static readonly ProfilerMarker IntegrateMarker = new ProfilerMarker("XpbdRope.Integrate");
+        private static readonly ProfilerMarker BendsMarker = new ProfilerMarker("XpbdRope.SolveBends");
+        private static readonly ProfilerMarker DistancesMarker = new ProfilerMarker("XpbdRope.SolveDistances");
+        private static readonly ProfilerMarker CollideParticlesMarker = new ProfilerMarker("XpbdRope.CollideParticles");
+        private static readonly ProfilerMarker CollideSegmentsMarker = new ProfilerMarker("XpbdRope.CollideSegments");
+        private static readonly ProfilerMarker EndStepMarker = new ProfilerMarker("XpbdRope.EndStep");
 
         private readonly RopeSettings _settings;
         private readonly IRopeCollider _collider;
@@ -131,6 +139,7 @@ namespace FlameBlame.Hose.Simulation
 
         public void SolveDistances()
         {
+            using var marker = DistancesMarker.Auto();
             for (var index = 0; index < _positions.Length - 1; index++)
             {
                 var weight = InverseMass(index);
@@ -156,6 +165,7 @@ namespace FlameBlame.Hose.Simulation
 
         public void EndStep()
         {
+            using var marker = EndStepMarker.Auto();
             RecoverStretch();
             ReleaseFreezesPulledTaut();
             CollideAfterStretch();
@@ -195,6 +205,7 @@ namespace FlameBlame.Hose.Simulation
 
         private void Integrate()
         {
+            using var marker = IntegrateMarker.Auto();
             for (var index = 0; index < _positions.Length; index++)
             {
                 _substepStartPositions[index] = _positions[index];
@@ -214,6 +225,7 @@ namespace FlameBlame.Hose.Simulation
 
         private void SolveBends()
         {
+            using var marker = BendsMarker.Auto();
             var outerWeight = InverseMass(AnchoredCount - 2);
             var middleWeight = InverseMass(AnchoredCount - 1);
             for (var index = AnchoredCount; index < _positions.Length; index++)
@@ -247,6 +259,7 @@ namespace FlameBlame.Hose.Simulation
 
         private void CollideParticles(Vector3[] startPositions, float friction)
         {
+            using var marker = CollideParticlesMarker.Auto();
             for (var index = FirstFreeIndex; index < _positions.Length; index++)
             {
                 if (_frozen[index]) continue;
@@ -269,6 +282,7 @@ namespace FlameBlame.Hose.Simulation
 
         private void CollideSegments()
         {
+            using var marker = CollideSegmentsMarker.Auto();
             for (var index = Mathf.Max(FirstFreeIndex - 1, 0); index < _positions.Length - 1; index++)
             {
                 var weight = InverseMass(index);
