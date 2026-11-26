@@ -112,10 +112,21 @@ Decided: one first-person player who swaps between the two firefighters with Tab
 | --- | --- | --- |
 | Local two-player co-op | Needs split-screen with a first-person camera | Cut |
 | Character swap (solo) | One key switches control between the two firefighters; the idle one stays where it is, and can still end up standing on your hose | Core |
+| Forced swap timer | A random timer swaps the firefighters for you, with a warning before it fires | Planned |
 | Simple AI buddy | Takes the second firefighter in solo play: holds a line or works the valve | Stretch |
 | Online multiplayer | Not built: XPBD rope sync over WebSockets is high risk for a small demo | Cut |
 
 First-person camera: each firefighter has an eye camera; only the active one renders.
+
+Forced swap timer (planned, not built). It turns "the idle one stays where it is" into a pacing and blame source.
+
+- **Timer:** each round draws a random interval between 50% and 100% of the max set in settings, so players can't time it exactly. It starts when the players leave the yard.
+- **Warning:** a few seconds before the swap, a ticking sound speeds up and a helmet icon or visor fog builds at the screen edge. Text is optional.
+- **Transition:** the helmet visor drops over the camera, the view cuts to the other firefighter, and the visor lifts. A manual Tab swap uses the same transition.
+- **State on swap:** the firefighter left behind freezes as they are: a held grip stays held, a climber stays hanging, a body on the hose keeps pinching it.
+- **Fairness:** the swap waits for a mantle or a throw in the air to finish. A manual swap resets the timer.
+- **Settings:** Off (the same as infinite), 30 s, 60 s, 90 s. [ASSUMPTION] Off by default for the demo.
+- **Open question:** whether the frozen firefighter keeps their grip on the hose or drops it.
 
 If the AI buddy stretch goal is built, it's deliberately a bit dumb. It follows simple behaviours on a NavMesh, and its mistakes are a feature: it wanders onto your hose, opens the valve at the wrong moment, or slides through puddles.
 
@@ -123,14 +134,192 @@ Architecture: every firefighter is the same component driven by an input source 
 
 ## Demo slice: the burning building
 
-One small burning building with four problems, each solved by a different side of the pressure rule. Players start at a hydrant and fire truck outside with a pile of hose pieces, couplings and one Y-splitter.
+One small burning building with four problems, each solved by a different side of the pressure rule. Players start at a fire truck outside with a pile of hose pieces, couplings and Y-splitters.
 
 1. **Fire behind a gap.** A collapsed floor separates the players from a fire. Make a rigid high-pressure hose into a bridge, or jet across using recoil.
-2. **Fire on the upper floor.** No stairs. Throw an empty hose up and over a beam, climb it like a rope, then turn the water on.
+2. **Fire on the upper floor.** The stairs end short of the landing. Throw an empty hose up and over a beam or rail, climb it like a rope, then turn the water on.
 3. **A crate blocking a door.** Push it away with a high-pressure jet, or tie an empty hose around it and yank it by turning the water on.
 4. **A burst hose.** Fire burns through the main line mid-level. Tape it (fast, but the leak floods the floor and makes it slippery) or fetch a coupling (slower but clean).
 
 The problems can be solved in any order. The level is done when all fires are out. The point of the level is to show that one system solves four different kinds of problems, and causes chaos along the way.
+
+Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled from the modular kit in `Assets/Prefabs/ModularBuilding/` (root `Building_Kit`); gameplay objects live under `Blockout` (zones `Z0`–`Z5`, `Fires`, `Markers`).
+
+### Level design spine
+
+- **Hose length and parts are the budget.** Enough hose to finish the level, but not enough to cover every route at once, so players have to think about where they lay it. Hose catches on corners and doorframes, so every route costs length.
+- **Pressure is shared.** Everything draws from one truck. A second branch halves everyone's pressure; a pinch (door or body) on one branch gives the other branch full pressure. Most puzzles come down to where the pressure goes right now.
+- **Two bodies, one player.** Many tasks want one firefighter holding or pinching while the other acts. The idle firefighter stays where it was left, so it keeps pinching or holding after a swap.
+- **The level ramps up:** the yard teaches, the ground floor combines two mechanics, the gap and upper floor combine three or more, and the stairwell blaze uses the whole network.
+- **Fires don't regrow** (decided for now). Every route is valid; the challenge is routing and pressure, not a race.
+
+### Player metrics and kit scale
+
+The firefighter is the measuring stick. The kit is placed at 1.5× so doorways and storeys fit the capsule.
+
+| Metric | Value |
+| --- | --- |
+| Firefighter capsule | 2 m tall, 0.5 m radius, eye at 1.7 m; no step-up, so stairs carry an invisible ramp |
+| Jump apex | ~1.8 m (jump speed 6 m/s, gravity 9.81; on paper, not measured in play) |
+| Reach / grip distance | 3 m / 3.5 m |
+| Grid / storey height | 3 m modules, 3.6 m storeys (upper floor at 3.6 m, roof at 7.2 m) |
+| Doorway / wide doorway opening | 1.35 × 3.15 m / 4.35 m wide |
+| Windows | sill 1.05 m, top 2.85 m |
+| Stairwell stairs | top step at 1.5 m; the landing is 2.1 m above it, out of jump reach, so the last stretch needs a hose climb |
+| Rails (balcony, landing) | 0.75 m tall |
+| Gap pit | 9 × 6 m, 3 m deep; climb beam at 6.3 m above it |
+
+### Zones (as built)
+
+The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z < 0).
+
+**Z0 Yard (hub).** Both firefighters start here (Tab to swap).
+- The fire truck is parked on the east side of the yard (x 13.5, z −6.2), beside the hall's wide door. It is the only pressure source: the main thick hose is fixed to its Coupling and runs 12 m west along the facade, with a medium hose already coupled to its end.
+- Spare hoses lie in a pile south of the yard (outlets at x 2, z −14..−22).
+- A burning bin (`Fire_Z0_YardBin`) by the wheelbarrow teaches spraying.
+- The balcony over the lobby entrance (x −12..−3, 3.6 m up) is the outside route to the upper floor: throw a hose over its rail and climb.
+
+**Z1 Lobby (ground floor, west).** Entered through the wide front doorway.
+- `Splitter_Lobby` is pre-placed here, so the split decision comes early: split now to cover two rooms and every later zone gets half pressure.
+- `Door_LobbyHall` leads east to the hall; like every kit door it pinches a hose when it closes on it.
+- A heavy crate (`Crate`, with `Socket_Crate` to tie to) jams the doorway to the stairwell: push it with a jet, tie and yank it by opening the valve, or tie-drag it by hand.
+- One fire behind the counter (`Fire_Z1_Lobby`).
+
+**Z2 Burning hall (ground floor, east, single storey).** Entered through its wide front doorway (closest to the truck) or from the lobby.
+- The hall fire (`Fire_Z2_Hall`) sits on a heat zone (5 × 5 m at x 8.5, z 4.5). The shortest route from the truck to the gap runs through it, so a hose laid here heats up and burns through: problem 4.
+- Repair by swapping the burnt piece with a spare and a coupling, rerouting through the lobby, or taping it (fast, leaks).
+- A wide opening at the back leads to the near side of the gap.
+
+**Z3 The gap (collapsed floor).** A 6 m pit between the near side (z 15..18) and the far side (z 24..27), with `Fire_Z3_GapFar` on the far side.
+- Bridge: latch the far end on `Socket_GapBracket` and give the hose full pressure, usually by pinching the other branch (a closed door or the idle firefighter).
+- Rope: throw an empty hose over the climb beam, climb it, and mantle.
+- Walk-around: clear the crate, go through the stairwell and `Door_StairGap` to reach the far side on foot.
+- A ramp along the pit's east wall leads back out, so falling in is never a soft-lock.
+
+**Z4 Upper floor (rooms, balcony, landing, mezzanine).** Two fire rooms (`Fire_Z4_RoomA` in the west room, `Fire_Z4_RoomB` in the east room) split by `Door_RoomDivider`.
+- Ways up: from the yard over the balcony rail (`Door_Balcony` into room A), from the stairwell via the hose climb onto the landing (`Door_RoomsLanding`), or from the gap's beam onto the mezzanine (`Door_LandingMezzanine` to the landing).
+- Options at the top: haul the nozzle up and spray, anchor it as a fixed sprinkler, or drop it and let the hose snake whip around.
+
+**Z5 Stairwell (finale).** Reached through the crate doorway; the back exit is boarded up.
+- The stairwell blaze (`Fire_Z5_Blaze`) is the biggest fire. Beat it with two nozzles at once (`Splitter_Stairwell` sits at the crate doorway) or one nozzle at full pressure by pinching every other branch.
+- Short stairs (top at 1.5 m) stop 2.1 m below the landing; throw a hose over the landing rail and climb.
+
+**Win:** every fire is out. `LevelGoal` tracks all seven fires (`Fire_Z0_YardBin` to `Fire_Z5_Blaze`).
+
+### Level flow graph
+
+Every fire zone has at least two ways in, and every route depends on pressure or on the hose as a rope.
+
+```mermaid
+graph LR
+  Yard["Z0 Yard<br/>fire truck, hose pile"]
+  Lobby["Z1 Lobby<br/>splitter, crate"]
+  Hall["Z2 Burning hall<br/>heat zone"]
+  Near["Z3 Gap near side"]
+  Far["Z3 Gap far side"]
+  Stair["Z5 Stairwell<br/>finale blaze"]
+  Landing["Z4 Landing"]
+  Rooms["Z4 Rooms A and B"]
+  Mezz["Z4 Mezzanine"]
+
+  Yard -- wide doorway --- Lobby
+  Yard -- wide doorway --- Hall
+  Yard -- "throw + climb over balcony rail" --> Rooms
+  Lobby -- Door_LobbyHall --- Hall
+  Lobby -- "crate: jet, yank or drag" --> Stair
+  Hall -- wide opening --- Near
+  Near -- "bridge or rope over beam" --> Far
+  Near -- "climb beam" --> Mezz
+  Stair -- Door_StairGap --- Far
+  Stair -- "stairs + 2.1 m hose climb" --> Landing
+  Landing -- Door_RoomsLanding --- Rooms
+  Landing -- Door_LandingMezzanine --- Mezz
+```
+
+### Mechanic combination graph
+
+The chains the level is built to produce. Arrows read "leads to" or "enables".
+
+```mermaid
+graph TD
+  Valve["Valve / source pressure"] --> Stiff["Rigid hose"]
+  Valve --> Empty["Empty hose"]
+  Split["Y-splitter"] -- halves pressure --> Valve
+  Pinch["Pinch: door or idle body"] -- boosts the other branch --> Stiff
+  Pinch -- cuts flow --> Starve["Starved nozzle (blame)"]
+  Swap["Character swap"] -- idle body left on hose --> Pinch
+  Stiff --> Bridge["Bridge over the gap"]
+  Stiff --> Jet["Strong jet: push crate, recoil"]
+  Empty --> Throw["Throw over beam or rail"] --> Climb["Climb + mantle"]
+  Empty --> Tie["Tie crate"] -- open valve --> Yank["Yank crate"]
+  Heat["Heat zone"] --> Burn["Burn-through"] --> Leak["Leak spray + puddles"]
+  Over["Over max pressure"] --> Burst["Balloon + burst"] --> Leak
+  Leak --> Tape["Tape (leaks)"]
+  Leak --> Swapout["Swap piece + coupling"]
+  Leak -- near a fire --> Douse["Accidental douse"]
+  Jet --> Douse
+  Socket["Socket / anchor"] --> Bridge
+  Socket --> Sprinkler["Anchored sprinkler"]
+```
+
+### Coverage matrix
+
+Each mechanic is taught once where failure is cheap, then tested where it matters, and has a stand-in where possible. Mechanics that are not built yet only ever appear as optional alternatives.
+
+| Mechanic | Taught | Tested | Alternative |
+| --- | --- | --- | --- |
+| Rope physics and collision | Yard: laying the main line | Hall and stairwell: routes cost length | — |
+| Pressure sets stiffness | Yard: valve on, hose goes rigid | Gap bridge | — |
+| Carry load (thick hose) | Yard main line | Moving the main line between zones | Use thin pieces |
+| Couplings and joints | Yard: hose pile | Hall repair | — |
+| Y-splitter | Lobby (pre-placed) | Stairwell blaze, two nozzles | One branch at full pressure |
+| Valve and source | Yard truck | Bridge collapse, crate yank | — |
+| Sockets and anchors | Lobby splitter ports | Gap bridge bracket, upper-floor sprinkler | Rope route |
+| Body pinch | Lobby (idle firefighter) | Gap: pinch to boost the bridge | Door pinch |
+| Door pinch and cut | Lobby–hall door | Stairwell blaze: closing off branches | Body pinch |
+| Burst and balloon | Hall overpressure | Stairwell blaze overpressure | — |
+| Heat and burn-through | Hall heat zone | Main line through the hall | Reroute via lobby |
+| Leak and open-end spray | Hall burn-through | Accidental douse | Repair |
+| Nozzle spray and push | Yard bin | Crate push, blaze | — |
+| Thumb boost | Yard bin | Blaze, crate push | Full pressure |
+| Recoil on the holder | Yard | Gap (jet across) | Bridge or rope |
+| Grab, grip, anchored grip | Yard | Gap far side, sprinkler | Holding by hand |
+| Throw and catch | Balcony rail | Gap beam, landing rail | Stairwell walk-around |
+| Climb and mantle | Balcony | Gap beam, landing | Bridge |
+| Tie and drag / yank | Lobby crate | — | Jet push |
+| Tape | Hall burn-through | Any burst | Swap the piece |
+| Puddles | Yard spray | Under the upper rooms | — |
+| Character swap | Yard | Everywhere | — |
+| Forced swap timer (planned) | Starts on leaving the yard | Gap and blaze | Off in settings |
+| Slippery puddles, steam, jet move (not built) | — | Optional only | Every route has a built alternative |
+
+### Hose budget
+
+All pieces are 0.18 m in radius with particles 0.2 m apart; length is the piece's type.
+
+| Piece | Length | Count | Where |
+| --- | --- | --- | --- |
+| Thick (main line) | 12 m | 1 | Fixed to the truck's Coupling, pinned |
+| Medium (with nozzle) | 9.8 m | 1 | Coupled to the end of the main line |
+| Thick | 12 m | 1 | Pile |
+| Medium (with nozzle) | 9.8 m | 1 | Pile |
+| Thin | 6 m | 3 | Pile |
+
+That is 61.6 m in total (21.8 m laid at the start) for a 24 × 27 m building, with at most 16 pieces per network. Whether it is "enough but limited" is open until a playtest walks every route.
+
+### Soft-lock guards
+
+- The pit has a ramp out.
+- The bridge and the rope route each work alone at the gap, and the gap's far side can also be reached on foot through the stairwell.
+- Fires never spread into the yard, so the start area stays safe.
+
+### Open items
+
+- **Finale:** whether the blaze needs both nozzles (must) or only rewards it. To be decided by playtest.
+- **Hose budget:** walk each route in Play mode and measure the length it really takes.
+- **Wall-pipe socket:** marked on the facade (`Marker_WallPipeSocket`) but not built; it would let players latch the hose onto a pre-laid pipe into the lobby.
+- **Lighting:** the roof shades the interior; rooms may need lights.
+- **Not verified in Play mode:** the stair ramp (31° slope), the hose climb to the landing, door slams on hoses, and the 6 m bridge span.
 
 ## Feedback and readability
 
@@ -335,6 +524,7 @@ The demo ships the core rule, seven part types and four puzzles. Everything else
 | Slippery puddles, steam | In | Cheap, funny, and reuse the water system |
 | Character swap | In | One key switches between the two firefighters |
 | Local two-player co-op | Cut | First-person view would need split-screen |
+| Forced swap timer | Planned | Adds pace and blame on top of the existing swap; can be turned off |
 | Simple AI buddy | Stretch | Nice for solo play, not required |
 | Fake kinks (sharp bend angle reduces flow) | Stretch | Stable and cheap, but standing on the hose already covers the idea |
 | Real knot detection | Cut | Unstable and expensive for little payoff |

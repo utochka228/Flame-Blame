@@ -26,7 +26,19 @@ Be brief. No preambles, no closing recaps. One sentence between tool calls, not 
 
 "Flame & Blame" — Unity 6 project (Editor 6000.3.17f1), URP 17.3, new Input System. A demo of one modular fire hose system where water pressure sets hose stiffness and nozzle force. Details in [DESIGN.md](DESIGN.md).
 
-State: two scenes: `Assets/Scenes/SampleScene.unity` holds the milestone 1 rope prototype (hydrant, hose, boxes, pressure slider); `NetworkTestScene.unity` holds the milestone 2 pressure network (hydrant, coupling, Y-splitter, thin and thick branches, valve, pinch box). Code: `Assets/Scripts/Core/` (`EventBus`, `PercentExtensions`, `Vector3Extensions`, `Loggers`) and `Assets/Scripts/Features/Hose/` (`XpbdRope`, `RopeWorld`, `HoseSegment`, `HoseNetwork`, `BurstSequence`, `TubeMeshBuilder`, `HoseConfigSO`), `Features/Pressure/` (`PressureGraph`, `PressureSolver`, `PressureResult`, `PressureSource`), `Features/UI/`, plus EditMode and PlayMode tests. Assemblies: `FlameBlame.Core`, `.Hose`, `.Pressure`, `.UI`, `.Tests.EditMode`, `.Tests.PlayMode`; each new feature gets its own `.asmdef`. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Milestones 1 and 2 are built; their gates are still open: the 60 fps WebGL profile, and an on-screen readability check of bursts and pinches. Next: milestone 3, player and hose actions.
+State: one scene, `Assets/Scenes/Level_BurningBuilding.unity`, the only one in Build Settings. The earlier test scenes for milestones 1–3 (`SampleScene`, `NetworkTestScene`, `ActionTestRoom`, `BurningBuilding`) were removed and stay in git history. The level is the demo level (milestone 4). It has zones Z0–Z5 built from the modular kit at 1.5× (root `Building_Kit`), with gameplay objects under `Blockout`. The fire truck is the only pressure source, and the main hose is pinned to its Coupling. The level design (metrics, zones, graphs, coverage matrix, hose budget) is in DESIGN.md "Demo slice".
+
+Code: `Assets/Scripts/Core/` (`EventBus`, `PercentExtensions`, `Vector3Extensions`, `Loggers`) and these feature folders under `Assets/Scripts/Features/`:
+- `Hose/`: `XpbdRope`, `RopeWorld`, `HoseSegment`, `HoseNetwork`, `Nozzle`, `BurstSequence`, `TubeMeshBuilder`, `HoseConfigSO`.
+- `Pressure/`: `PressureGraph`, `PressureSolver`, `PressureResult`, `PressureSource`.
+- `Firefighter/`: `FirefighterBody`, `FirefighterInteractor`, `HoseGrabber`, `HoseClimber`, `HoseTie`, `AnchoredGrip`, `HoseSocket(s)`, `FirefighterSwap`.
+- `Fire/` (`Fire`), `Water/` (`PuddleField`), `Interactables/` (`Door`), `Level/` (`LevelGoal`), and `UI/`.
+- EditMode and PlayMode tests.
+
+Assemblies: `FlameBlame.Core`, `.Hose`, `.Pressure`, `.Firefighter`, `.Fire`, `.Water`, `.Interactables`, `.Level`, `.UI`, `.Tests.EditMode`, `.Tests.PlayMode`; each new feature gets its own `.asmdef`. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Milestones 1–3 are built, and milestone 4 (systems and level) is in progress. Not built yet: slippery puddles, steam, jet move, the wall-pipe socket, and the planned forced swap timer. Gates still open:
+- the 60 fps WebGL profile;
+- an on-screen readability check of bursts and pinches;
+- "level completable by every route" (Play-mode walk of each route and the hose budget).
 
 ## Project Structure
 
