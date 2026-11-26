@@ -3,6 +3,8 @@
     "rootNamespace": "FlameBlame.UI",
     "references": [
         "FlameBlame.Core",
+        "FlameBlame.Fire",
+        "FlameBlame.Firefighter",
         "FlameBlame.Hose",
         "FlameBlame.Level",
         "FlameBlame.Pressure",
