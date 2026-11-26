@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0eb3ac82510e44608fc21635865ed54, type: 3}
   m_Name: HoseConfig
   m_EditorClassIdentifier: FlameBlame.Hose::FlameBlame.Hose.Config.HoseConfigSO
+  _liveTuning: 1
   <Rope>k__BackingField:
     <ParticleCount>k__BackingField: 50
     <Spacing>k__BackingField: 0.2
@@ -19,18 +20,18 @@ MonoBehaviour:
     <Substeps>k__BackingField: 8
     <FloppyBendCompliance>k__BackingField: 1
     <RigidBendCompliance>k__BackingField: 0.000001
+    <MaxStretchFraction>k__BackingField: 0.1
     <Damping>k__BackingField: 2.5
     <RigidDampingMultiplier>k__BackingField: 3
     <GroundFriction>k__BackingField: 0.3
     <MaxSpeed>k__BackingField: 20
-    <MaxStretchFraction>k__BackingField: 0.1
     <CollisionLayers>k__BackingField:
       serializedVersion: 2
       m_Bits: 311
   <Pressure>k__BackingField:
-    <SmoothingPercentPerSecond>k__BackingField: 100
     <MaxPressure>k__BackingField: 100
     <LossPerMeter>k__BackingField: 2
+    <SmoothingPercentPerSecond>k__BackingField: 100
     <OpenEndLeakLoss>k__BackingField: 40
     <OpenEndRecoilAcceleration>k__BackingField: 6
     <LeakPuddleVolumePerSecond>k__BackingField: 0.4
@@ -43,17 +44,17 @@ MonoBehaviour:
       m_Bits: 512
     <FootHeightMeters>k__BackingField: 0.35
     <ChecksPerSecond>k__BackingField: 10
-    <SquashPercent>k__BackingField: 60
+    <SquashPercent>k__BackingField: 20
   <Burst>k__BackingField:
     <OverloadSeconds>k__BackingField: 1.5
     <RecoverSeconds>k__BackingField: 1
     <WeakPointPercent>k__BackingField: 50
+    <LeakLoss>k__BackingField: 40
+    <TapeLeakLoss>k__BackingField: 8
     <BalloonPercent>k__BackingField: 120
     <BalloonWidthParticles>k__BackingField: 6
     <ShakeAmplitude>k__BackingField: 0.04
     <ShakeHertz>k__BackingField: 25
-    <LeakLoss>k__BackingField: 40
-    <TapeLeakLoss>k__BackingField: 8
   <Heat>k__BackingField:
     <ChecksPerSecond>k__BackingField: 10
     <BurnThresholdPercent>k__BackingField: 50
@@ -70,13 +71,13 @@ MonoBehaviour:
     <RadiusMeters>k__BackingField: 0.18
     <MaxSpanSpeed>k__BackingField: 2.5
   <Tube>k__BackingField:
-    <SwellPercent>k__BackingField: 40
     <SamplesPerSegment>k__BackingField: 4
     <RingSides>k__BackingField: 12
     <MiterLimit>k__BackingField: 1.5
+    <SwellPercent>k__BackingField: 40
   <Colors>k__BackingField:
+    <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
+    <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}
     <BurnedColor>k__BackingField: {r: 0.06, g: 0.05, b: 0.05, a: 1}
     <TapedColor>k__BackingField: {r: 0, g: 0.33333334, b: 1, a: 1}
     <BreachFeatherParticles>k__BackingField: 0.6
-    <RelaxedColor>k__BackingField: {r: 0.9, g: 0.2, b: 0.15, a: 1}
-    <StrainedColor>k__BackingField: {r: 1, g: 0.6, b: 0.1, a: 1}
