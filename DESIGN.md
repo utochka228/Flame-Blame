@@ -1,6 +1,6 @@
 # Flame & Blame — Hose System Design Doc
 
-Source of truth: https://claude.ai/artifact/25BaRzKnSzxLpxwA9tV63G (exported 2026-11-23)
+Source of truth: https://claude.ai/artifact/25BaRzKnSzxLpxwA9tV63G (synced 2026-11-26)
 
 ## Overview
 
@@ -125,7 +125,7 @@ Forced swap timer (planned, not built). It turns "the idle one stays where it is
 - **Transition:** the helmet visor drops over the camera, the view cuts to the other firefighter, and the visor lifts. A manual Tab swap uses the same transition.
 - **State on swap:** the firefighter left behind freezes as they are: a held grip stays held, a climber stays hanging, a body on the hose keeps pinching it.
 - **Fairness:** the swap waits for a mantle or a throw in the air to finish. A manual swap resets the timer.
-- **Settings:** Off (the same as infinite), 30 s, 60 s, 90 s. [ASSUMPTION] Off by default for the demo.
+- **Settings:** Off (the same as infinite), 30 s, 60 s, 90 s. 60 s by default for the demo.
 - **Open question:** whether the frozen firefighter keeps their grip on the hose or drops it.
 
 If the AI buddy stretch goal is built, it's deliberately a bit dumb. It follows simple behaviours on a NavMesh, and its mistakes are a feature: it wanders onto your hose, opens the valve at the wrong moment, or slides through puddles.
@@ -151,7 +151,7 @@ Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled fr
 - **Pressure is shared.** Everything draws from one truck. A second branch halves everyone's pressure; a pinch (door or body) on one branch gives the other branch full pressure. Most puzzles come down to where the pressure goes right now.
 - **Two bodies, one player.** Many tasks want one firefighter holding or pinching while the other acts. The idle firefighter stays where it was left, so it keeps pinching or holding after a swap.
 - **The level ramps up:** the yard teaches, the ground floor combines two mechanics, the gap and upper floor combine three or more, and the stairwell blaze uses the whole network.
-- **Fires don't regrow** (decided for now). Every route is valid; the challenge is routing and pressure, not a race.
+- **Fires regrow slowly** while no water hits them, but never spread (not built yet). Every route is valid; the challenge is routing and pressure, and regrow adds urgency without making it a race.
 
 ### Player metrics and kit scale
 
@@ -315,11 +315,24 @@ That is 61.6 m in total (21.8 m laid at the start) for a 24 × 27 m building, wi
 
 ### Open items
 
-- **Finale:** whether the blaze needs both nozzles (must) or only rewards it. To be decided by playtest.
-- **Hose budget:** walk each route in Play mode and measure the length it really takes.
+- **Hose budget:** walk each route in Play mode and measure the length it really takes; target covering about two zones at once.
 - **Wall-pipe socket:** marked on the facade (`Marker_WallPipeSocket`) but not built; it would let players latch the hose onto a pre-laid pipe into the lobby.
 - **Lighting:** the roof shades the interior; rooms may need lights.
 - **Not verified in Play mode:** the stair ramp (31° slope), the hose climb to the landing, door slams on hoses, and the 6 m bridge span.
+
+### Engagement changes
+
+Accepted 2026-11-26 from a design review; not built yet. Each one targets a gap in player engagement; ordered by value for cost.
+
+| # | Change | Gap it closes |
+| --- | --- | --- |
+| 1 | The blaze needs two nozzles at once, or one nozzle at full pressure from pinching every other branch (settles the "Finale" open item as "must") | Every fire ends the same way, by aiming and holding the spray. The finale should test the whole network, not just take longer |
+| 2 | Forced swap timer on at 60 s for the demo, once built | No tension, and blame turns into self-blame in solo play: the idle firefighter is only ever where the player put it |
+| 3 | A fire that gets no water slowly regrows toward full strength, but never spreads (would reverse "fires don't regrow") | Mistakes cost nothing, so patience solves everything |
+| 4 | Tune the hose budget so the players can cover about two zones at once, not more | Routing is the main puzzle only while hose length is scarce |
+| 5 | Make tape's cost visible now: a clear pressure drop at the taped point, until slippery puddles exist | Without puddles, taping always beats swapping in a coupling, so problem 4 has no trade-off |
+| 6 | End screen with time, hose metres used and swaps | The walk-around costs the same as the bridge or rope, so the clever routes go unused; a score rewards them and gives a reason to replay |
+| 7 | Move the crate, or the blaze's entrance, so the stairwell is reached late | The crate doorway is in the lobby, so the finale can be the second thing a player does and the planned ramp is not enforced |
 
 ## Feedback and readability
 
