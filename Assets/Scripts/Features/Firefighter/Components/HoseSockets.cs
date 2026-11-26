@@ -15,6 +15,8 @@ namespace FlameBlame.Firefighter.Components
 
         private readonly CatchWindows _windows = new CatchWindows();
 
+        public bool IsCatchArmed => _windows.OpenRopes.Count > 0;
+
         private void FixedUpdate()
         {
             _windows.Step(Time.fixedDeltaTime);

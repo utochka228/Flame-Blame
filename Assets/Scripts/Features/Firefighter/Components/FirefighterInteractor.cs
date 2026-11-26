@@ -1,4 +1,6 @@
+using FlameBlame.Core.Events;
 using FlameBlame.Firefighter.Config;
+using FlameBlame.Firefighter.Events;
 using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Simulation;
@@ -18,6 +20,8 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private HoseClimber _climber;
         [SerializeField] private HoseSockets _sockets;
 
+        private UseAction _targetAction;
+
         private void OnEnable()
         {
             _firefighter.Driven += OnDriven;
@@ -26,19 +30,36 @@ namespace FlameBlame.Firefighter.Components
         private void OnDisable()
         {
             _firefighter.Driven -= OnDriven;
+            ShowTarget(UseAction.None);
         }
 
         private void OnDriven(FirefighterCommands commands)
         {
-            if (!commands.WasPressed(FirefighterButtons.Use)) return;
-
             var targets = FindTargets();
+            var action = Resolve(targets);
+            ShowTarget(action);
+            if (!commands.WasPressed(FirefighterButtons.Use) || action == UseAction.None) return;
+
+            Execute(action, targets);
+            EventBus.Publish(new InteractionUsed());
+        }
+
+        private void ShowTarget(UseAction action)
+        {
+            if (action == _targetAction) return;
+
+            _targetAction = action;
+            EventBus.Publish(new InteractionTargetChanged(action));
+        }
+
+        private UseAction Resolve(UseTargets targets)
+        {
             var context = new UseContext(targets.CanConnect, targets.Burst, targets.Joint != HoseNetwork.NoJoint, targets.Valve)
                 .WithTie(targets.CanTie, targets.TiedInReach)
                 .WithSocket(targets.CanLatch, targets.LatchedInReach)
                 .WithDoor(targets.HasDoor)
                 .WithClimb(targets.CanClimb, _climber.IsClimbing);
-            Execute(UseResolver.Resolve(context), targets);
+            return UseResolver.Resolve(context);
         }
 
         private UseTargets FindTargets()

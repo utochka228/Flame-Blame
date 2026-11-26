@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using FlameBlame.Core.Events;
+using FlameBlame.Hose.Events;
 using FlameBlame.Hose.Simulation;
 using UnityEngine;
 
@@ -72,6 +74,7 @@ namespace FlameBlame.Hose.Components
         private void OnPopped()
         {
             Popped?.Invoke();
+            EventBus.Publish(new HoseBurst());
         }
     }
 }

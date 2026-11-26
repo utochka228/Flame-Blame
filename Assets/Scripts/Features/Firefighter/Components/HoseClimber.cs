@@ -22,6 +22,7 @@ namespace FlameBlame.Firefighter.Components
         private bool _isMantling;
 
         public bool IsClimbing => _hose;
+        public bool IsMantling => _isMantling;
 
         private void Awake()
         {
