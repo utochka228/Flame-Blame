@@ -249,6 +249,44 @@ namespace FlameBlame.Tests.EditMode
             Assert.AreEqual(0f, _result.Sample(hose, 0.45f), Tolerance);
         }
 
+        [Test]
+        public void PinchSurge_RaisesPressureBeforeIt_AndKeepsZeroBeyondIt()
+        {
+            var hose = ConnectedHose(10f, 2f);
+            _graph.Pinch(hose, 0.5f, 0.4f);
+
+            PressureSolver.Solve(_graph, _result);
+
+            Assert.AreEqual(95f * 1.4f, _result.Sample(hose, 0.25f), Tolerance);
+            Assert.AreEqual(0f, _result.Sample(hose, 0.75f), Tolerance);
+        }
+
+        [Test]
+        public void PinchSurge_OnReversedHose_RaisesTheInletSide()
+        {
+            var source = _graph.AddSource(100f);
+            var hose = _graph.AddHose(10f, 2f);
+            _graph.Link(source, PressureGraph.SourceOutlet, hose, PressureGraph.HoseEnd);
+            _graph.Pinch(hose, 0.25f, 0.5f);
+
+            PressureSolver.Solve(_graph, _result);
+
+            Assert.AreEqual(98f * 1.5f, _result.Sample(hose, 0.9f), Tolerance);
+            Assert.AreEqual(0f, _result.Sample(hose, 0.1f), Tolerance);
+        }
+
+        [Test]
+        public void PinchSurge_LeavesOtherHosesUnchanged()
+        {
+            var pinched = ConnectedHose(10f, 0f);
+            var free = ConnectedHose(10f, 0f);
+            _graph.Pinch(pinched, 0.5f, 0.4f);
+
+            PressureSolver.Solve(_graph, _result);
+
+            Assert.AreEqual(100f, _result.Sample(free, 0.25f), Tolerance);
+        }
+
         private int ConnectedHose(float length, float lossPerMeter, float sourcePressure = 100f)
         {
             var source = _graph.AddSource(sourcePressure);

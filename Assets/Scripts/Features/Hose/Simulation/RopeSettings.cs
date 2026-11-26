@@ -15,6 +15,7 @@ namespace FlameBlame.Hose.Simulation
         public float GroundFriction { get; set; } = 0.3f;
         public float MaxSpeed { get; set; } = 20f;
         public float MaxStretchFraction { get; set; } = 0.1f;
+        public float SlipSeconds { get; set; } = 0.5f;
         public Vector3 Gravity { get; set; } = new Vector3(0f, -9.81f, 0f);
     }
 }

@@ -27,6 +27,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HoseSegment _sourceHose;
         [SerializeField] private HoseSegment[] _hoses;
         [SerializeField] private HoseJoint[] _joints;
+        [SerializeField] private HoseSplitter[] _splitters = new HoseSplitter[0];
         [SerializeField] [Range(2, 64)] private int _maxPieces = 16;
         [SerializeField] [Min(0.1f)] private float _junctionBreakDistance = 0.25f;
         [SerializeField] [Range(1, 30)] private int _solvesPerSecond = 10;
@@ -95,7 +96,28 @@ namespace FlameBlame.Hose.Components
 
         public Vector3 JointPosition(int jointIndex) => _ropeJoints.Position(jointIndex);
 
-        public bool IsEndFree(HoseEndRef end) => _ropeJoints.IsEndFree(ToRopeEnd(end));
+        public bool IsEndFree(HoseEndRef end)
+        {
+            var ropeEnd = ToRopeEnd(end);
+            if (!_ropeJoints.IsEndFree(ropeEnd)) return false;
+
+            foreach (var splitter in _splitters)
+            {
+                if (splitter.Ports.Contains(ropeEnd)) return false;
+            }
+
+            return true;
+        }
+
+        public bool TryPlug(HoseSplitter splitter, int port, HoseEndRef end)
+        {
+            return IsEndFree(end) && splitter.Ports.Plug(port, ToRopeEnd(end));
+        }
+
+        public void Unplug(HoseSplitter splitter, int port)
+        {
+            splitter.Ports.Unplug(port);
+        }
 
         public bool IsOpenEnd(HoseEndRef end) => IsEndFree(end) && !IsNozzleEnd(end);
 
@@ -201,7 +223,7 @@ namespace FlameBlame.Hose.Components
         {
             var positions = hose.Rope.Positions;
             var outward = (positions[end.ParticleIndex] - positions[end.InnerIndex]).normalized;
-            var acceleration = outward * (hose.Config.Pressure.OpenEndRecoilAcceleration * hose.PressureFractions[end.ParticleIndex]);
+            var acceleration = outward * (hose.Config.Pressure.OpenEndRecoilAcceleration * hose.PressureFractions[end.InnerIndex]);
             _world.AddImpulse(new RopeParticle(ropeIndex, end.ParticleIndex), -acceleration * Time.fixedDeltaTime);
         }
 
@@ -293,6 +315,7 @@ namespace FlameBlame.Hose.Components
 
             _graph.Link(SourcePartId, PressureGraph.SourceOutlet, HosePartId(_sourceHoseIndex), PressureGraph.HoseStart);
             LinkJoints();
+            LinkSplitters();
             AddHoseMarkers();
             AddThumbs();
 
@@ -319,6 +342,22 @@ namespace FlameBlame.Hose.Components
             }
         }
 
+        private void LinkSplitters()
+        {
+            foreach (var splitter in _splitters)
+            {
+                var ports = splitter.Ports;
+                if (ports.PluggedCount < 2) continue;
+
+                var partId = _graph.AddSplitter();
+                for (var port = 0; port < ports.PortCount; port++)
+                {
+                    if (ports.IsPlugged(port))
+                        LinkSplitterPort(ports.EndAt(port), partId, port);
+                }
+            }
+        }
+
         private void LinkCoupling(RopeEnd first, RopeEnd second)
         {
             _graph.Link(HosePartId(first.Rope), GraphEnd(first.Kind), HosePartId(second.Rope), GraphEnd(second.Kind));
@@ -336,7 +375,7 @@ namespace FlameBlame.Hose.Components
                 var partId = HosePartId(index);
                 PinchRuns.CollectPositions(_sensors[index].Pinched, _pinchPositions);
                 foreach (var position in _pinchPositions)
-                    _graph.Pinch(partId, position);
+                    _graph.Pinch(partId, position, _hoses[index].Config.Pinch.SurgeFraction);
 
                 var lastParticle = _hoses[index].Config.ParticleCount - 1;
                 foreach (var breach in _monitors[index].Breaches)

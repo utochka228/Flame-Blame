@@ -41,9 +41,9 @@ namespace FlameBlame.Pressure.Simulation
             _links.Add(new PortLink(new PortRef(partA, portA), new PortRef(partB, portB)));
         }
 
-        public void Pinch(int hose, float position)
+        public void Pinch(int hose, float position, float surgeFraction = 0f)
         {
-            _pinches.Add(new HoseMarker(hose, position, 0f));
+            _pinches.Add(new HoseMarker(hose, position, surgeFraction));
         }
 
         public void Leak(int hose, float position, float loss)
@@ -104,13 +104,13 @@ namespace FlameBlame.Pressure.Simulation
         {
             public int Hose { get; }
             public float Position { get; }
-            public float Loss { get; }
+            public float Amount { get; }
 
-            public HoseMarker(int hose, float position, float loss)
+            public HoseMarker(int hose, float position, float amount)
             {
                 Hose = hose;
                 Position = position;
-                Loss = loss;
+                Amount = amount;
             }
         }
     }

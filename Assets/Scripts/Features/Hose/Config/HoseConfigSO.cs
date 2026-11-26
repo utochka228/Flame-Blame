@@ -23,8 +23,14 @@ namespace FlameBlame.Hose.Config
         public RopeSettings CreateRopeSettings()
         {
             var settings = new RopeSettings { ParticleCount = Rope.ParticleCount };
-            Rope.ApplyTo(settings);
+            ApplyTo(settings);
             return settings;
+        }
+
+        public void ApplyTo(RopeSettings settings)
+        {
+            Rope.ApplyTo(settings);
+            Pinch.ApplyTo(settings);
         }
 
         public HeldHoseSettings CreateHeldSettings()

@@ -22,6 +22,7 @@ namespace FlameBlame.Hose.Components
         private float[] _dampingMultipliers;
         private HeldHoseProfile _heldProfile;
         private OpenEnd[] _openEnds;
+        private HosePinchSensor _pinchSensor;
 
         public IReadOnlyList<Vector3> Positions => _interpolatedPositions;
         public IReadOnlyList<float> PressureFractions => _smoothedPressureFractions;
@@ -53,6 +54,7 @@ namespace FlameBlame.Hose.Components
                 new OpenEnd(RopeEndKind.Tail, lastIndex, lastIndex - 1)
             };
             HeldHoseProfile.Clear(_rigidityCaps, _dampingMultipliers);
+            _pinchSensor = GetComponent<HosePinchSensor>();
             Interpolate();
         }
 
@@ -77,6 +79,9 @@ namespace FlameBlame.Hose.Components
 
             _rope.SetRigidityProfile(_rigidityProfile);
             _rope.SetDampingProfile(_dampingMultipliers);
+            if (_pinchSensor)
+                _rope.SetFrozenProfile(_pinchSensor.Pinched);
+
             if (_anchoredToOutlet)
                 _rope.SetAnchor(_outlet.position, _outlet.forward);
 
@@ -113,7 +118,7 @@ namespace FlameBlame.Hose.Components
 
         private void OnConfigChanged()
         {
-            _config.Rope.ApplyTo(_ropeSettings);
+            _config.ApplyTo(_ropeSettings);
             _config.Held.ApplyTo(_heldSettings);
         }
 

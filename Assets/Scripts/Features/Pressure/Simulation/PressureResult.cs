@@ -22,21 +22,25 @@ namespace FlameBlame.Pressure.Simulation
             var distanceFraction = DistanceFromInlet(inletEnd, position);
             var pressure = _inletPressures[hose] - part.LossPerMeter * part.Length * distanceFraction;
 
+            var surgeFraction = 0f;
             for (var index = 0; index < _graph.Pinches.Count; index++)
             {
                 var pinch = _graph.Pinches[index];
-                if (pinch.Hose == hose && DistanceFromInlet(inletEnd, pinch.Position) <= distanceFraction)
+                if (pinch.Hose != hose) continue;
+                if (DistanceFromInlet(inletEnd, pinch.Position) <= distanceFraction)
                     return 0f;
+
+                surgeFraction = Mathf.Max(surgeFraction, pinch.Amount);
             }
 
             for (var index = 0; index < _graph.Leaks.Count; index++)
             {
                 var leak = _graph.Leaks[index];
                 if (leak.Hose == hose && DistanceFromInlet(inletEnd, leak.Position) <= distanceFraction)
-                    pressure -= leak.Loss;
+                    pressure -= leak.Amount;
             }
 
-            return Mathf.Max(0f, pressure);
+            return Mathf.Max(0f, pressure) * (1f + surgeFraction);
         }
 
         public float TipPressure(int hose)

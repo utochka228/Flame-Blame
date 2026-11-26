@@ -56,9 +56,16 @@ namespace FlameBlame.Firefighter.Components
         {
             Disarm(particle.Rope);
             socket.Latch(_network.World, particle, _config.Grip.Compliance, _config.Tie.CreateDragSettings());
+            if (socket.Splitter)
+                PlugSplitterPort(socket, particle);
         }
 
-        public void Free(HoseSocket socket) => socket.Release(_network.World);
+        public void Free(HoseSocket socket)
+        {
+            socket.Release(_network.World);
+            if (socket.Splitter)
+                _network.Unplug(socket.Splitter, socket.SplitterPort);
+        }
 
         public void FreeAt(RopeParticle particle, int toleranceParticles)
         {
@@ -90,6 +97,17 @@ namespace FlameBlame.Firefighter.Components
                 Latch(socket, new RopeParticle(rope, index));
                 return;
             }
+        }
+
+        private void PlugSplitterPort(HoseSocket socket, RopeParticle particle)
+        {
+            var hose = _network.HoseOf(particle.Rope);
+            var isStart = particle.Index == 0;
+            var kind = isStart ? RopeEndKind.Start : RopeEndKind.Tail;
+            if (!_network.TryPlug(socket.Splitter, socket.SplitterPort, new HoseEndRef(hose, kind))) return;
+
+            var inner = new RopeParticle(particle.Rope, isStart ? 1 : particle.Index - 1);
+            socket.Aim(_network.World, inner, hose.Config.Rope.Spacing, _config.Grip.AimCompliance);
         }
 
         private CatchParts FreeParts(int rope)

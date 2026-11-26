@@ -20,6 +20,9 @@ namespace FlameBlame.Hose.Simulation
         private readonly float[] _particleRigidity;
         private readonly float[] _bendAlphas;
         private readonly float[] _dampingMultipliers;
+        private readonly bool[] _frozen;
+        private readonly float[] _slipSecondsLeft;
+        private readonly bool[] _clamped;
         private readonly float _floppyBendLog;
         private readonly float _rigidBendLog;
 
@@ -56,6 +59,9 @@ namespace FlameBlame.Hose.Simulation
             _bendAlphas = new float[settings.ParticleCount];
             _dampingMultipliers = new float[settings.ParticleCount];
             Array.Fill(_dampingMultipliers, 1f);
+            _frozen = new bool[settings.ParticleCount];
+            _slipSecondsLeft = new float[settings.ParticleCount];
+            _clamped = new bool[settings.ParticleCount];
             _floppyBendLog = Mathf.Log(settings.FloppyBendCompliance);
             _rigidBendLog = Mathf.Log(settings.RigidBendCompliance);
 
@@ -85,6 +91,12 @@ namespace FlameBlame.Hose.Simulation
                 _dampingMultipliers[index] = multipliers[index];
         }
 
+        public void SetFrozenProfile(IReadOnlyList<bool> frozen)
+        {
+            for (var index = 0; index < _frozen.Length; index++)
+                _frozen[index] = frozen[index] && _slipSecondsLeft[index] <= 0f;
+        }
+
         public void Step(float deltaTime)
         {
             BeginStep(deltaTime, _settings.Substeps);
@@ -106,6 +118,8 @@ namespace FlameBlame.Hose.Simulation
             _collider.Prepare(_positions, _settings.ParticleRadius);
             _substepTime = deltaTime / substeps;
             UpdateBendAlphas(_substepTime);
+            for (var index = 0; index < _slipSecondsLeft.Length; index++)
+                _slipSecondsLeft[index] = Mathf.Max(0f, _slipSecondsLeft[index] - deltaTime);
         }
 
         public void AdvanceSubstep()
@@ -141,13 +155,14 @@ namespace FlameBlame.Hose.Simulation
         public void EndStep()
         {
             RecoverStretch();
+            ReleaseFreezesPulledTaut();
             CollideAfterStretch();
 
             if (!IsFinite())
                 RestoreLastGoodState();
         }
 
-        public bool IsMovable(int index) => index >= FirstFreeIndex;
+        public bool IsMovable(int index) => index >= FirstFreeIndex && !_frozen[index];
 
         public void SetPosition(int index, Vector3 position)
         {
@@ -166,7 +181,7 @@ namespace FlameBlame.Hose.Simulation
                 _bendAlphas[index] = Mathf.Exp(Mathf.Lerp(_floppyBendLog, _rigidBendLog, _particleRigidity[index])) / (substepTime * substepTime);
         }
 
-        private float InverseMass(int index) => index < FirstFreeIndex ? 0f : 1f;
+        private float InverseMass(int index) => IsMovable(index) ? 1f : 0f;
 
         private void ApplyAnchor()
         {
@@ -181,7 +196,10 @@ namespace FlameBlame.Hose.Simulation
             for (var index = 0; index < _positions.Length; index++)
             {
                 _substepStartPositions[index] = _positions[index];
-                if (index < FirstFreeIndex) continue;
+                if (_frozen[index])
+                    _velocities[index] = Vector3.zero;
+
+                if (!IsMovable(index)) continue;
 
                 var rigidDamping = Mathf.Lerp(1f, _settings.RigidDampingMultiplier, _particleRigidity[index]);
                 var dampingFactor = Mathf.Max(0f, 1f - _settings.Damping * _dampingMultipliers[index] * rigidDamping * _substepTime);
@@ -196,9 +214,17 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = AnchoredCount; index < _positions.Length; index++)
             {
-                var straightTarget = 2f * _positions[index - 1] - _positions[index - 2];
-                var correction = (straightTarget - _positions[index]) / (1f + _bendAlphas[index]);
-                _positions[index] += correction;
+                var outerWeight = InverseMass(index - 2);
+                var middleWeight = InverseMass(index - 1);
+                var innerWeight = InverseMass(index);
+                var weightSum = outerWeight + 4f * middleWeight + innerWeight;
+                if (weightSum <= 0f) continue;
+
+                var curvature = _positions[index - 2] - 2f * _positions[index - 1] + _positions[index];
+                var correction = -curvature / (weightSum + _bendAlphas[index]);
+                _positions[index - 2] += correction * outerWeight;
+                _positions[index - 1] -= correction * (2f * middleWeight);
+                _positions[index] += correction * innerWeight;
             }
         }
 
@@ -217,6 +243,8 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = FirstFreeIndex; index < _positions.Length; index++)
             {
+                if (_frozen[index]) continue;
+
                 var unresolved = _collider.Sweep(startPositions[index], _positions[index], _settings.ParticleRadius);
                 _positions[index] = unresolved;
                 var resolved = _collider.Resolve(unresolved, _lastFreePositions[index], _settings.ParticleRadius);
@@ -253,20 +281,48 @@ namespace FlameBlame.Hose.Simulation
         private void UpdateVelocities()
         {
             for (var index = FirstFreeIndex; index < _positions.Length; index++)
-                _velocities[index] = (_positions[index] - _substepStartPositions[index]) / _substepTime;
+            {
+                if (!_frozen[index])
+                    _velocities[index] = (_positions[index] - _substepStartPositions[index]) / _substepTime;
+            }
+        }
+
+        private void ReleaseFreezesPulledTaut()
+        {
+            for (var index = 0; index < _positions.Length; index++)
+            {
+                if (!_frozen[index] || !IsRunClamped(index, -1) && !IsRunClamped(index, 1)) continue;
+
+                _frozen[index] = false;
+                _slipSecondsLeft[index] = _settings.SlipSeconds;
+            }
+        }
+
+        private bool IsRunClamped(int frozenIndex, int direction)
+        {
+            for (var index = frozenIndex + direction; index >= 0 && index < _positions.Length && IsMovable(index); index += direction)
+            {
+                if (_clamped[index]) return true;
+            }
+
+            return false;
         }
 
         private void RecoverStretch()
         {
             var maxLength = _settings.Spacing * (1f + _settings.MaxStretchFraction);
+            Array.Clear(_clamped, 0, _clamped.Length);
             for (var index = Mathf.Max(FirstFreeIndex, 1); index < _positions.Length; index++)
             {
+                if (_frozen[index]) continue;
+
                 var delta = _positions[index] - _positions[index - 1];
                 var length = delta.magnitude;
                 if (length <= maxLength) continue;
 
                 _positions[index] = _positions[index - 1] + delta / length * _settings.Spacing;
                 _velocities[index] = Vector3.zero;
+                _clamped[index] = true;
             }
         }
 

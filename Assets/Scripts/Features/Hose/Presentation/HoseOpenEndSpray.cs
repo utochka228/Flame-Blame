@@ -30,7 +30,7 @@ namespace FlameBlame.Hose.Presentation
 
         private void Spray(OpenEnd end, ref float carry)
         {
-            var pressureFraction = _hose.PressureFractions[end.ParticleIndex];
+            var pressureFraction = _hose.PressureFractions[end.InnerIndex];
             if (!end.IsOpen || pressureFraction < MinSprayPressureFraction)
             {
                 carry = 0f;
