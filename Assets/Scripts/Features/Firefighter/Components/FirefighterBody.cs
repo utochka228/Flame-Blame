@@ -46,6 +46,7 @@ namespace FlameBlame.Firefighter.Components
 
         public event Action<FirefighterCommands> Driven;
         public event Action<float> Landed;
+        public event Action Jumped;
 
         private void Awake()
         {
@@ -78,7 +79,10 @@ namespace FlameBlame.Firefighter.Components
             var traction = _puddles ? _puddles.TractionAt(transform.position) : 1f;
             var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, IsGrounded, MoveSpeedScale, traction);
             if (jumps)
+            {
                 velocity = _motion.Jump(velocity);
+                Jumped?.Invoke();
+            }
             else if (!IsGrounded)
                 velocity = _motion.AddAirGravity(velocity, Physics.gravity.y, _isJumpHeld, Time.fixedDeltaTime);
 

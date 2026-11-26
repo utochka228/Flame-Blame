@@ -55,7 +55,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 341830455201243430}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.52045286, y: -0.4783894, z: 0.5225287, w: 0.47669286}
+  m_LocalRotation: {x: 0.5204529, y: -0.47838944, z: 0.52252877, w: 0.4766929}
   m_LocalPosition: {x: -15.747903, y: 22.378025, z: 0.023308692}
   m_LocalScale: {x: 0.9999982, y: 0.999998, z: 0.99999785}
   m_ConstrainProportionsScale: 0
@@ -732,6 +732,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6663953365036881447}
   - component: {fileID: 4580353893869986553}
+  - component: {fileID: 6821199327618785161}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -766,7 +767,7 @@ Animator:
   m_GameObject: {fileID: 5716860344371659344}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f9f65d468731bcf4fba794d064637f84, type: 3}
-  m_Controller: {fileID: 9100000, guid: dd9b07c29b5310946a030aab4c3a971e, type: 2}
+  m_Controller: {fileID: 9100000, guid: ccc606a01f4b64dd398151e56a6e6991, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -778,6 +779,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6821199327618785161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5716860344371659344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a0ea13f7a46940c280688ee0285b0b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Presentation.FirefighterAnimation
+  _body: {fileID: 4432599679487170533}
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
 --- !u!1 &5988989406718217062
 GameObject:
   m_ObjectHideFlags: 0
@@ -1179,7 +1194,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8733597305789236658}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.52090484, y: -0.4779242, z: 0.5219844, w: -0.47726178}
+  m_LocalRotation: {x: -0.5209049, y: -0.47792423, z: 0.52198446, w: -0.4772618}
   m_LocalPosition: {x: 15.747893, y: 22.37779, z: -0.03386527}
   m_LocalScale: {x: 0.9999996, y: 0.9999988, z: 0.9999972}
   m_ConstrainProportionsScale: 0
