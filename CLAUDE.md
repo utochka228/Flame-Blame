@@ -34,9 +34,35 @@ See [.claude/architecture.md](.claude/architecture.md) for the full breakdown. I
 
 ## Working with the project
 
-- No CLI build/test/lint. Work happens in the Unity Editor (Rider as IDE); `Flame&Blame.sln` and `.csproj` files are generated.
+- No build/test/lint scripts. Work happens in the Unity Editor (Rider as IDE); `Flame&Blame.sln` and `.csproj` files are generated.
 - Unity MCP tools (`unityMCP`, `unity`) drive the Editor. After any script change, read the console for compile errors before continuing.
 - Tests use `com.unity.test-framework`: EditMode for pressure solver and rope math, PlayMode for rope stability. Run via Test Runner or MCP `run_tests`.
+- If MCP is down or times out, fall back to the Unity CLI — see "Unity CLI fallback" below. Never fall back to hand-editing `.unity`, `.prefab`, or `.asset` YAML.
+
+### Unity CLI fallback
+
+Use only when the Unity MCP tools fail (not connected, timing out, erroring). The `unity` CLI (Homebrew, `/opt/homebrew/bin/unity`) drives the open Editor through the `com.unity.pipeline` package, already in `Packages/manifest.json`. MUST invoke the `unity-cli` skill before the first CLI call.
+
+| Need | Command |
+| --- | --- |
+| Is an Editor connected? | `unity status --project-path "$PWD" --format json` (wait: add `--until-ready`) |
+| Find a command | `unity command --query <term>` — never grep `--help` |
+| List Editor commands | `unity command` |
+| Run C# in the live Editor | `unity command script eval --caller plugin --skill unity-cli '<C#>'` |
+| Recompile + compile errors | `unity recompile --project-path "$PWD" --format json` |
+| Console / Editor log | `unity logs` |
+| Play mode | `unity command editor.playmode start` / `stop` |
+| Tests, Editor closed only | `unity test "$PWD" --mode EditMode` (or `PlayMode`); exit 8 = tests failed, other non-zero = run never finished |
+
+Rules:
+
+- Always pass `--project-path "$PWD"` and `--format json`; branch on `success` and the exit code, read stdout only (no `2>&1`).
+- Pass `--caller plugin --skill <skill name>` on every `unity command`.
+- Command names come from the Editor: run `unity command` to see them, never guess.
+- `unity status` reporting Safe Mode means compile errors: fix the C# it lists, then retry.
+- "No instances" from a sandboxed shell is not proof the Editor is closed — ask the user before going further.
+- `unity test` refuses a project open in an Editor. Never close the user's Editor to make room; run tests through `unity command` instead.
+- If both MCP and CLI fail, stop and tell the user what ran and what failed. Don't retry in a loop or drive another Editor.
 - Keep a short AI log (what was generated, hand-changed, time saved); it is a deliverable.
 - Rendering: URP with PC and Mobile tiers in `Assets/Settings/`.
 - Platform: WebGL first (Windows .exe fallback), single-threaded budget. See DESIGN.md "Stability and performance guardrails" and "Platform".
