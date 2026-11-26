@@ -112,13 +112,13 @@ Decided: one first-person player who swaps between the two firefighters with Tab
 | --- | --- | --- |
 | Local two-player co-op | Needs split-screen with a first-person camera | Cut |
 | Character swap (solo) | One key switches control between the two firefighters; the idle one stays where it is, and can still end up standing on your hose | Core |
-| Forced swap timer | A random timer swaps the firefighters for you, with a warning before it fires | Planned |
+| Forced swap timer | A random timer swaps the firefighters for you, with a warning before it fires | Core |
 | Simple AI buddy | Takes the second firefighter in solo play: holds a line or works the valve | Stretch |
 | Online multiplayer | Not built: XPBD rope sync over WebSockets is high risk for a small demo | Cut |
 
 First-person camera: each firefighter has an eye camera; only the active one renders.
 
-Forced swap timer (planned, not built). It turns "the idle one stays where it is" into a pacing and blame source.
+Forced swap timer (built). It turns "the idle one stays where it is" into a pacing and blame source.
 
 - **Timer:** each round draws a random interval between 50% and 100% of the max set in settings, so players can't time it exactly. It starts when the players leave the yard.
 - **Warning:** a few seconds before the swap, a ticking sound speeds up and a helmet icon or visor fog builds at the screen edge. Text is optional.
@@ -126,7 +126,7 @@ Forced swap timer (planned, not built). It turns "the idle one stays where it is
 - **State on swap:** the firefighter left behind freezes as they are: a held grip stays held, a climber stays hanging, a body on the hose keeps pinching it.
 - **Fairness:** the swap waits for a mantle or a throw in the air to finish. A manual swap resets the timer.
 - **Settings:** Off (the same as infinite), 30 s, 60 s, 90 s. 60 s by default for the demo.
-- **Open question:** whether the frozen firefighter keeps their grip on the hose or drops it.
+- **Grip on swap:** decided, the frozen firefighter keeps their grip on the hose.
 
 If the AI buddy stretch goal is built, it's deliberately a bit dumb. It follows simple behaviours on a NavMesh, and its mistakes are a feature: it wanders onto your hose, opens the valve at the wrong moment, or slides through puddles.
 
@@ -290,7 +290,7 @@ Each mechanic is taught once where failure is cheap, then tested where it matter
 | Tape | Hall burn-through | Any burst | Swap the piece |
 | Puddles | Yard spray | Under the upper rooms | — |
 | Character swap | Yard | Everywhere | — |
-| Forced swap timer (planned) | Starts on leaving the yard | Gap and blaze | Off in settings |
+| Forced swap timer | Starts on leaving the yard | Gap and blaze | Off in settings |
 | Slippery puddles, steam, jet move (not built) | — | Optional only | Every route has a built alternative |
 
 ### Hose budget
@@ -471,6 +471,8 @@ Namespaces match folders, for example `FlameBlame.Hose.Simulation`.
 - **World visuals belong to the feature,** in its Presentation folder: tube mesh, swelling, jet, leaks, puddles, fire. Since pressure is shown on the hose, most of the demo's "UI" lives here.
 - **Screen UI is its own feature:** title screen, click to start, controls overlay, join and swap prompts, pause.
 - **Interaction prompts:** UI owns one generic prompt system; features only provide data, such as `IInteractable.PromptText`.
+- **HUD (built, UI Toolkit):** objective pill (fires left), Use prompt and reticle driven by `FirefighterInteractor.ResolveAction()`, event feed (fire out, hose burst, latch and release), swap chip with the forced-swap warning, and a level-complete banner. Look and feel came from a throwaway prototype of reference shots; hotbar, money, chat, revive and the garage were cut because no mechanic backs them.
+- **UI kit:** `Assets/UI/Kit/` holds the colour and size tokens and the shared `fb-` classes (chip, pill, keycap, toast, banner); `UiTween` holds the DOTween helpers for UI Toolkit elements (pop, squash, pulse, slide, fade, shake, flash), all in real time and returning to the USS rest value.
 - **UI depends on features, never the reverse.** It listens to events or reads small read-only interfaces.
 
 ### Dependency direction
@@ -537,7 +539,7 @@ The demo ships the core rule, seven part types and four puzzles. Everything else
 | Slippery puddles, steam | In | Cheap, funny, and reuse the water system |
 | Character swap | In | One key switches between the two firefighters |
 | Local two-player co-op | Cut | First-person view would need split-screen |
-| Forced swap timer | Planned | Adds pace and blame on top of the existing swap; can be turned off |
+| Forced swap timer | In | Adds pace and blame on top of the existing swap; can be turned off |
 | Simple AI buddy | Stretch | Nice for solo play, not required |
 | Fake kinks (sharp bend angle reduces flow) | Stretch | Stable and cheap, but standing on the hose already covers the idea |
 | Real knot detection | Cut | Unstable and expensive for little payoff |
