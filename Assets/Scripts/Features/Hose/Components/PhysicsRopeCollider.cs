@@ -44,7 +44,8 @@ namespace FlameBlame.Hose.Components
             for (var index = 0; index < _candidateCount; index++)
             {
                 _candidateBounds[index] = _candidates[index].bounds;
-                _candidateBounds[index].Expand(2f * QueryMargin);
+                if (_candidates[index].attachedRigidbody)
+                    _candidateBounds[index].Expand(2f * QueryMargin);
             }
 
             if (_candidateCount < MaxOverlaps || _hasWarnedAboutOverflow) return;

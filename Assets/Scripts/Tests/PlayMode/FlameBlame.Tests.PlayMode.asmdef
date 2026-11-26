@@ -5,6 +5,7 @@
         "FlameBlame.Core",
         "FlameBlame.Fire",
         "FlameBlame.Hose",
+        "FlameBlame.Interactables",
         "FlameBlame.Pressure",
         "FlameBlame.Water",
         "UnityEngine.TestRunner",

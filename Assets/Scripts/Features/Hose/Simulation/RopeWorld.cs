@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using FlameBlame.Core.Extensions;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace FlameBlame.Hose.Simulation
 {
     public class RopeWorld
     {
+        private static readonly ProfilerMarker StepMarker = new ProfilerMarker("RopeWorld.Step");
+
         private readonly int _substeps;
         private readonly List<XpbdRope> _ropes = new List<XpbdRope>();
         private readonly List<Junction> _junctions = new List<Junction>();
@@ -140,6 +143,7 @@ namespace FlameBlame.Hose.Simulation
 
         public void Step(float deltaTime)
         {
+            using var marker = StepMarker.Auto();
             _hasStepped = true;
             foreach (var rope in _ropes)
                 rope.BeginStep(deltaTime, _substeps);

@@ -249,12 +249,12 @@ namespace FlameBlame.Hose.Simulation
         private void CollideSubstep()
         {
             CollideParticles(_substepStartPositions, _settings.GroundFriction);
-            CollideSegments();
         }
 
         private void CollideAfterStretch()
         {
             CollideParticles(_previousStepPositions, 0f);
+            CollideSegments();
         }
 
         private void CollideParticles(Vector3[] startPositions, float friction)
