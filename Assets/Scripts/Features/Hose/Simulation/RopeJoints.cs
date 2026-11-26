@@ -28,6 +28,11 @@ namespace FlameBlame.Hose.Simulation
             _reserved.Add(end);
         }
 
+        public void Unreserve(RopeEnd end)
+        {
+            _reserved.Remove(end);
+        }
+
         public int Add(IReadOnlyList<RopeEnd> ends)
         {
             if (LiveCount() >= _maxLiveJoints) return NoJoint;
@@ -71,10 +76,7 @@ namespace FlameBlame.Hose.Simulation
 
         public bool IsEndFree(RopeEnd end)
         {
-            foreach (var reserved in _reserved)
-            {
-                if (IsSameEnd(reserved, end)) return false;
-            }
+            if (_reserved.Contains(end)) return false;
 
             for (var joint = 0; joint < _joints.Count; joint++)
             {
@@ -82,7 +84,7 @@ namespace FlameBlame.Hose.Simulation
 
                 foreach (var jointEnd in _joints[joint].Ends)
                 {
-                    if (IsSameEnd(jointEnd, end)) return false;
+                    if (jointEnd.Equals(end)) return false;
                 }
             }
 
@@ -106,8 +108,6 @@ namespace FlameBlame.Hose.Simulation
 
             return best;
         }
-
-        private static bool IsSameEnd(RopeEnd first, RopeEnd second) => first.Rope == second.Rope && first.Kind == second.Kind;
 
         private int LiveCount()
         {

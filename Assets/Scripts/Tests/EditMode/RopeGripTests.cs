@@ -33,17 +33,6 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
-        public void ActiveHandGripCount_CountsOnlyActiveHandGrips()
-        {
-            _world.AddGrip(new RopeParticle(0, 0), StiffCompliance);
-            _world.AddGrip(new RopeParticle(0, 4), StiffCompliance, true);
-            var released = _world.AddGrip(new RopeParticle(0, 6), StiffCompliance, true);
-            _world.Release(released);
-
-            Assert.AreEqual(1, _world.ActiveHandGripCount(0));
-        }
-
-        [Test]
         public void Grip_HoldsParticleAtTarget()
         {
             var grip = _world.AddGrip(new RopeParticle(0, 4), StiffCompliance);

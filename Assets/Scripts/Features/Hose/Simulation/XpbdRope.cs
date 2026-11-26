@@ -133,7 +133,9 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = 0; index < _positions.Length - 1; index++)
             {
-                var weightSum = InverseMass(index) + InverseMass(index + 1);
+                var weight = InverseMass(index);
+                var nextWeight = InverseMass(index + 1);
+                var weightSum = weight + nextWeight;
                 if (weightSum <= 0f) continue;
 
                 var delta = _positions[index + 1] - _positions[index];
@@ -141,8 +143,8 @@ namespace FlameBlame.Hose.Simulation
                 if (length < MinLength) continue;
 
                 var correction = delta / length * ((length - _settings.Spacing) / weightSum);
-                _positions[index] += correction * InverseMass(index);
-                _positions[index + 1] -= correction * InverseMass(index + 1);
+                _positions[index] += correction * weight;
+                _positions[index + 1] -= correction * nextWeight;
             }
         }
 
@@ -212,19 +214,23 @@ namespace FlameBlame.Hose.Simulation
 
         private void SolveBends()
         {
+            var outerWeight = InverseMass(AnchoredCount - 2);
+            var middleWeight = InverseMass(AnchoredCount - 1);
             for (var index = AnchoredCount; index < _positions.Length; index++)
             {
-                var outerWeight = InverseMass(index - 2);
-                var middleWeight = InverseMass(index - 1);
                 var innerWeight = InverseMass(index);
                 var weightSum = outerWeight + 4f * middleWeight + innerWeight;
-                if (weightSum <= 0f) continue;
+                if (weightSum > 0f)
+                {
+                    var curvature = _positions[index - 2] - 2f * _positions[index - 1] + _positions[index];
+                    var correction = -curvature / (weightSum + _bendAlphas[index]);
+                    _positions[index - 2] += correction * outerWeight;
+                    _positions[index - 1] -= correction * (2f * middleWeight);
+                    _positions[index] += correction * innerWeight;
+                }
 
-                var curvature = _positions[index - 2] - 2f * _positions[index - 1] + _positions[index];
-                var correction = -curvature / (weightSum + _bendAlphas[index]);
-                _positions[index - 2] += correction * outerWeight;
-                _positions[index - 1] -= correction * (2f * middleWeight);
-                _positions[index] += correction * innerWeight;
+                outerWeight = middleWeight;
+                middleWeight = innerWeight;
             }
         }
 
@@ -265,7 +271,9 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = Mathf.Max(FirstFreeIndex - 1, 0); index < _positions.Length - 1; index++)
             {
-                var weightSum = InverseMass(index) + InverseMass(index + 1);
+                var weight = InverseMass(index);
+                var nextWeight = InverseMass(index + 1);
+                var weightSum = weight + nextWeight;
                 if (weightSum <= 0f) continue;
 
                 var midpoint = (_positions[index] + _positions[index + 1]) * 0.5f;
@@ -273,8 +281,8 @@ namespace FlameBlame.Hose.Simulation
                 var push = _collider.Resolve(midpoint, reference, _settings.ParticleRadius) - midpoint;
                 if (push.sqrMagnitude < MinLength * MinLength) continue;
 
-                _positions[index] += push * (2f * InverseMass(index) / weightSum);
-                _positions[index + 1] += push * (2f * InverseMass(index + 1) / weightSum);
+                _positions[index] += push * (2f * weight / weightSum);
+                _positions[index + 1] += push * (2f * nextWeight / weightSum);
             }
         }
 
@@ -282,7 +290,7 @@ namespace FlameBlame.Hose.Simulation
         {
             for (var index = FirstFreeIndex; index < _positions.Length; index++)
             {
-                if (!_frozen[index])
+                if (IsMovable(index))
                     _velocities[index] = (_positions[index] - _substepStartPositions[index]) / _substepTime;
             }
         }

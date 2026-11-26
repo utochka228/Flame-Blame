@@ -16,7 +16,6 @@ namespace FlameBlame.Hose.Components
         public const int NoJoint = RopeJoints.NoJoint;
 
         private const int SourcePartId = 0;
-        private const int SplitterEndCount = 3;
         private const int NoSplitter = -1;
 
         private static readonly RopeEndKind[] EndKinds = { RopeEndKind.Start, RopeEndKind.Tail };
@@ -96,27 +95,24 @@ namespace FlameBlame.Hose.Components
 
         public Vector3 JointPosition(int jointIndex) => _ropeJoints.Position(jointIndex);
 
-        public bool IsEndFree(HoseEndRef end)
-        {
-            var ropeEnd = ToRopeEnd(end);
-            if (!_ropeJoints.IsEndFree(ropeEnd)) return false;
-
-            foreach (var splitter in _splitters)
-            {
-                if (splitter.Ports.Contains(ropeEnd)) return false;
-            }
-
-            return true;
-        }
+        public bool IsEndFree(HoseEndRef end) => _ropeJoints.IsEndFree(ToRopeEnd(end));
 
         public bool TryPlug(HoseSplitter splitter, int port, HoseEndRef end)
         {
-            return IsEndFree(end) && splitter.Ports.Plug(port, ToRopeEnd(end));
+            var ropeEnd = ToRopeEnd(end);
+            if (!_ropeJoints.IsEndFree(ropeEnd) || !splitter.Ports.Plug(port, ropeEnd)) return false;
+
+            _ropeJoints.Reserve(ropeEnd);
+            return true;
         }
 
         public void Unplug(HoseSplitter splitter, int port)
         {
-            splitter.Ports.Unplug(port);
+            var ports = splitter.Ports;
+            if (!ports.IsPlugged(port)) return;
+
+            _ropeJoints.Unreserve(ports.EndAt(port));
+            ports.Unplug(port);
         }
 
         public bool IsOpenEnd(HoseEndRef end) => IsEndFree(end) && !IsNozzleEnd(end);
@@ -426,7 +422,7 @@ namespace FlameBlame.Hose.Components
 
         private int HoseIndex(HoseSegment hose) => Array.IndexOf(_hoses, hose);
 
-        private bool IsSplitter(int joint) => _ropeJoints.Ends(joint).Count == SplitterEndCount;
+        private bool IsSplitter(int joint) => _ropeJoints.Ends(joint).Count == HoseSplitter.PortCount;
 
         private RopeEnd ToRopeEnd(HoseEndRef end) => new RopeEnd(HoseIndex(end.Hose), end.End);
 

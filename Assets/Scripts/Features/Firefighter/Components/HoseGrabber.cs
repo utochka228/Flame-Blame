@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FlameBlame.Firefighter.Config;
 using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
@@ -9,6 +10,8 @@ namespace FlameBlame.Firefighter.Components
     public class HoseGrabber : MonoBehaviour
     {
         private const int NoGrip = -1;
+
+        private static readonly List<HoseGrabber> Enabled = new List<HoseGrabber>();
 
         [SerializeField] private FirefighterConfigSO _config;
         [SerializeField] private FirefighterBody _firefighter;
@@ -29,6 +32,7 @@ namespace FlameBlame.Firefighter.Components
 
         private bool IsHolding => _grip != NoGrip;
         private bool IsHoldingNozzle => _aimGrip != NoGrip;
+        private int GripCount => (IsHolding ? 1 : 0) + (IsHoldingNozzle ? 1 : 0);
 
         private void Awake()
         {
@@ -40,12 +44,14 @@ namespace FlameBlame.Firefighter.Components
 
         private void OnEnable()
         {
+            Enabled.Add(this);
             _firefighter.Driven += OnDriven;
             _config.Changed += OnConfigChanged;
         }
 
         private void OnDisable()
         {
+            Enabled.Remove(this);
             _firefighter.Driven -= OnDriven;
             _config.Changed -= OnConfigChanged;
         }
@@ -75,7 +81,7 @@ namespace FlameBlame.Firefighter.Components
                 _body.AddForce(_heldNozzle.RecoilAcceleration * _config.Grip.RecoilTransferMultiplier, ForceMode.Acceleration);
             }
 
-            var gripsOnHose = _network.World.ActiveHandGripCount(heldParticle.Rope);
+            var gripsOnHose = HandGripsOn(heldParticle.Rope);
             _firefighter.MoveSpeedScale = CarryLoad.SpeedScale(gripsOnHose, IsHoldingNozzle, _heldHose.Config.Held.SoloCarrySpeedFraction);
 
             var pull = _network.World.GripTension(_grip) * _config.Grip.PullAccelerationMultiplier;
@@ -125,7 +131,7 @@ namespace FlameBlame.Firefighter.Components
             _sockets.FreeAt(found, _config.Tie.GrabToleranceParticles);
             _sockets.Disarm(found.Rope);
 
-            _grip = _network.World.AddGrip(found, _config.Grip.Compliance, true);
+            _grip = _network.World.AddGrip(found, _config.Grip.Compliance);
             _heldHose = _network.HoseOf(found.Rope);
             _heldHose.SetHeld(found.Index);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], eye.forward);
@@ -135,7 +141,7 @@ namespace FlameBlame.Firefighter.Components
                 return;
 
             _heldNozzle = nozzle;
-            _aimGrip = _network.World.AddGrip(nozzle.InnerParticle, _config.Grip.AimCompliance, true);
+            _aimGrip = _network.World.AddGrip(nozzle.InnerParticle, _config.Grip.AimCompliance);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], nozzle.CurrentDirection);
         }
 
@@ -168,6 +174,18 @@ namespace FlameBlame.Firefighter.Components
                 var weight = ThrowSpread.Weight(offset, spread);
                 _network.World.AddImpulse(new RopeParticle(held.Rope, index), velocity * weight);
             }
+        }
+
+        private static int HandGripsOn(int rope)
+        {
+            var count = 0;
+            foreach (var grabber in Enabled)
+            {
+                if (grabber.HeldParticle.Rope == rope)
+                    count += grabber.GripCount;
+            }
+
+            return count;
         }
 
         private Vector3 PhysicsEyePosition(Transform eye)

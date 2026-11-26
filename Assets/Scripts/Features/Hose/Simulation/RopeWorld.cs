@@ -63,9 +63,9 @@ namespace FlameBlame.Hose.Simulation
 
         public Vector3 JunctionPosition(int junction) => JunctionTarget(_junctions[junction]);
 
-        public int AddGrip(RopeParticle particle, float compliance, bool isHand = false)
+        public int AddGrip(RopeParticle particle, float compliance)
         {
-            var grip = new Grip(particle, compliance, _ropes[particle.Rope].Positions[particle.Index]) { IsHand = isHand };
+            var grip = new Grip(particle, compliance, _ropes[particle.Rope].Positions[particle.Index]);
             var slot = _grips.FindIndex(existing => !existing.IsActive);
             if (slot < 0)
             {
@@ -87,18 +87,6 @@ namespace FlameBlame.Hose.Simulation
             }
 
             return false;
-        }
-
-        public int ActiveHandGripCount(int rope)
-        {
-            var count = 0;
-            foreach (var grip in _grips)
-            {
-                if (grip.IsActive && grip.IsHand && grip.Particle.Rope == rope)
-                    count++;
-            }
-
-            return count;
         }
 
         public Vector3 ParticlePosition(RopeParticle particle) => _ropes[particle.Rope].Positions[particle.Index];
@@ -280,7 +268,6 @@ namespace FlameBlame.Hose.Simulation
             public Vector3 Tension { get; set; }
             public Vector3 Displacement { get; set; }
             public bool IsActive { get; set; } = true;
-            public bool IsHand { get; set; }
 
             public Grip(RopeParticle particle, float compliance, Vector3 target)
             {

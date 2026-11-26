@@ -102,12 +102,14 @@ namespace FlameBlame.Firefighter.Components
         private void PlugSplitterPort(HoseSocket socket, RopeParticle particle)
         {
             var hose = _network.HoseOf(particle.Rope);
-            var isStart = particle.Index == 0;
-            var kind = isStart ? RopeEndKind.Start : RopeEndKind.Tail;
-            if (!_network.TryPlug(socket.Splitter, socket.SplitterPort, new HoseEndRef(hose, kind))) return;
+            foreach (var end in hose.OpenEnds)
+            {
+                if (end.ParticleIndex != particle.Index) continue;
+                if (!_network.TryPlug(socket.Splitter, socket.SplitterPort, new HoseEndRef(hose, end.Kind))) return;
 
-            var inner = new RopeParticle(particle.Rope, isStart ? 1 : particle.Index - 1);
-            socket.Aim(_network.World, inner, hose.Config.Rope.Spacing, _config.Grip.AimCompliance);
+                socket.Aim(_network.World, new RopeParticle(particle.Rope, end.InnerIndex), hose.Config.Rope.Spacing, _config.Grip.AimCompliance);
+                return;
+            }
         }
 
         private CatchParts FreeParts(int rope)

@@ -63,6 +63,16 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void Unreserve_FreesTheEnd()
+        {
+            _joints.Reserve(_secondStart);
+            _joints.Unreserve(_secondStart);
+
+            Assert.IsTrue(_joints.IsEndFree(_secondStart));
+            Assert.AreNotEqual(RopeJoints.NoJoint, Join(_firstTail, _secondStart));
+        }
+
+        [Test]
         public void Add_EndAlreadyJoined_IsRefused()
         {
             Join(_firstTail, _secondStart);

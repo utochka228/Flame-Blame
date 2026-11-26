@@ -1,3 +1,5 @@
+using System;
+
 namespace FlameBlame.Hose.Simulation
 {
     public enum RopeEndKind
@@ -6,7 +8,7 @@ namespace FlameBlame.Hose.Simulation
         Tail = 1
     }
 
-    public readonly struct RopeEnd
+    public readonly struct RopeEnd : IEquatable<RopeEnd>
     {
         public int Rope { get; }
         public RopeEndKind Kind { get; }
@@ -16,5 +18,11 @@ namespace FlameBlame.Hose.Simulation
             Rope = rope;
             Kind = kind;
         }
+
+        public bool Equals(RopeEnd other) => Rope == other.Rope && Kind == other.Kind;
+
+        public override bool Equals(object obj) => obj is RopeEnd other && Equals(other);
+
+        public override int GetHashCode() => Rope * 2 + (int)Kind;
     }
 }
