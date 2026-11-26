@@ -242,6 +242,7 @@ GameObject:
   - component: {fileID: 52628298}
   - component: {fileID: 52628296}
   - component: {fileID: 52628297}
+  - component: {fileID: 52628299}
   m_Layer: 0
   m_Name: Eye
   m_TagString: MainCamera
@@ -323,6 +324,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1884012712}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &52628299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 52628295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00aa4676aa8b64a578bb99edad2dd724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Presentation.FirefighterEyeMotion
+  _body: {fileID: 1884012711}
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
 --- !u!1 &69343190
 GameObject:
   m_ObjectHideFlags: 0
@@ -753,6 +768,7 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
   _firefighter: {fileID: 199389384}
   _network: {fileID: 655287859}
+  _sockets: {fileID: 0}
 --- !u!114 &199389391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -771,6 +787,7 @@ MonoBehaviour:
   _network: {fileID: 655287859}
   _tie: {fileID: 199389393}
   _climber: {fileID: 199389392}
+  _sockets: {fileID: 0}
 --- !u!114 &199389392
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11254,6 +11271,7 @@ GameObject:
   - component: {fileID: 565016974}
   - component: {fileID: 565016972}
   - component: {fileID: 565016973}
+  - component: {fileID: 565016975}
   m_Layer: 0
   m_Name: Eye
   m_TagString: MainCamera
@@ -11335,6 +11353,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 199389385}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &565016975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565016971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00aa4676aa8b64a578bb99edad2dd724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Presentation.FirefighterEyeMotion
+  _body: {fileID: 199389384}
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
 --- !u!1 &655287858
 GameObject:
   m_ObjectHideFlags: 0
@@ -11376,6 +11408,7 @@ MonoBehaviour:
       <End>k__BackingField: 1
     - <Hose>k__BackingField: {fileID: 410306587}
       <End>k__BackingField: 0
+  _splitters: []
   _maxPieces: 16
   _junctionBreakDistance: 0.25
   _solvesPerSecond: 10
@@ -28412,6 +28445,7 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
   _firefighter: {fileID: 1884012711}
   _network: {fileID: 655287859}
+  _sockets: {fileID: 0}
 --- !u!114 &1884012718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28430,6 +28464,7 @@ MonoBehaviour:
   _network: {fileID: 655287859}
   _tie: {fileID: 1884012720}
   _climber: {fileID: 1884012719}
+  _sockets: {fileID: 0}
 --- !u!114 &1884012719
 MonoBehaviour:
   m_ObjectHideFlags: 0
