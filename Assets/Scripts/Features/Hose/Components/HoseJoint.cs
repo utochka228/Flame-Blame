@@ -10,7 +10,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HoseEndRef[] _ends;
 
         public IReadOnlyList<HoseEndRef> Ends => _ends;
-        public bool IsSplitter => _ends.Length == HoseSplitter.PortCount;
+        public bool IsSplitter => _ends.Length > 2;
 
         public HoseJoint(params HoseEndRef[] ends)
         {

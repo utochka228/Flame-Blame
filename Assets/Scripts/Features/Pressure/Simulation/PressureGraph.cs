@@ -8,7 +8,7 @@ namespace FlameBlame.Pressure.Simulation
         public const int HoseStart = 0;
         public const int HoseEnd = 1;
 
-        internal const int PortsPerPart = 3;
+        internal const int PortsPerPart = 4;
 
         private readonly List<Part> _parts = new List<Part>();
         private readonly List<float> _thumbBoostFractions = new List<float>();

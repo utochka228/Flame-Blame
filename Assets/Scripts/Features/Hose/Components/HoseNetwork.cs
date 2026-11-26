@@ -422,7 +422,7 @@ namespace FlameBlame.Hose.Components
 
         private int HoseIndex(HoseSegment hose) => Array.IndexOf(_hoses, hose);
 
-        private bool IsSplitter(int joint) => _ropeJoints.Ends(joint).Count == HoseSplitter.PortCount;
+        private bool IsSplitter(int joint) => _ropeJoints.Ends(joint).Count > 2;
 
         private RopeEnd ToRopeEnd(HoseEndRef end) => new RopeEnd(HoseIndex(end.Hose), end.End);
 
