@@ -17,22 +17,44 @@ namespace FlameBlame.Firefighter.Components
         private CapsuleCollider _capsule;
         private LookState _look;
         private FirefighterMotion _motion;
+        private JumpGate _jump;
         private Vector2 _move;
-        private bool _jumpRequested;
+        private bool _isJumpHeld;
+        private float _airborneFallSpeed;
+        private bool _isMotionOverridden;
 
         public Camera Eye => _eye;
-        public bool IsMotionOverridden { get; set; }
+        public bool IsMotionOverridden
+        {
+            get => _isMotionOverridden;
+            set
+            {
+                if (value == _isMotionOverridden)
+                    return;
+
+                _isMotionOverridden = value;
+                _jump.Cancel();
+                IsGrounded = false;
+                _airborneFallSpeed = 0f;
+            }
+        }
+
         public float MoveSpeedScale { get; set; } = 1f;
+        public bool IsGrounded { get; private set; }
+        public Vector3 Velocity => _body.linearVelocity;
+        public Quaternion EyeLookRotation => Quaternion.Euler(_look.Pitch, Mathf.DeltaAngle(transform.eulerAngles.y, _look.Yaw), 0f);
 
         public event Action<FirefighterCommands> Driven;
+        public event Action<float> Landed;
 
         private void Awake()
         {
             _body = GetComponent<Rigidbody>();
             _capsule = GetComponent<CapsuleCollider>();
             _body.freezeRotation = true;
-            _look = new LookState(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, transform.eulerAngles.y);
-            _motion = new FirefighterMotion(_config.Movement.MoveSpeed, _config.Movement.Acceleration, _config.Movement.Deceleration, _config.Movement.JumpSpeed, _config.Movement.AirControlFraction);
+            _look = new LookState(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, transform.eulerAngles.y, _config.Look.IsInvertedY);
+            _jump = new JumpGate(_config.Movement.JumpBufferSeconds, _config.Movement.CoyoteSeconds, _config.Movement.JumpLockoutSeconds);
+            _motion = CreateMotion(_config.Movement);
         }
 
         private void OnEnable()
@@ -51,34 +73,57 @@ namespace FlameBlame.Firefighter.Components
             _body.MoveRotation(facing);
             if (IsMotionOverridden) return;
 
-            var isGrounded = IsGrounded();
+            var jumps = _jump.Step(IsTouchingGround(), Time.fixedDeltaTime);
+            TrackLanding();
             var traction = _puddles ? _puddles.TractionAt(transform.position) : 1f;
-            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, isGrounded, MoveSpeedScale, traction);
-            if (_jumpRequested && isGrounded)
+            var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, IsGrounded, MoveSpeedScale, traction);
+            if (jumps)
                 velocity = _motion.Jump(velocity);
+            else if (!IsGrounded)
+                velocity = _motion.AddAirGravity(velocity, Physics.gravity.y, _isJumpHeld, Time.fixedDeltaTime);
 
-            _jumpRequested = false;
             _body.linearVelocity = Vector3.ClampMagnitude(velocity, _config.Movement.MaxSpeed);
         }
 
         public void Drive(FirefighterCommands commands)
         {
             _move = commands.Move;
-            _jumpRequested |= commands.WasPressed(FirefighterButtons.Jump);
+            _isJumpHeld = commands.IsHeld(FirefighterButtons.Jump);
+            if (commands.WasPressed(FirefighterButtons.Jump))
+                _jump.Press();
+
             _look.Apply(commands.Look);
-            _eye.transform.localRotation = Quaternion.Euler(_look.Pitch, 0f, 0f);
+            _eye.transform.localRotation = EyeLookRotation;
             Driven?.Invoke(commands);
         }
 
         private void OnConfigChanged()
         {
             var movement = _config.Movement;
-            _look.Configure(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees);
-            _motion = new FirefighterMotion(movement.MoveSpeed, movement.Acceleration, movement.Deceleration, movement.JumpSpeed,
-                movement.AirControlFraction);
+            _look.Configure(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, _config.Look.IsInvertedY);
+            _jump.Configure(movement.JumpBufferSeconds, movement.CoyoteSeconds, movement.JumpLockoutSeconds);
+            _motion = CreateMotion(movement);
         }
 
-        private bool IsGrounded()
+        private static FirefighterMotion CreateMotion(FirefighterMovementConfig movement) =>
+            new(movement.MoveSpeed, movement.Acceleration, movement.Deceleration, movement.JumpSpeed, movement.AirControlFraction,
+                movement.FallGravityMultiplier, movement.ShortJumpGravityMultiplier);
+
+        private void TrackLanding()
+        {
+            var isGrounded = _jump.IsGrounded;
+            if (!isGrounded)
+                _airborneFallSpeed = Mathf.Max(_airborneFallSpeed, -_body.linearVelocity.y);
+            else if (!IsGrounded)
+            {
+                Landed?.Invoke(_airborneFallSpeed);
+                _airborneFallSpeed = 0f;
+            }
+
+            IsGrounded = isGrounded;
+        }
+
+        private bool IsTouchingGround()
         {
             var bounds = _capsule.bounds;
             var origin = new Vector3(bounds.center.x, bounds.min.y + _capsule.radius, bounds.center.z);

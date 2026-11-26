@@ -113,5 +113,35 @@ namespace FlameBlame.Tests.EditMode
 
             Assert.That(velocity, Is.EqualTo(new Vector3(2f, JumpSpeed, 3f)));
         }
+
+        [Test]
+        public void AddAirGravity_Falling_AddsExtraGravity()
+        {
+            var motion = new FirefighterMotion(MoveSpeed, Acceleration, Deceleration, JumpSpeed, 1f, 2f, 3f);
+
+            var velocity = motion.AddAirGravity(new Vector3(1f, -2f, 0f), -10f, true, 0.1f);
+
+            Assert.That(velocity, Is.EqualTo(new Vector3(1f, -3f, 0f)));
+        }
+
+        [Test]
+        public void AddAirGravity_RisingWithJumpHeld_AddsNothing()
+        {
+            var motion = new FirefighterMotion(MoveSpeed, Acceleration, Deceleration, JumpSpeed, 1f, 2f, 3f);
+
+            var velocity = motion.AddAirGravity(new Vector3(0f, 4f, 0f), -10f, true, 0.1f);
+
+            Assert.That(velocity.y, Is.EqualTo(4f));
+        }
+
+        [Test]
+        public void AddAirGravity_RisingWithJumpReleased_CutsJumpShort()
+        {
+            var motion = new FirefighterMotion(MoveSpeed, Acceleration, Deceleration, JumpSpeed, 1f, 2f, 3f);
+
+            var velocity = motion.AddAirGravity(new Vector3(0f, 4f, 0f), -10f, false, 0.1f);
+
+            Assert.That(velocity.y, Is.EqualTo(2f).Within(1e-4f));
+        }
     }
 }

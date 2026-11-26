@@ -8,6 +8,7 @@ namespace FlameBlame.Firefighter.Config
     {
         [field: SerializeField] public FirefighterMovementConfig Movement { get; private set; } = new();
         [field: SerializeField] public FirefighterLookConfig Look { get; private set; } = new();
+        [field: SerializeField] public FirefighterEyeMotionConfig EyeMotion { get; private set; } = new();
         [field: SerializeField] public FirefighterInteractionConfig Interaction { get; private set; } = new();
         [field: SerializeField] public FirefighterGripConfig Grip { get; private set; } = new();
         [field: SerializeField] public FirefighterThrowConfig Throw { get; private set; } = new();

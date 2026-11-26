@@ -31,6 +31,16 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
+        public void Apply_InvertedY_MovingMouseUp_LooksDown()
+        {
+            var look = new LookState(DegreesPerPixel, PitchLimit, 0f, true);
+
+            look.Apply(new Vector2(0f, 20f));
+
+            Assert.That(look.Pitch, Is.EqualTo(10f));
+        }
+
+        [Test]
         public void Apply_ClampsPitchBothWays()
         {
             var look = new LookState(DegreesPerPixel, PitchLimit, 0f);
