@@ -141,5 +141,39 @@ namespace FlameBlame.Tests.EditMode
             Assert.That(puddles.Puddles.Count, Is.EqualTo(1));
             Assert.That(puddles.Puddles[0].Volume, Is.EqualTo(0.02f).Within(1e-5f));
         }
+
+        [Test]
+        public void Fade_ShrinksAndDimsThePuddle_AndItStopsCountingAsWet()
+        {
+            _puddles.Add(Vector3.zero, 4f);
+
+            _puddles.Fade(0, 0.5f);
+
+            Assert.That(_puddles.Puddles[0].Opacity, Is.EqualTo(0.5f).Within(1e-4f));
+            Assert.That(_puddles.Puddles[0].Radius, Is.EqualTo(0.5f).Within(1e-4f));
+            Assert.That(_puddles.TractionAt(Vector3.zero), Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void Fade_ToZero_RemovesThePuddle()
+        {
+            _puddles.Add(Vector3.zero, 4f);
+
+            _puddles.Fade(0, 1f);
+
+            Assert.That(_puddles.Puddles, Is.Empty);
+        }
+
+        [Test]
+        public void Add_NearAFadingPuddle_StartsANewOne()
+        {
+            _puddles.Add(Vector3.zero, 4f);
+            _puddles.Fade(0, 0.1f);
+
+            _puddles.Add(new Vector3(0.5f, 0f, 0f), 1f);
+
+            Assert.That(_puddles.Puddles.Count, Is.EqualTo(2));
+            Assert.That(_puddles.Puddles[1].Opacity, Is.EqualTo(1f));
+        }
     }
 }
