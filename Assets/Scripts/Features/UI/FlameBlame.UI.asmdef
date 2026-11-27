@@ -2,12 +2,14 @@
     "name": "FlameBlame.UI",
     "rootNamespace": "FlameBlame.UI",
     "references": [
+        "FlameBlame.Audio",
         "FlameBlame.Core",
         "FlameBlame.Fire",
         "FlameBlame.Firefighter",
         "FlameBlame.Hose",
         "FlameBlame.Level",
         "FlameBlame.Pressure",
+        "Unity.InputSystem",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],

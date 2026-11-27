@@ -1,0 +1,55 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../Kit/Tokens.uss" />
+    <ui:Style src="../Kit/Kit.uss" />
+    <ui:Style src="Menu.uss" />
+    <ui:VisualElement name="menuRoot" class="fb-layer menu-root" picking-mode="Ignore">
+        <ui:VisualElement name="menuBackdrop" class="fb-layer menu-backdrop menu--hidden" />
+        <ui:VisualElement name="menu" class="menu menu--hidden">
+            <ui:VisualElement name="menuLogo" class="menu-logo" picking-mode="Ignore">
+                <ui:Label text="LOGO GOES HERE" class="menu-logo__text" picking-mode="Ignore" />
+                <ui:Label text="(the intern is still drawing it)" class="fb-text-muted menu-logo__hint" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="menuTitle" text="FLAME &amp; BLAME" class="menu-title" picking-mode="Ignore" />
+            <ui:Label name="menuTagline" text="Put out fires. Blame coworkers. Repeat." class="fb-text-muted menu-tagline" picking-mode="Ignore" />
+            <ui:VisualElement name="menuCard" class="menu-card">
+                <ui:Label text="Body-swap chaos level" class="menu-card__heading" picking-mode="Ignore" />
+                <ui:VisualElement class="menu-modes">
+                    <ui:Button name="modeOff" text="Loyal" class="fb-button menu-mode" />
+                    <ui:Button name="mode90" text="Forgetful" class="fb-button menu-mode" />
+                    <ui:Button name="mode60" text="Identity crisis" class="fb-button menu-mode" />
+                    <ui:Button name="mode30" text="Full panic" class="fb-button menu-mode" />
+                </ui:VisualElement>
+                <ui:Label name="modeCaption" text="" class="fb-text-muted menu-mode-caption" picking-mode="Ignore" />
+                <ui:Label text="Noise department" class="menu-card__heading" picking-mode="Ignore" />
+                <ui:VisualElement class="menu-volume">
+                    <ui:Label text="SFX: splish, splash, screaming" class="fb-text-muted menu-volume__label" picking-mode="Ignore" />
+                    <ui:Slider name="sfxSlider" low-value="0" high-value="1" value="1" class="menu-volume__slider" />
+                    <ui:Label name="sfxValue" text="100%" class="menu-volume__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="menu-volume">
+                    <ui:Label text="Music: dramatic violins" class="fb-text-muted menu-volume__label" picking-mode="Ignore" />
+                    <ui:Slider name="musicSlider" low-value="0" high-value="1" value="1" class="menu-volume__slider" />
+                    <ui:Label name="musicValue" text="100%" class="menu-volume__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="playButton" text="PLAY (responsibly)" class="fb-button fb-button--primary menu-play" />
+            <ui:Label name="menuHint" text="Esc pauses the fire. The fire is very patient." class="fb-text-muted menu-hint" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="briefing" class="fb-layer briefing menu--hidden">
+            <ui:VisualElement name="briefingCard" class="briefing__card">
+                <ui:Label name="briefingCounter" text="1 / 1" class="briefing__counter" picking-mode="Ignore" />
+                <ui:Label name="briefingTitle" text="" class="briefing__title" picking-mode="Ignore" />
+                <ui:Label name="briefingBody" text="" class="fb-text-muted briefing__body" picking-mode="Ignore" />
+                <ui:VisualElement name="briefingDots" class="briefing__dots" picking-mode="Ignore" />
+                <ui:VisualElement class="briefing__buttons">
+                    <ui:Button name="briefingSkip" text="Skip (I'm a professional)" class="fb-button" />
+                    <ui:VisualElement class="briefing__nav">
+                        <ui:Button name="briefingBack" text="Back" class="fb-button briefing__back" />
+                        <ui:Button name="briefingNext" text="Next" class="fb-button fb-button--primary" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="companyLabel" text="" class="fb-text-muted menu-company" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

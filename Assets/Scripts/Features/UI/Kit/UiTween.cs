@@ -96,6 +96,19 @@ namespace FlameBlame.UI.Kit
                 .OnKill(() => element.style.backgroundColor = StyleKeyword.Null);
         }
 
+        public static Tween Wobble(VisualElement element, float fromDegrees, float restDegrees, float duration)
+        {
+            var angle = fromDegrees;
+            return DOTween.To(() => angle, value =>
+                {
+                    angle = value;
+                    element.style.rotate = new Rotate(value);
+                }, restDegrees, duration)
+                .SetEase(Ease.OutElastic)
+                .SetUpdate(true)
+                .OnKill(() => element.style.rotate = StyleKeyword.Null);
+        }
+
         public static void Restart(ref Tween tween, Tween next)
         {
             tween?.Kill();

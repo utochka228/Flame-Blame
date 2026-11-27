@@ -71,3 +71,41 @@
     border-color: var(--fb-accent);
     color: var(--fb-accent);
 }
+
+.fb-button {
+    margin: 0;
+    padding: 10px 20px;
+    border-width: 2px;
+    border-radius: 12px;
+    border-color: var(--fb-chip-border);
+    background-color: var(--fb-chip);
+    color: var(--fb-text);
+    font-size: var(--fb-font-m);
+    -unity-font-style: bold;
+    transition-duration: 0.12s;
+}
+
+.fb-button:hover {
+    scale: 1.06 1.06;
+    border-color: var(--fb-warn);
+}
+
+.fb-button:active {
+    scale: 0.94 0.94;
+}
+
+.fb-button--primary {
+    background-color: var(--fb-warn);
+    border-color: var(--fb-warn);
+    color: var(--fb-ink);
+}
+
+.fb-button--primary:hover {
+    border-color: var(--fb-text);
+}
+
+.fb-button--selected {
+    background-color: var(--fb-warn);
+    border-color: var(--fb-text);
+    color: var(--fb-ink);
+}

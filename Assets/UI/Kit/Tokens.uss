@@ -3,6 +3,10 @@
     --fb-text-muted: rgba(255, 255, 255, 0.78);
     --fb-chip: rgba(34, 34, 40, 0.78);
     --fb-chip-solid: rgba(18, 14, 18, 0.88);
+    --fb-chip-border: rgba(255, 255, 255, 0.12);
+    --fb-ink: rgb(28, 22, 26);
+    --fb-backdrop: rgba(10, 6, 10, 0.72);
+    --fb-font-s: 16px;
     --fb-accent: rgb(120, 200, 255);
     --fb-warn: rgb(245, 170, 40);
     --fb-good: rgb(98, 224, 106);
