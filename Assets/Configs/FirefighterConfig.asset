@@ -18,7 +18,7 @@ MonoBehaviour:
     <Acceleration>k__BackingField: 40
     <Deceleration>k__BackingField: 25
     <MaxSpeed>k__BackingField: 20
-    <JumpSpeed>k__BackingField: 6
+    <JumpSpeed>k__BackingField: 4.5
     <AirControlPercent>k__BackingField: 15
     <FallGravityMultiplier>k__BackingField: 1.8
     <ShortJumpGravityMultiplier>k__BackingField: 2.5
