@@ -32,10 +32,11 @@ Code: `Assets/Scripts/Core/` (`EventBus`, `PercentExtensions`, `Vector3Extension
 - `Hose/`: `XpbdRope`, `RopeWorld`, `HoseSegment`, `HoseNetwork`, `Nozzle`, `BurstSequence`, `TubeMeshBuilder`, `HoseConfigSO`.
 - `Pressure/`: `PressureGraph`, `PressureSolver`, `PressureResult`, `PressureSource`.
 - `Firefighter/`: `FirefighterBody`, `FirefighterInteractor`, `HoseGrabber`, `HoseClimber`, `HoseTie`, `AnchoredGrip`, `HoseSocket(s)`, `FirefighterSwap`.
+- `Audio/`: `AudioManager` (pooled SFX, crossfaded music, bus volume), `AudioConfigSO`, `SoundCueSO`, `VolumeCurve`, `TakePicker`. Mixer is `Assets/Audio/Mixer/MainMixer.mixer` (Sfx, Ui, Music, Ambience); each feature's `Presentation/*Audio` listener maps its events to cues.
 - `Fire/` (`Fire`), `Water/` (`PuddleField`), `Interactables/` (`Door`), `Level/` (`LevelGoal`), and `UI/` (new UI is UI Toolkit: UXML/USS in `Assets/UI/`, a `…View` plus a presenter; the HUD is `UI/Hud/` (`HudPresenter`), shared tokens/classes in `Assets/UI/Kit/`, DOTween helpers in `UI/Kit/UiTween`; the pressure-slider views are still UGUI).
 - EditMode and PlayMode tests.
 
-Assemblies: `FlameBlame.Core`, `.Hose`, `.Pressure`, `.Firefighter`, `.Fire`, `.Water`, `.Interactables`, `.Level`, `.UI`, `.Tests.EditMode`, `.Tests.PlayMode`; each new feature gets its own `.asmdef`. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Milestones 1–3 are built, and milestone 4 (systems and level) is in progress. Not built yet: slippery puddles, steam, jet move, and the wall-pipe socket. Gates still open:
+Assemblies: `FlameBlame.Core`, `.Audio`, `.Hose`, `.Pressure`, `.Firefighter`, `.Fire`, `.Water`, `.Interactables`, `.Level`, `.UI`, `.Tests.EditMode`, `.Tests.PlayMode`; each new feature gets its own `.asmdef`. Packages added beyond the template: UniTask and `org.nuget.microsoft.extensions.logging` (OpenUPM). DoTween is an Asset Store import (not UPM), living in `Assets/Plugins/Demigiant/`. Milestones 1–3 are built, and milestone 4 (systems and level) is in progress. Not built yet: slippery puddles, steam, jet move, and the wall-pipe socket. Gates still open:
 - the 60 fps WebGL profile;
 - an on-screen readability check of bursts and pinches;
 - "level completable by every route" (Play-mode walk of each route and the hose budget).

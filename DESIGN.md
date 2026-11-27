@@ -145,6 +145,13 @@ The problems can be solved in any order. The level is done when all fires are ou
 
 Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled from the modular kit in `Assets/Prefabs/ModularBuilding/` (root `Building_Kit`); gameplay objects live under `Blockout` (zones `Z0`–`Z5`, `Fires`, `Markers`).
 
+Set dressing lives under `Dressing` (one child per zone), built from the Mnostva interior packs and LowPolyFurniturePackFree at 1.25× (the LowPoly variants carry the scale themselves) so it reads against the 2 m firefighter: the lobby is a coffee shop, the hall a garage, room A a bedroom, room B a living room, and the stairwell burnt storage. Props within reach of a fire use the soot materials (`Prop_Cafe_Charred`, `Prop_Home_Charred`, `Prop_LowPoly_Charred`). Every prop follows one collider rule, through variants in `Assets/Prefabs/Props/`:
+- **Static** (original prefab): large furniture against walls. Its collider blocks bodies and catches hoses, so it stays off routes, door swings and fire sightlines.
+- **`_Physics`** (Rigidbody): chairs, café tables, boxes, plants, lamp, ironing board. The jet and the firefighters shove them, so they may sit on a route as mess. Knocked-over poses are baked from a Play-mode settle, so they start at rest.
+- **`_Decor`** (no collider): small clutter and wall art. The capsule has no step-up and the hose would snag on it, so it never collides.
+
+Spacing rule: a prop either touches its neighbour (wall, prop, vehicle) or leaves at least 1.1 m, the capsule's width plus margin. Anything between is a slot a firefighter wedges into and sticks.
+
 ### Level design spine
 
 - **Hose length and parts are the budget.** Enough hose to finish the level, but not enough to cover every route at once, so players have to think about where they lay it. Hose catches on corners and doorframes, so every route costs length.
@@ -160,7 +167,7 @@ The firefighter is the measuring stick. The kit is placed at 1.5× so doorways a
 | Metric | Value |
 | --- | --- |
 | Firefighter capsule | 2 m tall, 0.5 m radius, eye at 1.7 m; no step-up, so stairs carry an invisible ramp |
-| Jump apex | ~1.8 m (jump speed 6 m/s, gravity 9.81; on paper, not measured in play) |
+| Jump apex / reach | ~1.0 m / ~4.0 m at full run (jump speed 4.5 m/s, gravity 9.81, fall gravity ×1.8; on paper, not measured in play). Kept short so the gap pit can't be jumped: crossing it takes ~4.5 m of flight once ground-check overhang and coyote time are counted |
 | Reach / grip distance | 3 m / 3.5 m |
 | Grid / storey height | 3 m modules, 3.6 m storeys (upper floor at 3.6 m, roof at 7.2 m) |
 | Doorway / wide doorway opening | 1.35 × 3.15 m / 4.35 m wide |
@@ -180,21 +187,22 @@ The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z
 - The balcony over the lobby entrance (x −12..−3, 3.6 m up) is the outside route to the upper floor: throw a hose over its rail and climb.
 
 **Z1 Lobby (ground floor, west).** Entered through the wide front doorway.
-- `Splitter_Lobby` is pre-placed here, so the split decision comes early: split now to cover two rooms and every later zone gets half pressure.
+- `Splitter_Lobby` is pre-placed just inside the front doorway, tucked beside the couch out of the walking line, its input toward the door and its outputs toward the hall door and the counter, so the split decision comes early: split now to cover two rooms and every later zone gets half pressure.
 - `Door_LobbyHall` leads east to the hall; like every kit door it pinches a hose when it closes on it.
 - The lobby's wall to the stairwell is solid, so the stairwell can't be the second stop.
-- One fire behind the counter (`Fire_Z1_Lobby`).
+- One fire behind the café counter (`Fire_Z1_Lobby`), in a 1.3 m aisle between the serving counter and the back counter.
 
 **Z2 Burning hall (ground floor, east, single storey).** Entered through its wide front doorway (closest to the truck) or from the lobby.
 - The hall fire (`Fire_Z2_Hall`) sits on a heat zone (5 × 5 m at x 8.5, z 4.5). The shortest route from the truck to the gap runs through it, so a hose laid here heats up and burns through: problem 4.
 - Repair by swapping the burnt piece with a spare and a coupling, rerouting through the lobby, or taping it (fast, leaks).
 - A wide opening at the back leads to the near side of the gap.
-- On the near side, a heavy crate (`Crate`, with `Socket_Crate` to tie to) jams the doorway into the stairwell (x 3, z 16.5): push it with a jet, tie and yank it by opening the valve, or tie-drag it by hand.
+- On the near side, a heavy crate (`Crate`, dressed as a wardrobe pushed across the doorway, with `Socket_Crate` to tie to) jams the doorway into the stairwell (x 3, z 16.5): push it with a jet, tie and yank it by opening the valve, or tie-drag it by hand.
 
 **Z3 The gap (collapsed floor).** A 6 m pit between the near side (z 15..18) and the far side (z 24..27), with `Fire_Z3_GapFar` on the far side.
 - Bridge: latch the far end on `Socket_GapBracket` and give the hose full pressure, usually by pinching the other branch (a closed door or the idle firefighter).
 - Rope: throw an empty hose over the climb beam, climb it, and mantle.
 - Walk-around: clear the near-side crate, go through the stairwell and `Door_StairGap` to reach the far side on foot.
+- The outdoor `GroundCollider` is four slabs around the pit opening, so nothing invisible spans the pit.
 - A ramp along the pit's east wall leads back out, so falling in is never a soft-lock.
 
 **Z4 Upper floor (rooms, balcony, landing, mezzanine).** Two fire rooms (`Fire_Z4_RoomA` in the west room, `Fire_Z4_RoomB` in the east room) split by `Door_RoomDivider`.
@@ -202,7 +210,7 @@ The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z
 - Options at the top: haul the nozzle up and spray, anchor it as a fixed sprinkler, or drop it and let the hose snake whip around.
 
 **Z5 Stairwell (finale).** Reached from the gap's near side through the crate doorway, so only after the hall (or `Door_LobbyHall`); the back exit is boarded up. About 40 m of hose from the main line's end to the blaze with one nozzle, about 50 m with two.
-- The stairwell blaze (`Fire_Z5_Blaze`, 3× scale, `FireConfig_Blaze`) is by far the biggest fire. Water below its `MinWaterPerSecond` does nothing, so a single split jet only watches it regrow. Beat it with two nozzles at once (`Splitter_Stairwell` sits at the crate doorway) or one nozzle at full pressure by pinching every other branch.
+- The stairwell blaze (`Fire_Z5_Blaze`, `Fire_Huge` variant, `FireConfig_Blaze`) is by far the biggest fire. Water below its `MinWaterPerSecond` does nothing, so a single split jet only watches it regrow. Beat it with two nozzles at once (`Splitter_Stairwell` sits just inside the stairwell, in the corner beside the crate doorway, input toward the doorway) or one nozzle at full pressure by pinching every other branch.
 - Short stairs (top at 1.5 m) stop 2.1 m below the landing; throw a hose over the landing rail and climb.
 
 **Win:** every fire is out. `LevelGoal` tracks all seven fires (`Fire_Z0_YardBin` to `Fire_Z5_Blaze`).
@@ -473,6 +481,7 @@ Namespaces match folders, for example `FlameBlame.Hose.Simulation`.
 - **Screen UI is its own feature:** title screen, click to start, controls overlay, join and swap prompts, pause.
 - **Interaction prompts:** UI owns one generic prompt system; features only provide data, such as `IInteractable.PromptText`.
 - **HUD (built, UI Toolkit):** objective pill (fires left), Use prompt and reticle driven by `FirefighterInteractor.ResolveAction()`, event feed (fire out, hose burst, latch and release), swap chip with the forced-swap warning, and a level-complete banner. Look and feel came from a throwaway prototype of reference shots; hotbar, money, chat, revive and the garage were cut because no mechanic backs them.
+- **Menu (built, UI Toolkit):** a start menu before play and the same menu as the Esc pause: swap-timer mode (Off/90/60/30 s), SFX and music volume (saved in PlayerPrefs), a logo slot waiting for art, and the company name from Player Settings in a corner. Play opens a six-step briefing (goal, controls, pressure, bursts, two bodies, scoring); a replay with R skips both. Menu and briefing freeze time and player input.
 - **UI kit:** `Assets/UI/Kit/` holds the colour and size tokens and the shared `fb-` classes (chip, pill, keycap, toast, banner); `UiTween` holds the DOTween helpers for UI Toolkit elements (pop, squash, pulse, slide, fade, shake, flash), all in real time and returning to the USS rest value.
 - **UI depends on features, never the reverse.** It listens to events or reads small read-only interfaces.
 
