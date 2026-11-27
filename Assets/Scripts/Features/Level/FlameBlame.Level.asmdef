@@ -3,7 +3,10 @@
     "rootNamespace": "FlameBlame.Level",
     "references": [
         "FlameBlame.Core",
-        "FlameBlame.Fire"
+        "FlameBlame.Fire",
+        "FlameBlame.Firefighter",
+        "FlameBlame.Hose",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
