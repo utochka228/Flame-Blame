@@ -143,7 +143,7 @@ One small burning building with four problems, each solved by a different side o
 
 The problems can be solved in any order. The level is done when all fires are out. The point of the level is to show that one system solves four different kinds of problems, and causes chaos along the way.
 
-Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled from the modular kit in `Assets/Prefabs/ModularBuilding/` (root `Building_Kit`); gameplay objects live under `Blockout` (zones `Z0`–`Z5`, `Fires`, `Markers`).
+Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled from the modular kit in `Assets/Prefabs/ModularBuilding/` (root `Building_Kit`); gameplay objects live under `Zones` (zones `Z0`–`Z5`, `Fires`, `Markers`).
 
 Set dressing lives under `Dressing` (one child per zone), built from the Mnostva interior packs and LowPolyFurniturePackFree at 1.25× (the LowPoly variants carry the scale themselves) so it reads against the 2 m firefighter: the lobby is a coffee shop, the hall a garage, room A a bedroom, room B a living room, and the stairwell burnt storage. Props within reach of a fire use the soot materials (`Prop_Cafe_Charred`, `Prop_Home_Charred`, `Prop_LowPoly_Charred`). Every prop follows one collider rule, through variants in `Assets/Prefabs/Props/`:
 - **Static** (original prefab): large furniture against walls. Its collider blocks bodies and catches hoses, so it stays off routes, door swings and fire sightlines.
