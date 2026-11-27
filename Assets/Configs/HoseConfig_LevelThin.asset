@@ -18,6 +18,8 @@ MonoBehaviour:
     <Spacing>k__BackingField: 0.2
     <ParticleRadius>k__BackingField: 0.035
     <Substeps>k__BackingField: 8
+    <CoilInnerRadius>k__BackingField: 0.25
+    <CoilGap>k__BackingField: 0.05
     <FloppyBendCompliance>k__BackingField: 1
     <RigidBendCompliance>k__BackingField: 0.000001
     <MaxStretchFraction>k__BackingField: 0.1
@@ -29,7 +31,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 311
   <Pressure>k__BackingField:
-    <MaxPressure>k__BackingField: 100
+    <MaxPressure>k__BackingField: 92
     <LossPerMeter>k__BackingField: 2
     <SmoothingPercentPerSecond>k__BackingField: 100
     <OpenEndLeakLoss>k__BackingField: 40
@@ -83,3 +85,4 @@ MonoBehaviour:
     <BurnedColor>k__BackingField: {r: 0.06, g: 0.05, b: 0.05, a: 1}
     <TapedColor>k__BackingField: {r: 0, g: 0.33333334, b: 1, a: 1}
     <BreachFeatherParticles>k__BackingField: 0.6
+    <TapeWidthParticles>k__BackingField: 1
