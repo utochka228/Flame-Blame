@@ -1,6 +1,6 @@
 # Architecture
 
-Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/Pressure` (Simulation, Components), `Features/Firefighter` (Simulation, Components, Config), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
+Full breakdown of project structure. Source: [DESIGN.md](../DESIGN.md) "Architecture". Updated iteratively. The layout below is the plan; created so far: `Core`, `Features/Hose` (Simulation, Components, Presentation, Config), `Features/Pressure` (Simulation, Components), `Features/Firefighter` (Simulation, Components, Config), `Features/Audio` (Simulation, Components, Config), `Features/UI` and `Tests`. Scene adapters for pure-C# interfaces, such as `PhysicsRopeCollider`, live in the feature's `Components` folder.
 
 ## Decisions
 
@@ -30,6 +30,10 @@ Assets/Scripts/
       Events/                 HoseBurst, HoseConnected, NozzleRecoil
       Editor/                 FlameBlame.Hose.Editor
     Pressure/ Water/ Fire/ Firefighter/ Interactables/
+    Audio/                    FlameBlame.Audio
+      Simulation/             pure C#: VolumeCurve (slider to dB), TakePicker (no repeat of last take)
+      Components/             AudioManager: pooled SFX sources, two crossfaded music sources, bus volume
+      Config/                 AudioConfigSO (mixer, bus routes, pool size), SoundCueSO, AudioBus, BusRoute
     UI/                       FlameBlame.UI
   Bootstrap/                  FlameBlame.Bootstrap: GameBootstrap, scene wiring
   Tests/EditMode, Tests/PlayMode
@@ -40,6 +44,9 @@ Every feature uses the same roles: **Simulation** (no Unity objects), **Componen
 ## Dependency direction
 
 `Core <- Features <- UI <- Bootstrap`. Arrow = depends on. Features never reference UI or Bootstrap; Core references nothing; Bootstrap references everything. `Hose` references `Pressure` (`HoseNetwork` feeds the pressure solver); `Pressure` references only Core; `UI` references both.
+
+- Audio is a leaf feature: it references only Core, and Hose, Fire, Firefighter, Level and UI reference it. Each feature's `Presentation/` holds a listener (`HoseAudio`, `FireAudio`, `FirefighterAudio`, `LevelAudio`) that maps its events to `SoundCueSO` assets and calls `AudioManager`; gameplay code never calls audio directly.
+- Every sound goes through a mixer group (`MainMixer`: Master ← Sfx, Ui, Music, Ambience); sliders set exposed group volumes, never per-clip volume. DOTween's `DOFade` modules live in `Assembly-CSharp-firstpass`, which asmdef assemblies cannot reference, so audio tweens use `DOTween.To`.
 
 - World visuals belong to the feature's Presentation folder.
 - Screen UI is its own feature; it listens to events or reads small read-only interfaces (e.g. `IInteractable.PromptText`). UI depends on features, never the reverse.
