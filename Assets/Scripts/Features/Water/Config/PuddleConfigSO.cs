@@ -20,6 +20,7 @@ namespace FlameBlame.Water.Config
         [field: Header("Placement")]
         [field: SerializeField] public LayerMask GroundLayers { get; private set; } = ~0;
         [field: SerializeField] [field: Range(0.5f, 10f)] public float MaxDropMeters { get; private set; } = 3f;
+        [field: SerializeField] [field: Range(0.05f, 2f)] public float AirborneFadeSeconds { get; private set; } = 0.3f;
 
         public float MinTractionFraction => MinTractionPercent.ToFraction();
 

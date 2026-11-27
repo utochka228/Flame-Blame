@@ -35,15 +35,24 @@ namespace FlameBlame.Water.Simulation
                 if (volume <= 0f)
                     _puddles.RemoveAt(index);
                 else
-                    _puddles[index] = CreatePuddle(_puddles[index].Position, volume);
+                    _puddles[index] = CreatePuddle(_puddles[index].Position, volume, _puddles[index].Opacity);
             }
+        }
+
+        public void Fade(int index, float amount)
+        {
+            var opacity = _puddles[index].Opacity - amount;
+            if (opacity <= 0f)
+                _puddles.RemoveAt(index);
+            else
+                _puddles[index] = CreatePuddle(_puddles[index].Position, _puddles[index].Volume, opacity);
         }
 
         public float TractionAt(Vector3 point)
         {
             foreach (var puddle in _puddles)
             {
-                if (FlatDistance(puddle.Position, point) <= puddle.Radius)
+                if (!puddle.IsFading && FlatDistance(puddle.Position, point) <= puddle.Radius)
                     return _settings.MinTraction;
             }
 
@@ -64,6 +73,8 @@ namespace FlameBlame.Water.Simulation
             nearestDistance = float.MaxValue;
             for (var index = 0; index < _puddles.Count; index++)
             {
+                if (_puddles[index].IsFading) continue;
+
                 var distance = FlatDistance(_puddles[index].Position, point);
                 if (distance >= nearestDistance) continue;
 
@@ -74,8 +85,8 @@ namespace FlameBlame.Water.Simulation
             return nearest;
         }
 
-        private Puddle CreatePuddle(Vector3 position, float volume) =>
-            new Puddle(position, volume, _settings.RadiusPerSqrtVolume * Mathf.Sqrt(volume));
+        private Puddle CreatePuddle(Vector3 position, float volume, float opacity = 1f) =>
+            new Puddle(position, volume, _settings.RadiusPerSqrtVolume * Mathf.Sqrt(volume) * opacity, opacity);
 
         private static float FlatDistance(Vector3 first, Vector3 second) =>
             Vector2.Distance(new Vector2(first.x, first.z), new Vector2(second.x, second.z));
