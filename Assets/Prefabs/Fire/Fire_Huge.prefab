@@ -8,6 +8,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1545299684653113692, guid: d3bd4cb3bbbba405c934d1b675bdaed3, type: 3}
+      propertyPath: m_Range
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1545299684653113692, guid: d3bd4cb3bbbba405c934d1b675bdaed3, type: 3}
+      propertyPath: m_Intensity
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086200643838666059, guid: d3bd4cb3bbbba405c934d1b675bdaed3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.2
+      objectReference: {fileID: 0}
     - target: {fileID: 4405257652107548181, guid: d3bd4cb3bbbba405c934d1b675bdaed3, type: 3}
       propertyPath: m_Name
       value: Fire_Huge
