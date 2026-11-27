@@ -4,23 +4,64 @@
     <ui:Style src="Menu.uss" />
     <ui:VisualElement name="menuRoot" class="fb-layer menu-root" picking-mode="Ignore">
         <ui:VisualElement name="menuBackdrop" class="fb-layer menu-backdrop menu--hidden" />
-        <ui:VisualElement name="menu" class="menu menu--hidden">
-            <ui:VisualElement name="menuLogo" class="menu-logo" picking-mode="Ignore">
-                <ui:Label text="LOGO GOES HERE" class="menu-logo__text" picking-mode="Ignore" />
-                <ui:Label text="(the intern is still drawing it)" class="fb-text-muted menu-logo__hint" picking-mode="Ignore" />
+        <ui:VisualElement name="menu" class="menu menu--hidden" picking-mode="Ignore">
+            <ui:VisualElement class="menu-left" picking-mode="Ignore">
+                <ui:Label name="menuTitle" text="FLAME&#10;&lt;size=120&gt;&lt;color=#FFFFFF&gt;&amp;&lt;/color&gt;&lt;/size&gt; BLAME" enable-rich-text="true" class="menu-title" picking-mode="Ignore" />
+                <ui:Label name="menuTagline" text="Put out fires. Blame coworkers. Repeat." class="fb-text-muted menu-tagline" picking-mode="Ignore" />
+                <ui:Button name="playButton" text="PLAY (responsibly)" class="fb-button fb-button--primary menu-play" />
+                <ui:VisualElement class="menu-hint-row" picking-mode="Ignore">
+                    <ui:Label text="Esc" class="fb-keycap menu-hint__key" picking-mode="Ignore" />
+                    <ui:Label name="menuHint" text="pauses the fire. The fire is very patient." class="fb-text-muted menu-hint" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="menuTitle" text="FLAME &amp; BLAME" class="menu-title" picking-mode="Ignore" />
-            <ui:Label name="menuTagline" text="Put out fires. Blame coworkers. Repeat." class="fb-text-muted menu-tagline" picking-mode="Ignore" />
             <ui:VisualElement name="menuCard" class="menu-card">
-                <ui:Label text="Body-swap chaos level" class="menu-card__heading" picking-mode="Ignore" />
+                <ui:VisualElement class="menu-card__heading-row" picking-mode="Ignore">
+                    <ui:Label text="Body-swap chaos level" class="menu-card__heading" picking-mode="Ignore" />
+                    <ui:VisualElement class="menu-card__rule" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:VisualElement class="menu-modes">
-                    <ui:Button name="modeOff" text="Loyal" class="fb-button menu-mode" />
-                    <ui:Button name="mode90" text="Forgetful" class="fb-button menu-mode" />
-                    <ui:Button name="mode60" text="Identity crisis" class="fb-button menu-mode" />
-                    <ui:Button name="mode30" text="Full panic" class="fb-button menu-mode" />
+                    <ui:Button name="modeOff" text="" class="fb-button menu-mode">
+                        <ui:VisualElement class="menu-mode__bars" picking-mode="Ignore">
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--1" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--2" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--3" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="OFF" class="menu-mode__interval" picking-mode="Ignore" />
+                        <ui:Label text="Loyal" class="menu-mode__name" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="mode90" text="" class="fb-button menu-mode">
+                        <ui:VisualElement class="menu-mode__bars" picking-mode="Ignore">
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--1 menu-mode__bar--lit" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--2" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--3" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="90s" class="menu-mode__interval" picking-mode="Ignore" />
+                        <ui:Label text="Forgetful" class="menu-mode__name" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="mode60" text="" class="fb-button menu-mode">
+                        <ui:VisualElement class="menu-mode__bars" picking-mode="Ignore">
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--1 menu-mode__bar--lit" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--2 menu-mode__bar--lit" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--3" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="60s" class="menu-mode__interval" picking-mode="Ignore" />
+                        <ui:Label text="Identity crisis" class="menu-mode__name" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="mode30" text="" class="fb-button menu-mode">
+                        <ui:VisualElement class="menu-mode__bars" picking-mode="Ignore">
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--1 menu-mode__bar--lit" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--2 menu-mode__bar--lit" picking-mode="Ignore" />
+                            <ui:VisualElement class="menu-mode__bar menu-mode__bar--3 menu-mode__bar--lit" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="30s" class="menu-mode__interval" picking-mode="Ignore" />
+                        <ui:Label text="Full panic" class="menu-mode__name" picking-mode="Ignore" />
+                    </ui:Button>
                 </ui:VisualElement>
                 <ui:Label name="modeCaption" text="" class="fb-text-muted menu-mode-caption" picking-mode="Ignore" />
-                <ui:Label text="Noise department" class="menu-card__heading" picking-mode="Ignore" />
+                <ui:VisualElement class="menu-card__heading-row" picking-mode="Ignore">
+                    <ui:Label text="Noise department" class="menu-card__heading" picking-mode="Ignore" />
+                    <ui:VisualElement class="menu-card__rule" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:VisualElement class="menu-volume">
                     <ui:Label text="SFX: splish, splash, screaming" class="fb-text-muted menu-volume__label" picking-mode="Ignore" />
                     <ui:Slider name="sfxSlider" low-value="0" high-value="1" value="1" class="menu-volume__slider" />
@@ -32,8 +73,6 @@
                     <ui:Label name="musicValue" text="100%" class="menu-volume__value" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="playButton" text="PLAY (responsibly)" class="fb-button fb-button--primary menu-play" />
-            <ui:Label name="menuHint" text="Esc pauses the fire. The fire is very patient." class="fb-text-muted menu-hint" picking-mode="Ignore" />
         </ui:VisualElement>
         <ui:VisualElement name="briefing" class="fb-layer briefing menu--hidden">
             <ui:VisualElement name="briefingCard" class="briefing__card">

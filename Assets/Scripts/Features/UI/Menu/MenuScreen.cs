@@ -12,12 +12,14 @@ namespace FlameBlame.UI.Menu
     {
         private const string HiddenClass = "menu--hidden";
         private const string SelectedClass = "fb-button--selected";
+        private const string FillClass = "menu-volume__fill";
         private const string PlayText = "PLAY (responsibly)";
         private const string ResumeText = "BACK TO THE FIRE";
         private const string StartTagline = "Put out fires. Blame coworkers. Repeat.";
         private const string PauseTagline = "Paused. The fire is waiting politely.";
-        private const string StartHint = "Esc pauses the fire. The fire is very patient.";
-        private const string PauseHint = "Esc works too. We're flexible.";
+        // The "Esc" keycap sits in front of these labels in Menu.uxml.
+        private const string StartHint = "pauses the fire. The fire is very patient.";
+        private const string PauseHint = "works too. We're flexible.";
         private const float TitleRestDegrees = -2f;
 
         private static readonly SwapInterval[] Modes =
@@ -38,7 +40,6 @@ namespace FlameBlame.UI.Menu
 
         private readonly VisualElement _backdrop;
         private readonly VisualElement _menu;
-        private readonly VisualElement _logo;
         private readonly VisualElement _card;
         private readonly Label _title;
         private readonly Label _tagline;
@@ -48,11 +49,12 @@ namespace FlameBlame.UI.Menu
         private readonly Label _musicValue;
         private readonly Slider _sfx;
         private readonly Slider _music;
+        private readonly VisualElement _sfxFill;
+        private readonly VisualElement _musicFill;
         private readonly Button _play;
         private readonly Button[] _modeButtons;
         private Sequence _open;
         private Tween _close;
-        private Tween _logoPulse;
         private Tween _playPulse;
         private Tween _modePop;
         private Tween _captionShake;
@@ -70,7 +72,6 @@ namespace FlameBlame.UI.Menu
         {
             _backdrop = root.Q("menuBackdrop");
             _menu = root.Q("menu");
-            _logo = root.Q("menuLogo");
             _card = root.Q("menuCard");
             _title = root.Q<Label>("menuTitle");
             _tagline = root.Q<Label>("menuTagline");
@@ -82,6 +83,8 @@ namespace FlameBlame.UI.Menu
             _music = root.Q<Slider>("musicSlider");
             _play = root.Q<Button>("playButton");
             _modeButtons = new[] { root.Q<Button>("modeOff"), root.Q<Button>("mode90"), root.Q<Button>("mode60"), root.Q<Button>("mode30") };
+            _sfxFill = AddFill(_sfx);
+            _musicFill = AddFill(_music);
 
             for (var index = 0; index < _modeButtons.Length; index++)
             {
@@ -107,20 +110,20 @@ namespace FlameBlame.UI.Menu
             _music.SetValueWithoutNotify(settings.MusicVolume);
             _sfxValue.text = PercentText(settings.SfxVolume);
             _musicValue.text = PercentText(settings.MusicVolume);
+            SetFill(_sfxFill, settings.SfxVolume);
+            SetFill(_musicFill, settings.MusicVolume);
 
             _close?.Kill();
             _backdrop.RemoveFromClassList(HiddenClass);
             _menu.RemoveFromClassList(HiddenClass);
             _menu.style.opacity = 1f;
-            UiTween.Restart(ref _logoPulse, null);
             UiTween.Restart(ref _playPulse, null);
             _open?.Kill();
             _open = DOTween.Sequence()
                 .Insert(0f, UiTween.Fade(_backdrop, 0f, 1f, 0.2f, Ease.OutQuad))
-                .Insert(0f, UiTween.SlideIn(_title, new Vector2(0f, -240f), 0.55f, Ease.OutBounce))
+                .Insert(0f, UiTween.SlideIn(_title, new Vector2(-320f, 0f), 0.55f, Ease.OutBounce))
                 .Insert(0.3f, UiTween.Wobble(_title, 14f, TitleRestDegrees, 0.9f))
-                .Insert(0.1f, UiTween.Pop(_logo, 0f, 0.6f, Ease.OutElastic))
-                .Insert(0.15f, UiTween.SlideIn(_card, new Vector2(0f, 80f), 0.4f))
+                .Insert(0.15f, UiTween.SlideIn(_card, new Vector2(120f, 0f), 0.4f))
                 .Insert(0.15f, UiTween.Fade(_card, 0f, 1f, 0.25f, Ease.OutQuad))
                 .Insert(0.35f, UiTween.Pop(_play, 0f, 0.45f))
                 .AppendCallback(StartIdleLoops)
@@ -131,7 +134,6 @@ namespace FlameBlame.UI.Menu
         {
             IsShown = false;
             _open?.Kill();
-            UiTween.Restart(ref _logoPulse, null);
             UiTween.Restart(ref _playPulse, null);
             _close?.Kill();
             _close = DOTween.Sequence()
@@ -150,7 +152,6 @@ namespace FlameBlame.UI.Menu
         {
             _open?.Kill();
             _close?.Kill();
-            _logoPulse?.Kill();
             _playPulse?.Kill();
             _modePop?.Kill();
             _captionShake?.Kill();
@@ -160,7 +161,6 @@ namespace FlameBlame.UI.Menu
 
         private void StartIdleLoops()
         {
-            UiTween.Restart(ref _logoPulse, UiTween.Pulse(_logo, 1.05f, 1.1f));
             UiTween.Restart(ref _playPulse, UiTween.Pulse(_play, 1.06f, 0.5f));
         }
 
@@ -186,6 +186,7 @@ namespace FlameBlame.UI.Menu
         private void OnSfxChanged(float fraction)
         {
             _sfxValue.text = PercentText(fraction);
+            SetFill(_sfxFill, fraction);
             UiTween.Restart(ref _sfxPop, UiTween.Pop(_sfxValue, 1.25f, 0.2f));
             SfxVolumeChanged?.Invoke(fraction);
         }
@@ -193,9 +194,21 @@ namespace FlameBlame.UI.Menu
         private void OnMusicChanged(float fraction)
         {
             _musicValue.text = PercentText(fraction);
+            SetFill(_musicFill, fraction);
             UiTween.Restart(ref _musicPop, UiTween.Pop(_musicValue, 1.25f, 0.2f));
             MusicVolumeChanged?.Invoke(fraction);
         }
+
+        private static VisualElement AddFill(Slider slider)
+        {
+            var fill = new VisualElement { pickingMode = PickingMode.Ignore };
+            fill.AddToClassList(FillClass);
+            slider.Q(className: "unity-base-slider__tracker").Add(fill);
+            return fill;
+        }
+
+        private static void SetFill(VisualElement fill, float fraction) =>
+            fill.style.width = Length.Percent(fraction.ToPercent());
 
         private static string PercentText(float fraction) => $"{Mathf.RoundToInt(fraction.ToPercent())}%";
     }
