@@ -77,13 +77,14 @@ namespace FlameBlame.Audio.Components
                 return;
 
             history.NextPlayTime = now + cue.MinIntervalSeconds;
-            history.LastTake = TakePicker.Pick(cue.Takes.Count, history.LastTake, _random);
+            if (history.Takes.Count != cue.Takes.Count)
+                history.Takes = new ShuffleBag(cue.Takes.Count);
 
             var source = TakeEffectSource();
             source.transform.position = position;
             source.spatialBlend = spatialBlend;
             source.outputAudioMixerGroup = _config.RouteFor(cue.Bus).Group;
-            source.clip = cue.Takes[history.LastTake];
+            source.clip = cue.Takes[history.Takes.Draw(_random)];
             source.volume = cue.VolumeFraction;
             source.pitch = pitch + cue.PitchJitterFraction * (float)(_random.NextDouble() * 2.0 - 1.0);
             source.Play();
@@ -111,7 +112,7 @@ namespace FlameBlame.Audio.Components
             if (_history.TryGetValue(cue, out var history))
                 return history;
 
-            history = new CueHistory();
+            history = new CueHistory(new ShuffleBag(cue.Takes.Count));
             _history.Add(cue, history);
             return history;
         }
@@ -169,8 +170,13 @@ namespace FlameBlame.Audio.Components
 
         private sealed class CueHistory
         {
-            public int LastTake = TakePicker.NoTake;
+            public ShuffleBag Takes;
             public float NextPlayTime;
+
+            public CueHistory(ShuffleBag takes)
+            {
+                Takes = takes;
+            }
         }
     }
 }
