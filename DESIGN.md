@@ -150,6 +150,8 @@ Set dressing lives under `Dressing` (one child per zone), built from the Mnostva
 - **`_Physics`** (Rigidbody): chairs, café tables, boxes, plants, lamp, ironing board. The jet and the firefighters shove them, so they may sit on a route as mess. Knocked-over poses are baked from a Play-mode settle, so they start at rest.
 - **`_Decor`** (no collider): small clutter and wall art. The capsule has no step-up and the hose would snag on it, so it never collides.
 
+The exterior (`Dressing/Z0_Exterior`) uses Synty PolygonGeneric prefabs unmodified (their foliage has no collider, their trees and rocks do, so they already follow the rule): a tree line south of the yard, small clumps on the flanks and behind the building, two dead trees near the fire. The yard floor (`Z0_Exterior/Yard`) breaks up the grass with ground cover that has no collider and sits 3–5 cm above it, so feet and hoses never catch on it: a gravel track behind the truck, a scorched patch under the bin fire, worn ground at both front doors, plus grass, flowers, pebbles and leaves along the yard's edge. Synty's dirt and gravel tiles come with a lip collider, so the yard uses `_Decor` variants of them (`SM_Gen_Env_Ground_Dirt_*_Decor`, `SM_Gen_Env_Road_Gravel_*_Decor`). Along the side and back walls (`West`, `East`, `Back`), only low plants sit under the ground-floor windows (z 4.5 and 10.5), so the fires inside stay visible; bushes go between the windows. The east side has a fallen log, and the back has a woodpile and a worn dirt patch in front of the barricaded exit (x −4.5). Budget: about 70 instances and 26k triangles. Every collider sits at least 5 m from the yard's routes, the hose pile and the truck.
+
 Spacing rule: a prop either touches its neighbour (wall, prop, vehicle) or leaves at least 1.1 m, the capsule's width plus margin. Anything between is a slot a firefighter wedges into and sticks.
 
 ### Level design spine
@@ -181,8 +183,8 @@ The firefighter is the measuring stick. The kit is placed at 1.5× so doorways a
 The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z < 0).
 
 **Z0 Yard (hub).** Both firefighters start here (Tab to swap).
-- The fire truck is parked on the east side of the yard (x 13.5, z −6.2), beside the hall's wide door. It is the only pressure source: the main thick hose is fixed to its Coupling and runs 12 m west along the facade, with a medium hose already coupled to its end.
-- Spare hoses lie in a pile south of the yard (outlets at x 2, z −14..−22).
+- The fire truck is parked on the east side of the yard (x 13.5, z −6.2), beside the hall's wide door. It is the only pressure source. Nothing is connected at the start: a player carries any hose end that has no nozzle to the truck's Coupling and latches it into `Socket_Truck`, and that hose becomes the line the truck feeds. Unlatching it cuts the supply.
+- All seven hoses lie coiled flat (`HoseSegment` "spawn coiled") in a neat pile between the start and the truck, centred on (6, −9): the two thick hoses and one medium hose in the front row (z −7.6), the second medium hose and three thin hoses in the back row (z −10.6). Coils are at least 1.1 m apart, so a firefighter can walk between them, and the main thick hose's coil is the one nearest the Coupling. Each coil's start end is in the centre and its tail on the outside, so nozzles lie on the outside.
 - A burning bin (`Fire_Z0_YardBin`) by the wheelbarrow teaches spraying.
 - The balcony over the lobby entrance (x −12..−3, 3.6 m up) is the outside route to the upper floor: throw a hose over its rail and climb.
 
@@ -308,10 +310,8 @@ All pieces are 0.18 m in radius with particles 0.2 m apart; length is the piece'
 
 | Piece | Length | Count | Where |
 | --- | --- | --- | --- |
-| Thick (main line) | 12 m | 1 | Fixed to the truck's Coupling, pinned |
-| Medium (with nozzle) | 9.8 m | 1 | Coupled to the end of the main line |
-| Thick | 12 m | 1 | Pile |
-| Medium (with nozzle) | 9.8 m | 1 | Pile |
+| Thick | 12 m | 2 | Pile (one is the usual main line into `Socket_Truck`) |
+| Medium (with nozzle) | 9.8 m | 2 | Pile |
 | Thin | 6 m | 3 | Pile |
 
 That is 61.6 m in total (21.8 m laid at the start) for a 24 × 27 m building, with at most 16 pieces per network. Whether it is "enough but limited" is open until a playtest walks every route.
