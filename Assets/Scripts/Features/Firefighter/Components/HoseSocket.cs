@@ -15,6 +15,7 @@ namespace FlameBlame.Firefighter.Components
         [SerializeField] private CatchParts _accepts = CatchParts.All;
         [SerializeField] private HoseSplitter _splitter;
         [SerializeField] [Range(0, HoseSplitter.PortCount - 1)] private int _splitterPort;
+        [SerializeField] private bool _feedsSource;
 
         private Rigidbody _body;
         private AnchoredGrip _latch;
@@ -23,6 +24,7 @@ namespace FlameBlame.Firefighter.Components
 
         public HoseSplitter Splitter => _splitter;
         public int SplitterPort => _splitterPort;
+        public bool FeedsSource => _feedsSource;
         public float CaptureRadiusMeters => _captureRadiusMeters;
         public CatchParts Accepts => _accepts;
         public Vector3 Position => transform.position;

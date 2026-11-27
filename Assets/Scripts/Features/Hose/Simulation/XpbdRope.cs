@@ -87,6 +87,16 @@ namespace FlameBlame.Hose.Simulation
             _anchorDirection = direction.normalized;
         }
 
+        public void Place(IReadOnlyList<Vector3> positions)
+        {
+            for (var index = 0; index < _positions.Length; index++)
+                _positions[index] = positions[index];
+
+            Array.Copy(_positions, _previousStepPositions, _positions.Length);
+            Array.Copy(_positions, _lastFreePositions, _positions.Length);
+            Array.Clear(_velocities, 0, _velocities.Length);
+        }
+
         public void SetRigidityProfile(IReadOnlyList<float> profile)
         {
             for (var index = 0; index < _particleRigidity.Length; index++)

@@ -10,6 +10,7 @@ namespace FlameBlame.Hose.Components
         [SerializeField] private HoseConfigSO _config;
         [SerializeField] private Transform _outlet;
         [SerializeField] private bool _anchoredToOutlet = true;
+        [SerializeField] private bool _spawnCoiled;
 
         private XpbdRope _rope;
         private RopeSettings _ropeSettings;
@@ -41,6 +42,9 @@ namespace FlameBlame.Hose.Components
                 IsPinned = _anchoredToOutlet
             };
             _interpolatedPositions = new Vector3[_rope.Positions.Count];
+            if (_spawnCoiled)
+                PlaceCoiled();
+
             _targetPressureFractions = new float[_rope.Positions.Count];
             _smoothedPressureFractions = new float[_rope.Positions.Count];
             _rigidityProfile = new float[_rope.Positions.Count];
@@ -120,6 +124,12 @@ namespace FlameBlame.Hose.Components
         {
             _config.ApplyTo(_ropeSettings);
             _config.Held.ApplyTo(_heldSettings);
+        }
+
+        private void PlaceCoiled()
+        {
+            CoilLayout.Fill(_interpolatedPositions, _outlet.position, _outlet.forward, _config.Rope.Coil);
+            _rope.Place(_interpolatedPositions);
         }
 
         private void Interpolate()

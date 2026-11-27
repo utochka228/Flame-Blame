@@ -14,6 +14,8 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] [field: Range(0.1f, 0.4f)] public float Spacing { get; private set; } = Defaults.Spacing;
         [field: SerializeField] [field: Range(0.02f, 0.15f)] public float ParticleRadius { get; private set; } = Defaults.ParticleRadius;
         [field: SerializeField] [field: Range(2, 16)] public int Substeps { get; private set; } = Defaults.Substeps;
+        [field: SerializeField] [field: Range(0.1f, 1f)] public float CoilInnerRadius { get; private set; } = 0.25f;
+        [field: SerializeField] [field: Range(0f, 0.2f)] public float CoilGap { get; private set; } = 0.05f;
 
         [field: Header("Stiffness")]
         [field: SerializeField] public float FloppyBendCompliance { get; private set; } = Defaults.FloppyBendCompliance;
@@ -30,6 +32,8 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] public LayerMask CollisionLayers { get; private set; } = ~0;
 
         public float Length => (ParticleCount - 1) * Spacing;
+
+        public CoilShape Coil => new CoilShape(CoilInnerRadius, 2f * ParticleRadius + CoilGap, Spacing);
 
         public void ApplyTo(RopeSettings settings)
         {

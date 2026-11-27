@@ -46,7 +46,7 @@ namespace FlameBlame.Hose.Components
         private Nozzle[] _nozzles;
         private float[][] _profiles;
         private float _secondsSinceCouplingCheck;
-        private int _sourceHoseIndex;
+        private RopeEnd? _sourceEnd;
 
         private void Start()
         {
@@ -113,6 +113,24 @@ namespace FlameBlame.Hose.Components
 
             _ropeJoints.Unreserve(ports.EndAt(port));
             ports.Unplug(port);
+        }
+
+        public bool TryPlugSource(HoseEndRef end)
+        {
+            var ropeEnd = ToRopeEnd(end);
+            if (_sourceEnd.HasValue || IsNozzleEnd(end) || !_ropeJoints.IsEndFree(ropeEnd)) return false;
+
+            _ropeJoints.Reserve(ropeEnd);
+            _sourceEnd = ropeEnd;
+            return true;
+        }
+
+        public void UnplugSource()
+        {
+            if (!_sourceEnd.HasValue) return;
+
+            _ropeJoints.Unreserve(_sourceEnd.Value);
+            _sourceEnd = null;
         }
 
         public bool IsOpenEnd(HoseEndRef end) => IsEndFree(end) && !IsNozzleEnd(end);
@@ -287,12 +305,11 @@ namespace FlameBlame.Hose.Components
                 _monitors[index] = _hoses[index].GetComponent<HoseBurstMonitor>();
                 _nozzles[index] = _hoses[index].GetComponent<Nozzle>();
                 _profiles[index] = new float[_hoses[index].Config.ParticleCount];
-                if (_hoses[index] == _sourceHose)
-                    _sourceHoseIndex = index;
             }
 
             _ropeJoints = new RopeJoints(_world, _junctionBreakDistance, _maxPieces - _hoses.Length);
-            _ropeJoints.Reserve(new RopeEnd(_sourceHoseIndex, RopeEndKind.Start));
+            if (_sourceHose)
+                TryPlugSource(new HoseEndRef(_sourceHose, RopeEndKind.Start));
             foreach (var joint in _joints)
                 _ropeJoints.Add(ToRopeEnds(joint.Ends));
         }
@@ -321,7 +338,8 @@ namespace FlameBlame.Hose.Components
             for (var joint = 0; joint < _ropeJoints.Count; joint++)
                 _splitterParts.Add(_ropeJoints.IsLive(joint) && IsSplitter(joint) ? _graph.AddSplitter() : NoSplitter);
 
-            _graph.Link(SourcePartId, PressureGraph.SourceOutlet, HosePartId(_sourceHoseIndex), PressureGraph.HoseStart);
+            if (_sourceEnd.HasValue)
+                _graph.Link(SourcePartId, PressureGraph.SourceOutlet, HosePartId(_sourceEnd.Value.Rope), GraphEnd(_sourceEnd.Value.Kind));
             LinkJoints();
             LinkSplitters();
             AddHoseMarkers();

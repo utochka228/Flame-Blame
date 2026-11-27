@@ -50,7 +50,10 @@ namespace FlameBlame.Firefighter.Components
 
         public bool Accepts(HoseSocket socket, RopeParticle particle)
         {
-            var count = _network.HoseOf(particle.Rope).Rope.Positions.Count;
+            var hose = _network.HoseOf(particle.Rope);
+            var count = hose.Rope.Positions.Count;
+            if (socket.FeedsSource && IsNozzleParticle(hose, particle.Index)) return false;
+
             return (socket.Accepts & FreeParts(particle.Rope) & SocketCatch.PartOf(particle.Index, count)) != 0;
         }
 
@@ -58,8 +61,8 @@ namespace FlameBlame.Firefighter.Components
         {
             Disarm(particle.Rope);
             socket.Latch(_network.World, particle, _config.Grip.Compliance, _config.Tie.CreateDragSettings());
-            if (socket.Splitter)
-                PlugSplitterPort(socket, particle);
+            if (socket.Splitter || socket.FeedsSource)
+                PlugEnd(socket, particle);
         }
 
         public void Free(HoseSocket socket)
@@ -67,6 +70,8 @@ namespace FlameBlame.Firefighter.Components
             socket.Release(_network.World);
             if (socket.Splitter)
                 _network.Unplug(socket.Splitter, socket.SplitterPort);
+            if (socket.FeedsSource)
+                _network.UnplugSource();
         }
 
         public void FreeAt(RopeParticle particle, int toleranceParticles)
@@ -94,24 +99,37 @@ namespace FlameBlame.Firefighter.Components
                 if (socket.IsOccupied) continue;
 
                 var index = SocketCatch.Closest(positions, socket.Accepts & freeParts, socket.Position, socket.CaptureRadiusMeters);
-                if (index == SocketCatch.NoParticle) continue;
+                if (index == SocketCatch.NoParticle || !Accepts(socket, new RopeParticle(rope, index))) continue;
 
                 Latch(socket, new RopeParticle(rope, index));
                 return;
             }
         }
 
-        private void PlugSplitterPort(HoseSocket socket, RopeParticle particle)
+        private void PlugEnd(HoseSocket socket, RopeParticle particle)
         {
             var hose = _network.HoseOf(particle.Rope);
             foreach (var end in hose.OpenEnds)
             {
                 if (end.ParticleIndex != particle.Index) continue;
-                if (!_network.TryPlug(socket.Splitter, socket.SplitterPort, new HoseEndRef(hose, end.Kind))) return;
+                if (!TryPlug(socket, new HoseEndRef(hose, end.Kind))) return;
 
                 socket.Aim(_network.World, new RopeParticle(particle.Rope, end.InnerIndex), hose.Config.Rope.Spacing, _config.Grip.AimCompliance);
                 return;
             }
+        }
+
+        private bool TryPlug(HoseSocket socket, HoseEndRef end)
+        {
+            return socket.FeedsSource ? _network.TryPlugSource(end) : _network.TryPlug(socket.Splitter, socket.SplitterPort, end);
+        }
+
+        private bool IsNozzleParticle(HoseSegment hose, int index)
+        {
+            var lastIndex = hose.Rope.Positions.Count - 1;
+            if (index != 0 && index != lastIndex) return false;
+
+            return _network.IsNozzleEnd(new HoseEndRef(hose, index == 0 ? RopeEndKind.Start : RopeEndKind.Tail));
         }
 
         private CatchParts FreeParts(int rope)
