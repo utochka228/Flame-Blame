@@ -1,0 +1,76 @@
+.valve-gauge {
+    flex-grow: 1;
+    padding: 18px 22px;
+    border-width: 3px;
+    border-radius: var(--fb-radius);
+    border-color: var(--fb-chip-border);
+    background-color: var(--fb-chip-solid);
+    color: var(--fb-text);
+    -unity-font-style: bold;
+}
+
+.valve-gauge__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.valve-gauge__state {
+    padding: 2px 12px;
+    border-radius: 10px;
+    background-color: var(--fb-good);
+    color: var(--fb-ink);
+}
+
+.valve-gauge__track {
+    height: 30px;
+    margin: 14px 0;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.valve-gauge__fill {
+    height: 100%;
+    background-color: var(--fb-warn);
+}
+
+.valve-gauge__footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.valve-gauge__percent {
+    font-size: var(--fb-font-xl);
+}
+
+.valve-gauge__hints {
+    align-items: flex-end;
+}
+
+.valve-gauge__hint {
+    flex-direction: row;
+    align-items: center;
+    margin: 3px 0;
+}
+
+.valve-gauge__hint-text {
+    margin-left: 8px;
+}
+
+.valve-gauge--closed {
+    border-color: var(--fb-danger);
+}
+
+.valve-gauge--closed .valve-gauge__state {
+    background-color: var(--fb-danger);
+}
+
+.valve-gauge--closed .valve-gauge__fill {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.valve-gauge--closed .valve-gauge__percent {
+    color: var(--fb-text-muted);
+}

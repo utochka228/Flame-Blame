@@ -1,5 +1,7 @@
 using System;
+using FlameBlame.Core.Events;
 using FlameBlame.Firefighter.Config;
+using FlameBlame.Firefighter.Events;
 using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Water.Components;
 using UnityEngine;
@@ -18,6 +20,7 @@ namespace FlameBlame.Firefighter.Components
         private LookState _look;
         private FirefighterMotion _motion;
         private JumpGate _jump;
+        private SlipGate _slip;
         private Vector2 _move;
         private bool _isJumpHeld;
         private float _airborneFallSpeed;
@@ -41,12 +44,14 @@ namespace FlameBlame.Firefighter.Components
 
         public float MoveSpeedScale { get; set; } = 1f;
         public bool IsGrounded { get; private set; }
+        public bool IsFallen => _slip.IsFallen;
         public Vector3 Velocity => _body.linearVelocity;
         public Quaternion EyeLookRotation => Quaternion.Euler(_look.Pitch, Mathf.DeltaAngle(transform.eulerAngles.y, _look.Yaw), 0f);
 
         public event Action<FirefighterCommands> Driven;
         public event Action<float> Landed;
         public event Action Jumped;
+        public event Action Slipped;
 
         private void Awake()
         {
@@ -55,6 +60,7 @@ namespace FlameBlame.Firefighter.Components
             _body.freezeRotation = true;
             _look = new LookState(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, transform.eulerAngles.y, _config.Look.IsInvertedY);
             _jump = new JumpGate(_config.Movement.JumpBufferSeconds, _config.Movement.CoyoteSeconds, _config.Movement.JumpLockoutSeconds);
+            _slip = new SlipGate(_config.Movement.SlipSpeed, _config.Movement.FallSeconds, _config.Movement.SlipImmunitySeconds);
             _motion = CreateMotion(_config.Movement);
         }
 
@@ -77,8 +83,9 @@ namespace FlameBlame.Firefighter.Components
             var jumps = _jump.Step(IsTouchingGround(), Time.fixedDeltaTime);
             TrackLanding();
             var traction = _puddles ? _puddles.TractionAt(transform.position) : 1f;
+            StepSlip(traction < 1f);
             var velocity = _motion.Step(_body.linearVelocity, _move, facing, Time.fixedDeltaTime, IsGrounded, MoveSpeedScale, traction);
-            if (jumps)
+            if (jumps && !IsFallen)
             {
                 velocity = _motion.Jump(velocity);
                 Jumped?.Invoke();
@@ -91,6 +98,9 @@ namespace FlameBlame.Firefighter.Components
 
         public void Drive(FirefighterCommands commands)
         {
+            if (IsFallen)
+                commands = new FirefighterCommands(Vector2.zero, commands.Look, FirefighterButtons.None, FirefighterButtons.None);
+
             _move = commands.Move;
             _isJumpHeld = commands.IsHeld(FirefighterButtons.Jump);
             if (commands.WasPressed(FirefighterButtons.Jump))
@@ -106,12 +116,25 @@ namespace FlameBlame.Firefighter.Components
             var movement = _config.Movement;
             _look.Configure(_config.Look.DegreesPerPixel, _config.Look.PitchLimitDegrees, _config.Look.IsInvertedY);
             _jump.Configure(movement.JumpBufferSeconds, movement.CoyoteSeconds, movement.JumpLockoutSeconds);
+            _slip.Configure(movement.SlipSpeed, movement.FallSeconds, movement.SlipImmunitySeconds);
             _motion = CreateMotion(movement);
         }
 
         private static FirefighterMotion CreateMotion(FirefighterMovementConfig movement) =>
             new(movement.MoveSpeed, movement.Acceleration, movement.Deceleration, movement.JumpSpeed, movement.AirControlFraction,
                 movement.FallGravityMultiplier, movement.ShortJumpGravityMultiplier);
+
+        private void StepSlip(bool isWet)
+        {
+            var velocity = _body.linearVelocity;
+            var planarSpeed = new Vector2(velocity.x, velocity.z).magnitude;
+            if (!_slip.Step(IsGrounded && isWet, planarSpeed, Time.fixedDeltaTime))
+                return;
+
+            _move = Vector2.zero;
+            Slipped?.Invoke();
+            EventBus.Publish(new FirefighterSlipped(transform.position));
+        }
 
         private void TrackLanding()
         {

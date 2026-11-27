@@ -19,7 +19,9 @@ namespace FlameBlame.Firefighter.Components
             var held = mouse.rightButton.isPressed || keyboard.vKey.isPressed ? FirefighterButtons.Thumb : FirefighterButtons.None;
             if (keyboard.spaceKey.isPressed)
                 held |= FirefighterButtons.Jump;
-            return new FirefighterCommands(move, mouse.delta.ReadValue(), PressedButtons(keyboard, mouse), held);
+            var scroll = mouse.scroll.ReadValue().y;
+            var adjustSteps = scroll > 0f ? 1 : scroll < 0f ? -1 : 0;
+            return new FirefighterCommands(move, mouse.delta.ReadValue(), PressedButtons(keyboard, mouse), held, adjustSteps);
         }
 
         private static FirefighterButtons PressedButtons(Keyboard keyboard, Mouse mouse)

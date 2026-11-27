@@ -14,5 +14,6 @@ namespace FlameBlame.Hose.Config
         [field: SerializeField] public Color BurnedColor { get; private set; } = new Color(0.06f, 0.05f, 0.05f);
         [field: SerializeField] public Color TapedColor { get; private set; } = new Color(0.78f, 0.8f, 0.84f);
         [field: SerializeField] [field: Range(0f, 3f)] public float BreachFeatherParticles { get; private set; } = 0.6f;
+        [field: SerializeField] [field: Range(0f, 5f)] public float TapeWidthParticles { get; private set; } = 1f;
     }
 }

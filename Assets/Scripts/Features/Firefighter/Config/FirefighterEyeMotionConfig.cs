@@ -14,6 +14,13 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField] [field: Range(5f, 40f)] public float SpringAngularFrequency { get; private set; } = 18f;
         [field: SerializeField] [field: Range(0.1f, 1f)] public float SpringDampingRatio { get; private set; } = 0.6f;
 
+        [field: Header("Slip")]
+        [field: SerializeField] [field: Range(0f, 10f)] public float SlipKick { get; private set; } = 4f;
+        [field: SerializeField] [field: Range(0f, 1f)] public float SlipTrauma { get; private set; } = 0.5f;
+        [field: SerializeField] [field: Range(0f, 1.2f)] public float FallenEyeDrop { get; private set; } = 0.7f;
+        [field: SerializeField] [field: Range(0f, 30f)] public float FallenRollDegrees { get; private set; } = 14f;
+        [field: SerializeField] [field: Range(1f, 20f)] public float FallenBlendSpeed { get; private set; } = 8f;
+
         [field: Header("Head bob")]
         [field: SerializeField] [field: Range(0.3f, 2f)] public float BobStepLength { get; private set; } = 1.3f;
         [field: SerializeField] [field: Range(0f, 0.1f)] public float BobVerticalAmplitude { get; private set; } = 0.03f;

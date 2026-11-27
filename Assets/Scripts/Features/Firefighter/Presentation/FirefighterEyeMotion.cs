@@ -24,6 +24,8 @@ namespace FlameBlame.Firefighter.Presentation
         private float _tiltDegrees;
         private float _baseFieldOfView;
         private float _extraFieldOfView;
+        private float _fallenWeight;
+        private float _fallenRollSign = 1f;
 
         private void Awake()
         {
@@ -35,11 +37,13 @@ namespace FlameBlame.Firefighter.Presentation
         private void OnEnable()
         {
             _body.Landed += OnLanded;
+            _body.Slipped += OnSlipped;
         }
 
         private void OnDisable()
         {
             _body.Landed -= OnLanded;
+            _body.Slipped -= OnSlipped;
         }
 
         private void LateUpdate()
@@ -55,9 +59,12 @@ namespace FlameBlame.Firefighter.Presentation
             var bob = StepHeadBob(eyeMotion, horizontalSpeed, motionWeight, deltaTime);
             StepStrafeTilt(eyeMotion, velocity, motionWeight, deltaTime);
             StepFieldOfView(eyeMotion, horizontalSpeed, motionWeight, deltaTime);
+            _fallenWeight = Smooth(_fallenWeight, _body.IsFallen ? 1f : 0f, eyeMotion.FallenBlendSpeed, deltaTime);
 
-            transform.localPosition = _restPosition + bob + ShakeOffset(eyeMotion) + Vector3.up * _landingDip.Offset;
-            transform.localRotation = _body.EyeLookRotation * Quaternion.Euler(0f, 0f, _tiltDegrees + ShakeRollDegrees(eyeMotion));
+            var fallenDrop = _fallenWeight * eyeMotion.FallenEyeDrop;
+            var fallenRoll = _fallenWeight * _fallenRollSign * eyeMotion.FallenRollDegrees * motionWeight;
+            transform.localPosition = _restPosition + bob + ShakeOffset(eyeMotion) + Vector3.up * (_landingDip.Offset - fallenDrop);
+            transform.localRotation = _body.EyeLookRotation * Quaternion.Euler(0f, 0f, _tiltDegrees + fallenRoll + ShakeRollDegrees(eyeMotion));
         }
 
         private Vector3 StepHeadBob(FirefighterEyeMotionConfig eyeMotion, float horizontalSpeed, float motionWeight, float deltaTime)
@@ -101,6 +108,14 @@ namespace FlameBlame.Firefighter.Presentation
                 _landingDip.Kick(-Mathf.Min(fallSpeed * eyeMotion.LandingKickPerFallSpeed, eyeMotion.LandingMaxKick));
             if (fallSpeed > eyeMotion.LandingShakeMinFallSpeed)
                 _trauma.Add((fallSpeed - eyeMotion.LandingShakeMinFallSpeed) * eyeMotion.LandingTraumaPerFallSpeed);
+        }
+
+        private void OnSlipped()
+        {
+            var eyeMotion = _config.EyeMotion;
+            _fallenRollSign = Vector3.Dot(_body.Velocity, _body.transform.right) > 0f ? -1f : 1f;
+            _landingDip.Kick(-eyeMotion.SlipKick);
+            _trauma.Add(eyeMotion.SlipTrauma);
         }
 
         private static float Smooth(float current, float target, float speed, float deltaTime) =>

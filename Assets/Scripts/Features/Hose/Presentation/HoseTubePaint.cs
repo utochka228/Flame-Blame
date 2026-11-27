@@ -34,7 +34,8 @@ namespace FlameBlame.Hose.Presentation
 
         public void ApplyColors(HoseConfigSO config)
         {
-            _paint = new BreachPaint(config.Colors.BurnedColor, config.Colors.TapedColor, config.Colors.BreachFeatherParticles);
+            _paint = new BreachPaint(config.Colors.BurnedColor, config.Colors.TapedColor, config.Colors.BreachFeatherParticles,
+                config.Colors.TapeWidthParticles);
         }
 
         public void Update(IReadOnlyList<Breach> breaches, Color baseColor)

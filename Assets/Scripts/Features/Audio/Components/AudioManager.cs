@@ -37,12 +37,12 @@ namespace FlameBlame.Audio.Components
 
         public void Play(SoundCueSO cue)
         {
-            Emit(cue, transform.position, 0f);
+            Emit(cue, transform.position, 0f, 1f);
         }
 
-        public void PlayAt(SoundCueSO cue, Vector3 position)
+        public void PlayAt(SoundCueSO cue, Vector3 position, float pitch = 1f)
         {
-            Emit(cue, position, 1f);
+            Emit(cue, position, 1f, pitch);
         }
 
         public void PlayMusic(AudioClip clip)
@@ -66,7 +66,7 @@ namespace FlameBlame.Audio.Components
             _config.Mixer.SetFloat(_config.RouteFor(bus).VolumeParameter, VolumeCurve.ToDecibels(sliderFraction));
         }
 
-        private void Emit(SoundCueSO cue, Vector3 position, float spatialBlend)
+        private void Emit(SoundCueSO cue, Vector3 position, float spatialBlend, float pitch)
         {
             if (!cue || cue.Takes.Count == 0)
                 return;
@@ -85,7 +85,7 @@ namespace FlameBlame.Audio.Components
             source.outputAudioMixerGroup = _config.RouteFor(cue.Bus).Group;
             source.clip = cue.Takes[history.LastTake];
             source.volume = cue.VolumeFraction;
-            source.pitch = 1f + cue.PitchJitterFraction * (float)(_random.NextDouble() * 2.0 - 1.0);
+            source.pitch = pitch + cue.PitchJitterFraction * (float)(_random.NextDouble() * 2.0 - 1.0);
             source.Play();
         }
 

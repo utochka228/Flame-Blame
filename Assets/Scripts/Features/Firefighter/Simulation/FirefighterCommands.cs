@@ -9,11 +9,13 @@ namespace FlameBlame.Firefighter.Simulation
 
         public Vector2 Move { get; }
         public Vector2 Look { get; }
+        public int AdjustSteps { get; }
 
-        public FirefighterCommands(Vector2 move, Vector2 look, FirefighterButtons pressed, FirefighterButtons held)
+        public FirefighterCommands(Vector2 move, Vector2 look, FirefighterButtons pressed, FirefighterButtons held, int adjustSteps = 0)
         {
             Move = Vector2.ClampMagnitude(move, 1f);
             Look = look;
+            AdjustSteps = adjustSteps;
             _pressed = pressed;
             _held = held;
         }

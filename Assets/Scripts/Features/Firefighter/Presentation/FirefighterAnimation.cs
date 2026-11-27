@@ -12,6 +12,7 @@ namespace FlameBlame.Firefighter.Presentation
         private static readonly int SpeedFloat = Animator.StringToHash("Speed");
         private static readonly int IsGroundedBool = Animator.StringToHash("IsGrounded");
         private static readonly int JumpTrigger = Animator.StringToHash("Jump");
+        private static readonly int IsFallenBool = Animator.StringToHash("IsFallen");
 
         [SerializeField] private FirefighterBody _body;
         [SerializeField] private FirefighterConfigSO _config;
@@ -39,6 +40,7 @@ namespace FlameBlame.Firefighter.Presentation
             var planarSpeed = new Vector2(velocity.x, velocity.z).magnitude;
             _animator.SetFloat(SpeedFloat, planarSpeed / _config.Movement.MoveSpeed, SpeedDampSeconds, Time.deltaTime);
             _animator.SetBool(IsGroundedBool, _body.IsGrounded || _body.IsMotionOverridden);
+            _animator.SetBool(IsFallenBool, _body.IsFallen);
         }
 
         private void OnJumped()

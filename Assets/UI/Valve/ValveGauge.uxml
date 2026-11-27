@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../Kit/Tokens.uss" />
+    <ui:Style src="../Kit/Kit.uss" />
+    <ui:Style src="ValveGauge.uss" />
+    <ui:VisualElement name="valveGauge" class="valve-gauge" picking-mode="Ignore">
+        <ui:VisualElement class="valve-gauge__header" picking-mode="Ignore">
+            <ui:Label text="Truck pressure" class="fb-text-l" picking-mode="Ignore" />
+            <ui:Label name="valveState" text="OPEN" class="fb-text-m valve-gauge__state" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement class="valve-gauge__track" picking-mode="Ignore">
+            <ui:VisualElement name="valveFill" class="valve-gauge__fill" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement class="valve-gauge__footer" picking-mode="Ignore">
+            <ui:Label name="valvePercent" text="100%" class="valve-gauge__percent" picking-mode="Ignore" />
+            <ui:VisualElement class="valve-gauge__hints" picking-mode="Ignore">
+                <ui:VisualElement class="valve-gauge__hint" picking-mode="Ignore">
+                    <ui:Label text="Scroll" class="fb-keycap" picking-mode="Ignore" />
+                    <ui:Label text="Pressure" class="fb-text-m fb-text-muted valve-gauge__hint-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="valve-gauge__hint" picking-mode="Ignore">
+                    <ui:Label text="F" class="fb-keycap" picking-mode="Ignore" />
+                    <ui:Label text="On / Off" class="fb-text-m fb-text-muted valve-gauge__hint-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

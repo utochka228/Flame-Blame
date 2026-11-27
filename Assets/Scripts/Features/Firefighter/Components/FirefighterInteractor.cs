@@ -1,4 +1,5 @@
 using FlameBlame.Core.Events;
+using FlameBlame.Core.Extensions;
 using FlameBlame.Firefighter.Config;
 using FlameBlame.Firefighter.Events;
 using FlameBlame.Firefighter.Simulation;
@@ -38,6 +39,7 @@ namespace FlameBlame.Firefighter.Components
             var targets = FindTargets();
             var action = Resolve(targets);
             ShowTarget(action);
+            AdjustValve(targets.ValveSource, commands.AdjustSteps);
             if (!commands.WasPressed(FirefighterButtons.Use) || action == UseAction.None) return;
 
             Execute(action, targets);
@@ -50,6 +52,17 @@ namespace FlameBlame.Firefighter.Components
 
             _targetAction = action;
             EventBus.Publish(new InteractionTargetChanged(action));
+        }
+
+        private void AdjustValve(PressureSource valve, int steps)
+        {
+            if (!valve || steps == 0) return;
+
+            var step = _config.Interaction.ValveStepPercent.ToFraction();
+            var target = Mathf.Clamp01(Mathf.Round(valve.PressureFraction / step + steps) * step);
+            var isAtLimit = Mathf.Approximately(target, valve.PressureFraction);
+            valve.SetPressureFraction(target);
+            EventBus.Publish(new ValveAdjusted(valve, isAtLimit));
         }
 
         private UseAction Resolve(UseTargets targets)

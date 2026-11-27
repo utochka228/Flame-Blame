@@ -28,6 +28,12 @@ namespace FlameBlame.Firefighter.Config
         [field: SerializeField] [field: Range(0.01f, 0.5f)] public float GroundCheckDistance { get; private set; } = 0.1f;
         [field: SerializeField] public LayerMask GroundLayers { get; private set; } = ~0;
 
+        [field: Header("Puddle slip")]
+        [field: SerializeField] [field: Range(0f, 100f)] public float SlipSpeedPercent { get; private set; } = 60f;
+        [field: SerializeField] [field: Range(0.2f, 3f)] public float FallSeconds { get; private set; } = 1.2f;
+        [field: SerializeField] [field: Range(0f, 5f)] public float SlipImmunitySeconds { get; private set; } = 1.5f;
+
         public float AirControlFraction => AirControlPercent.ToFraction();
+        public float SlipSpeed => SlipSpeedPercent.ToFraction() * MoveSpeed;
     }
 }

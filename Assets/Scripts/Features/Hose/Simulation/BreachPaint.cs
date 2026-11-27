@@ -10,12 +10,14 @@ namespace FlameBlame.Hose.Simulation
         private readonly Color _burnedColor;
         private readonly Color _tapedColor;
         private readonly float _featherParticles;
+        private readonly float _halfTapeWidth;
 
-        public BreachPaint(Color burnedColor, Color tapedColor, float featherParticles)
+        public BreachPaint(Color burnedColor, Color tapedColor, float featherParticles, float tapeWidthParticles)
         {
             _burnedColor = burnedColor;
             _tapedColor = tapedColor;
             _featherParticles = featherParticles;
+            _halfTapeWidth = tapeWidthParticles * 0.5f;
         }
 
         public void Fill(Color[] texels, IReadOnlyList<Breach> breaches, int particleCount, Color baseColor)
@@ -39,7 +41,9 @@ namespace FlameBlame.Hose.Simulation
 
         private float Coverage(Breach breach, float position)
         {
-            var distance = Mathf.Max(breach.FirstIndex - HalfParticle - position, position - (breach.LastIndex + HalfParticle), 0f);
+            var start = breach.IsTaped ? breach.Index - _halfTapeWidth : breach.FirstIndex - HalfParticle;
+            var end = breach.IsTaped ? breach.Index + _halfTapeWidth : breach.LastIndex + HalfParticle;
+            var distance = Mathf.Max(start - position, position - end, 0f);
             if (_featherParticles <= 0f)
                 return distance <= 0f ? 1f : 0f;
 

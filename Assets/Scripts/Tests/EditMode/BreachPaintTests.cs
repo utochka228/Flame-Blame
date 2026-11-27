@@ -16,7 +16,7 @@ namespace FlameBlame.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
-            _paint = new BreachPaint(Burned, Taped, 1f);
+            _paint = new BreachPaint(Burned, Taped, 1f, 1f);
         }
 
         private Color[] Paint(int texelCount, int particleCount, params Breach[] breaches)
@@ -55,12 +55,21 @@ namespace FlameBlame.Tests.EditMode
         }
 
         [Test]
-        public void TapedLeak_PaintsItsStretchWithTape()
+        public void TapedLeak_PaintsTapeAroundItsCentre()
         {
-            var texels = Paint(41, 11, new Breach(3, 5, 8f, true));
+            var texels = Paint(41, 11, new Breach(2, 6, 8f, true));
 
-            AssertColor(texels[20], Taped);
+            AssertColor(texels[16], Taped);
             AssertColor(texels[0], Base);
+        }
+
+        [Test]
+        public void TapedLeak_RestoresTheBaseColorOverTheRestOfItsStretch()
+        {
+            var texels = Paint(41, 11, new Breach(2, 6, 8f, true));
+
+            AssertColor(texels[8], Base);
+            AssertColor(texels[24], Base);
         }
 
         [Test]
