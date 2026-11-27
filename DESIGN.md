@@ -40,8 +40,8 @@ The demo has seven part types. Each one does one obvious thing, so a player can 
 | Thick hose | Heavy, carries high pressure | Needs two players, or one player drags it slowly |
 | Universal coupling | Joins any two hose ends | Snaps on with a satisfying pop; can be pulled apart by force |
 | Y-splitter | Splits one line into two | Each output gets half the pressure |
-| Source (hydrant, fire truck) | Feeds water into the network | Fixed source pressure; stationary |
-| Valve (on the source) | Turns the water on or off | Operated by a player, usually not the one holding the nozzle |
+| Source (hydrant, fire truck) | Feeds water into the network | Source pressure set at its valve; stationary |
+| Valve (on the source) | Turns the water on or off and sets source pressure | Operated by a player, usually not the one holding the nozzle |
 | Nozzle | The hose's working end | Aimed by the holder; applies recoil |
 
 Two player-made modifiers sit on top of the parts:
@@ -66,7 +66,7 @@ Every action uses the same hose, and each one depends on the current pressure.
 | Tie / pull | Empty hose wrapped around an object | Drag the object, or turn the water on to yank it |
 | Bridge / climb | High pressure for a bridge, empty for a rope | Walk across a rigid hose, or climb a hanging one |
 | Tape | A cut or burst point | Restores flow, with a permanent leak |
-| Valve | Standing at a source | Turns the whole network on or off |
+| Valve | Standing at a source | Use turns the whole network on or off; scroll steps source pressure (10% a step) |
 
 Controls are kept minimal: move, jump, grab/drop, use (spray, or tape when near a break), thumb (hold), and aim. Context decides what "use" does.
 
@@ -183,7 +183,7 @@ The firefighter is the measuring stick. The kit is placed at 1.5× so doorways a
 The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z < 0).
 
 **Z0 Yard (hub).** Both firefighters start here (Tab to swap).
-- The fire truck is parked on the east side of the yard (x 13.5, z −6.2), beside the hall's wide door. It is the only pressure source. Nothing is connected at the start: a player carries any hose end that has no nozzle to the truck's Coupling and latches it into `Socket_Truck`, and that hose becomes the line the truck feeds. Unlatching it cuts the supply.
+- The fire truck is parked on the east side of the yard (x 13.5, z −6.2), beside the hall's wide door. It is the only pressure source. Nothing is connected at the start: a player carries any hose end that has no nozzle to the truck's Coupling and latches it into `Socket_Truck`, and that hose becomes the line the truck feeds. Unlatching it cuts the supply. A world-space gauge on the truck's side above the Coupling (`ValveGauge`) shows the valve setting (percent and bar) and whether it is open; it starts at 100%.
 - All seven hoses lie coiled flat (`HoseSegment` "spawn coiled") in a neat pile between the start and the truck, centred on (6, −9): the two thick hoses and one medium hose in the front row (z −7.6), the second medium hose and three thin hoses in the back row (z −10.6). Coils are at least 1.1 m apart, so a firefighter can walk between them, and the main thick hose's coil is the one nearest the Coupling. Each coil's start end is in the centre and its tail on the outside, so nozzles lie on the outside.
 - A burning bin (`Fire_Z0_YardBin`) by the wheelbarrow teaches spraying.
 - The balcony over the lobby entrance (x −12..−3, 3.6 m up) is the outside route to the upper floor: throw a hose over its rail and climb.
@@ -302,7 +302,7 @@ Each mechanic is taught once where failure is cheap, then tested where it matter
 | Puddles | Yard spray | Under the upper rooms | — |
 | Character swap | Yard | Everywhere | — |
 | Forced swap timer | Starts on leaving the yard | Gap and blaze | Off in settings |
-| Slippery puddles, steam, jet move (not built) | — | Optional only | Every route has a built alternative |
+| Steam, jet move (not built) | — | Optional only | Every route has a built alternative |
 
 ### Hose budget
 
@@ -345,7 +345,7 @@ Accepted 2026-11-26 from a design review. Applied: 1 (`FireConfig_Blaze` minimum
 
 ## Feedback and readability
 
-Pressure is shown on the hose itself, not on a HUD gauge. A player should read the state of any hose in under a second.
+Pressure is shown on the hose itself, not on a HUD gauge. A player should read the state of any hose in under a second. The one gauge is the truck valve's setting, shown in the world on the truck itself.
 
 | Signal | How it reads |
 | --- | --- |
@@ -398,7 +398,7 @@ A pinch (foot, door) sets flow beyond that point to zero. A section above its ho
 ### Water and puddles
 
 - The jet is a particle system. Its collision events hit components such as `Extinguishable`, `Wettable` and `Pushable` on scene objects.
-- Puddles are decals or spreading discs with a slippery physics material area. They evaporate near fire.
+- Puddles are spreading discs that cut a firefighter's traction. Moving through one faster than a threshold knocks the firefighter down for a moment (fall animation, no input, still holding the hose), then gives a short grace period against slipping again. They evaporate near fire.
 - Steam is a particle burst when water hits fire.
 
 ### Rendering
