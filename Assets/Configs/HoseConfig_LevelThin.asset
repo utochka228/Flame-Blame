@@ -52,7 +52,7 @@ MonoBehaviour:
     <RecoverSeconds>k__BackingField: 1
     <WeakPointPercent>k__BackingField: 50
     <LeakLoss>k__BackingField: 40
-    <TapeLeakLoss>k__BackingField: 8
+    <TapeLeakLoss>k__BackingField: 20
     <BalloonPercent>k__BackingField: 120
     <BalloonWidthParticles>k__BackingField: 6
     <ShakeAmplitude>k__BackingField: 0.04

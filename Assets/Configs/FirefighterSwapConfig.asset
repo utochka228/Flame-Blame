@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FirefighterSwapConfig
   m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Config.FirefighterSwapConfigSO
   _liveTuning: 1
-  <Interval>k__BackingField: 0
+  <Interval>k__BackingField: 60
   <WarningSeconds>k__BackingField: 4
   <VisorDropSeconds>k__BackingField: 0.25
   <VisorLiftSeconds>k__BackingField: 0.35
