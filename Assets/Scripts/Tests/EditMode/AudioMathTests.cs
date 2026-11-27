@@ -68,5 +68,42 @@ namespace FlameBlame.Tests.EditMode
         {
             Assert.That(TakePicker.Pick(1, 0, new Random(7)), Is.EqualTo(0));
         }
+
+        [Test]
+        public void Draw_DealsEveryTakeOncePerRound()
+        {
+            var random = new Random(7);
+            var bag = new ShuffleBag(Takes);
+            for (var round = 0; round < Draws / Takes; round++)
+            {
+                var seen = new bool[Takes];
+                for (var draw = 0; draw < Takes; draw++)
+                    seen[bag.Draw(random)] = true;
+
+                Assert.That(seen, Is.All.True);
+            }
+        }
+
+        [Test]
+        public void Draw_NeverRepeatsAcrossRounds()
+        {
+            var random = new Random(7);
+            var bag = new ShuffleBag(Takes);
+            var last = bag.Draw(random);
+            for (var draw = 1; draw < Draws; draw++)
+            {
+                var take = bag.Draw(random);
+                Assert.That(take, Is.Not.EqualTo(last));
+                last = take;
+            }
+        }
+
+        [Test]
+        public void Draw_SingleTakeRepeats()
+        {
+            var bag = new ShuffleBag(1);
+            Assert.That(bag.Draw(new Random(7)), Is.EqualTo(0));
+            Assert.That(bag.Draw(new Random(7)), Is.EqualTo(0));
+        }
     }
 }

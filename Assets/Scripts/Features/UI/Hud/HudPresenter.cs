@@ -1,3 +1,5 @@
+using FlameBlame.Audio.Components;
+using FlameBlame.Audio.Config;
 using FlameBlame.Core.Events;
 using FlameBlame.Fire.Events;
 using FlameBlame.Firefighter.Components;
@@ -16,6 +18,9 @@ namespace FlameBlame.UI.Hud
     {
         [SerializeField] private LevelGoal _goal;
         [SerializeField] private FirefighterSwap _swap;
+        [SerializeField] private AudioManager _audio;
+        [SerializeField] private SoundCueSO _swapWarning;
+        [SerializeField] [Min(0f)] private float _swapWarningLeadSeconds = 2f;
 
         private ObjectiveView _objective;
         private InteractionPromptView _prompt;
@@ -25,6 +30,7 @@ namespace FlameBlame.UI.Hud
         private LevelCompleteScreen _endScreen;
         private SwapOverlayView _swapOverlay;
         private ControlsView _controls;
+        private bool _wasSwapWarning;
 
         private void OnEnable()
         {
@@ -78,6 +84,10 @@ namespace FlameBlame.UI.Hud
 
         private void LateUpdate()
         {
+            var isSwapWarning = _swap.SecondsLeft <= _swapWarningLeadSeconds;
+            if (isSwapWarning && !_wasSwapWarning)
+                _audio.Play(_swapWarning);
+            _wasSwapWarning = isSwapWarning;
             _swapChip.ShowWarning(_swap.WarningFraction);
             _swapOverlay.Show(_swap.WarningFraction, _swap.VisorFraction);
             _controls.Show(_swap.Commands);

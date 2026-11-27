@@ -25,6 +25,7 @@ namespace FlameBlame.Firefighter.Components
         private float _intervalSeconds;
 
         public float WarningFraction => _timer.WarningFraction;
+        public float SecondsLeft => _timer.SecondsLeft;
         public float VisorFraction => _transition.VisorFraction;
         public bool IsFirstActive => _firstIsActive;
         public FirefighterCommands Commands { get; private set; }

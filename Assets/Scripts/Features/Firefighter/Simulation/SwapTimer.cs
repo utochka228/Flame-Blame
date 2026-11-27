@@ -11,6 +11,7 @@ namespace FlameBlame.Firefighter.Simulation
         private float _secondsLeft;
         private bool _isRunning;
 
+        public float SecondsLeft => _isRunning ? _secondsLeft : float.PositiveInfinity;
         public float WarningFraction => _isRunning && _secondsLeft < _warningSeconds ? 1f - _secondsLeft / _warningSeconds : 0f;
 
         public SwapTimer(float maxSeconds, float warningSeconds)

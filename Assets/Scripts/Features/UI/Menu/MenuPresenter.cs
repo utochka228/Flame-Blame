@@ -17,6 +17,8 @@ namespace FlameBlame.UI.Menu
         [SerializeField] private FirefighterSwap _swap;
         [SerializeField] private FirefighterSwapConfigSO _swapConfig;
         [SerializeField] private AudioManager _audio;
+        [SerializeField] private SoundCueSO _click;
+        [SerializeField] private SoundCueSO _back;
 
         private MenuScreen _menu;
         private BriefingWindow _briefing;
@@ -35,6 +37,7 @@ namespace FlameBlame.UI.Menu
             _menu.SfxVolumeChanged += OnSfxVolumeChanged;
             _menu.MusicVolumeChanged += OnMusicVolumeChanged;
             _briefing.Finished += OnBriefingFinished;
+            root.RegisterCallback<ClickEvent>(OnClicked);
         }
 
         private void Start()
@@ -57,6 +60,7 @@ namespace FlameBlame.UI.Menu
             _menu.SfxVolumeChanged -= OnSfxVolumeChanged;
             _menu.MusicVolumeChanged -= OnMusicVolumeChanged;
             _briefing.Finished -= OnBriefingFinished;
+            GetComponent<UIDocument>().rootVisualElement.UnregisterCallback<ClickEvent>(OnClicked);
             _menu.Dispose();
             _briefing.Dispose();
         }
@@ -66,8 +70,9 @@ namespace FlameBlame.UI.Menu
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 
-            if (keyboard.escapeKey.wasPressedThisFrame)
+            if (keyboard.escapeKey.wasPressedThisFrame && _state != MenuState.Start && _state != MenuState.Briefing)
             {
+                _audio.Play(_back);
                 if (_state == MenuState.Playing)
                     OpenMenu(MenuState.Paused);
                 else if (_state == MenuState.Paused)
@@ -82,6 +87,12 @@ namespace FlameBlame.UI.Menu
         private static void ResetSession()
         {
             _hasStartedThisSession = false;
+        }
+
+        private void OnClicked(ClickEvent click)
+        {
+            if (click.target is Button)
+                _audio.Play(_click);
         }
 
         private void OpenMenu(MenuState state)

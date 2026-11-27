@@ -43,7 +43,7 @@ namespace FlameBlame.Firefighter.Components
             if (!commands.WasPressed(FirefighterButtons.Use) || action == UseAction.None) return;
 
             Execute(action, targets);
-            EventBus.Publish(new InteractionUsed());
+            EventBus.Publish(new InteractionUsed(action));
         }
 
         private void ShowTarget(UseAction action)

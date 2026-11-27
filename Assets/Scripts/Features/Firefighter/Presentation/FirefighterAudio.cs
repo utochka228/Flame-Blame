@@ -2,6 +2,7 @@ using FlameBlame.Audio.Components;
 using FlameBlame.Audio.Config;
 using FlameBlame.Core.Events;
 using FlameBlame.Firefighter.Events;
+using FlameBlame.Firefighter.Simulation;
 using UnityEngine;
 
 namespace FlameBlame.Firefighter.Presentation
@@ -13,6 +14,9 @@ namespace FlameBlame.Firefighter.Presentation
         [SerializeField] private SoundCueSO _socketReleased;
         [SerializeField] private SoundCueSO _interactionUsed;
         [SerializeField] private SoundCueSO _slipped;
+        [SerializeField] private SoundCueSO _grabbed;
+        [SerializeField] private SoundCueSO _thrown;
+        [SerializeField] private SoundCueSO _taped;
         [SerializeField] private SoundCueSO _valveStep;
         [SerializeField] private SoundCueSO _valveLimit;
         [SerializeField] private Vector2 _valveStepPitchRange = new Vector2(0.8f, 1.4f);
@@ -24,6 +28,8 @@ namespace FlameBlame.Firefighter.Presentation
             EventBus.Subscribe<InteractionUsed>(OnInteractionUsed);
             EventBus.Subscribe<FirefighterSlipped>(OnSlipped);
             EventBus.Subscribe<ValveAdjusted>(OnValveAdjusted);
+            EventBus.Subscribe<HoseGrabbed>(OnGrabbed);
+            EventBus.Subscribe<HoseThrown>(OnThrown);
         }
 
         private void OnDisable()
@@ -33,6 +39,8 @@ namespace FlameBlame.Firefighter.Presentation
             EventBus.Unsubscribe<InteractionUsed>(OnInteractionUsed);
             EventBus.Unsubscribe<FirefighterSlipped>(OnSlipped);
             EventBus.Unsubscribe<ValveAdjusted>(OnValveAdjusted);
+            EventBus.Unsubscribe<HoseGrabbed>(OnGrabbed);
+            EventBus.Unsubscribe<HoseThrown>(OnThrown);
         }
 
         private void OnSocketLatched(HoseSocketLatched latched)
@@ -47,7 +55,17 @@ namespace FlameBlame.Firefighter.Presentation
 
         private void OnInteractionUsed(InteractionUsed used)
         {
-            _audio.Play(_interactionUsed);
+            _audio.Play(used.Action == UseAction.Tape ? _taped : _interactionUsed);
+        }
+
+        private void OnGrabbed(HoseGrabbed grabbed)
+        {
+            _audio.PlayAt(_grabbed, grabbed.Position);
+        }
+
+        private void OnThrown(HoseThrown thrown)
+        {
+            _audio.PlayAt(_thrown, thrown.Position);
         }
 
         private void OnSlipped(FirefighterSlipped slipped)

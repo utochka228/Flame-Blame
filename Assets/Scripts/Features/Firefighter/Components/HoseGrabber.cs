@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using FlameBlame.Core.Events;
 using FlameBlame.Firefighter.Config;
+using FlameBlame.Firefighter.Events;
 using FlameBlame.Firefighter.Simulation;
 using FlameBlame.Hose.Components;
 using FlameBlame.Hose.Simulation;
@@ -135,6 +137,7 @@ namespace FlameBlame.Firefighter.Components
             _heldHose = _network.HoseOf(found.Rope);
             _heldHose.SetHeld(found.Index);
             _hold.Begin(_heldHose.Rope.Positions[found.Index], eye.forward);
+            EventBus.Publish(new HoseGrabbed(_heldHose.Rope.Positions[found.Index]));
             var nozzle = _network.NozzleOf(found.Rope);
             
             if (!nozzle || !nozzle.IsTip(found))
@@ -156,6 +159,7 @@ namespace FlameBlame.Firefighter.Components
         private void Throw()
         {
             var held = _network.World.GripParticle(_grip);
+            EventBus.Publish(new HoseThrown(_heldHose.Rope.Positions[held.Index]));
             var velocity = _hold.Velocity * _config.Throw.InheritMultiplier + _firefighter.Eye.transform.forward * _config.Throw.Speed;
             ReleaseGrips();
             ImpartVelocity(held, velocity);

@@ -14,14 +14,9 @@ namespace FlameBlame.Hose.Presentation
         [SerializeField] private HoseBurstMonitor _burstMonitor;
         [SerializeField] private ParticleSystem _particles;
         [SerializeField] private PuddleField _puddles;
-        [SerializeField] [Min(0)] private int _popBurstCount = 30;
+        [SerializeField] [Min(0.01f)] private float _leakBlastInterval = 0.25f;
 
-        private float _fullSprayRate;
-
-        private void Awake()
-        {
-            _fullSprayRate = _particles.emission.rateOverTime.constant;
-        }
+        private float _nextBlastTime;
 
         private void OnEnable()
         {
@@ -82,18 +77,22 @@ namespace FlameBlame.Hose.Presentation
 
         private void UpdateSpray(bool hasFlow, float strength)
         {
-            var emission = _particles.emission;
-            emission.rateOverTime = _fullSprayRate * strength;
-            if (hasFlow && !_particles.isEmitting)
-                _particles.Play();
-            else if (!hasFlow && _particles.isEmitting)
-                _particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            if (!hasFlow || Time.time < _nextBlastTime) return;
+
+            Blast();
+            _nextBlastTime = Time.time + _leakBlastInterval / Mathf.Max(strength, MinBurstLoss);
         }
 
         private void OnPopped()
         {
             _particles.transform.position = _hose.Positions[_burstMonitor.WeakPointIndex];
-            _particles.Emit(_popBurstCount);
+            Blast();
+        }
+
+        private void Blast()
+        {
+            _particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            _particles.Play(true);
         }
     }
 }
