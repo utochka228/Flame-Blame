@@ -22,8 +22,9 @@ namespace FlameBlame.UI.Hud
         private ReticleView _reticle;
         private EventFeedView _feed;
         private SwapChipView _swapChip;
-        private LevelCompleteBannerView _banner;
+        private LevelCompleteScreen _endScreen;
         private SwapOverlayView _swapOverlay;
+        private ControlsView _controls;
 
         private void OnEnable()
         {
@@ -33,8 +34,9 @@ namespace FlameBlame.UI.Hud
             _reticle = new ReticleView(root);
             _feed = new EventFeedView(root);
             _swapChip = new SwapChipView(root);
-            _banner = new LevelCompleteBannerView(root);
+            _endScreen = new LevelCompleteScreen(root);
             _swapOverlay = new SwapOverlayView(root);
+            _controls = new ControlsView(root);
 
             _goal.Changed += OnGoalChanged;
             _swap.Swapped += OnSwapped;
@@ -70,13 +72,15 @@ namespace FlameBlame.UI.Hud
             _reticle.Dispose();
             _feed.Dispose();
             _swapChip.Dispose();
-            _banner.Dispose();
+            _endScreen.Dispose();
+            _controls.Dispose();
         }
 
         private void LateUpdate()
         {
             _swapChip.ShowWarning(_swap.WarningFraction);
             _swapOverlay.Show(_swap.WarningFraction, _swap.VisorFraction);
+            _controls.Show(_swap.Commands);
         }
 
         private void OnInteractionTargetChanged(InteractionTargetChanged changed)
@@ -123,7 +127,7 @@ namespace FlameBlame.UI.Hud
 
         private void OnLevelCompleted(LevelCompleted completed)
         {
-            _banner.Show();
+            _endScreen.Show(completed);
         }
     }
 }
