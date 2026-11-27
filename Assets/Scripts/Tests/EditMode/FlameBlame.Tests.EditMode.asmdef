@@ -2,6 +2,7 @@
     "name": "FlameBlame.Tests.EditMode",
     "rootNamespace": "FlameBlame.Tests.EditMode",
     "references": [
+        "FlameBlame.Audio",
         "FlameBlame.Core",
         "FlameBlame.Fire",
         "FlameBlame.Firefighter",
