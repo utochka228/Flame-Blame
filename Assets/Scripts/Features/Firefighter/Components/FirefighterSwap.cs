@@ -22,19 +22,22 @@ namespace FlameBlame.Firefighter.Components
         private FirefighterInteractor _secondInteractor;
         private bool _firstIsActive = true;
         private bool _isTimerStarted;
+        private float _intervalSeconds;
 
         public float WarningFraction => _timer.WarningFraction;
         public float VisorFraction => _transition.VisorFraction;
         public bool IsFirstActive => _firstIsActive;
         public FirefighterCommands Commands { get; private set; }
         public int SwapCount { get; private set; }
+        public bool IsInputEnabled { get; set; } = true;
 
         public event System.Action Swapped;
 
         private void Awake()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            _timer = new SwapTimer(_config.IntervalSeconds, _config.WarningSeconds);
+            _intervalSeconds = _config.IntervalSeconds;
+            _timer = new SwapTimer(_intervalSeconds, _config.WarningSeconds);
             _transition = new SwapTransition(_config.VisorDropSeconds, _config.VisorLiftSeconds);
             _firstClimber = _first.GetComponent<HoseClimber>();
             _secondClimber = _second.GetComponent<HoseClimber>();
@@ -55,7 +58,7 @@ namespace FlameBlame.Firefighter.Components
 
         private void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame && !_transition.IsActive)
+            if (IsInputEnabled && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame && !_transition.IsActive)
                 BeginSwap();
 
             if (_timer.Step(Time.deltaTime, CanForceSwap()))
@@ -64,7 +67,7 @@ namespace FlameBlame.Firefighter.Components
             if (_transition.Step(Time.deltaTime))
                 CutToOther();
 
-            Commands = _input.Read();
+            Commands = IsInputEnabled ? _input.Read() : default;
             _first.Drive(_firstIsActive ? Commands : default);
             _second.Drive(_firstIsActive ? default : Commands);
         }
@@ -75,6 +78,12 @@ namespace FlameBlame.Firefighter.Components
 
             _isTimerStarted = true;
             RestartTimer();
+        }
+
+        public void SetInterval(SwapInterval interval)
+        {
+            _intervalSeconds = (int)interval;
+            ApplyTimerSettings();
         }
 
         private void BeginSwap()
@@ -114,8 +123,14 @@ namespace FlameBlame.Firefighter.Components
 
         private void OnConfigChanged()
         {
-            _timer.Configure(_config.IntervalSeconds, _config.WarningSeconds);
+            _intervalSeconds = _config.IntervalSeconds;
             _transition.Configure(_config.VisorDropSeconds, _config.VisorLiftSeconds);
+            ApplyTimerSettings();
+        }
+
+        private void ApplyTimerSettings()
+        {
+            _timer.Configure(_intervalSeconds, _config.WarningSeconds);
             if (_isTimerStarted && !_transition.IsActive)
                 RestartTimer();
         }
