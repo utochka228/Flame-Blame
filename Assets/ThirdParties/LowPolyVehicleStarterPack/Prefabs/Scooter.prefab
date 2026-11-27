@@ -48,6 +48,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6119925813118970598, guid: 9e08f1317faff9a4e9a8a3617f7aeb78, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9e08f1317faff9a4e9a8a3617f7aeb78, type: 3}
       propertyPath: m_Name
       value: Scooter
