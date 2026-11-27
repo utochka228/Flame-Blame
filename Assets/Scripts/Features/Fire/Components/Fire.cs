@@ -43,9 +43,14 @@ namespace FlameBlame.Fire.Components
             _heatField.Unregister(this);
         }
 
+        private void FixedUpdate()
+        {
+            _model.Tick(Time.fixedDeltaTime);
+        }
+
         public void Soak(float volume)
         {
-            _model.Douse(volume);
+            _model.AddWater(volume);
         }
 
         public float HeatAt(Vector3 point) => _model.HeatAt(Vector3.Distance(transform.position, point));

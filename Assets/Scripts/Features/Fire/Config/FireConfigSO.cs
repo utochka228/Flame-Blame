@@ -10,6 +10,11 @@ namespace FlameBlame.Fire.Config
         [field: Header("Simulation")]
         [field: SerializeField] [field: Range(0.1f, 10f)] public float DousePerVolume { get; private set; } = 1.5f;
         [field: SerializeField] [field: Range(0.5f, 8f)] public float HeatRadius { get; private set; } = 2.5f;
+        [field: SerializeField] [field: Range(0f, 1f)] public float MinWaterPerSecond { get; private set; }
+
+        [field: Header("Regrow")]
+        [field: SerializeField] [field: Range(0f, 10f)] public float RegrowDelaySeconds { get; private set; } = 2f;
+        [field: SerializeField] [field: Range(0f, 0.5f)] public float RegrowPerSecond { get; private set; } = 0.05f;
 
         [field: Header("Visuals")]
         [field: SerializeField] [field: Range(0f, 1f)] public float MinFlameScaleFraction { get; private set; } = 0.35f;
@@ -27,6 +32,9 @@ namespace FlameBlame.Fire.Config
         {
             settings.DousePerVolume = DousePerVolume;
             settings.HeatRadius = HeatRadius;
+            settings.RegrowDelaySeconds = RegrowDelaySeconds;
+            settings.RegrowPerSecond = RegrowPerSecond;
+            settings.MinWaterPerSecond = MinWaterPerSecond;
         }
     }
 }
