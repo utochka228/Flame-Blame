@@ -1,0 +1,14 @@
+:root {
+    --fb-text: rgb(255, 255, 255);
+    --fb-text-muted: rgba(255, 255, 255, 0.78);
+    --fb-chip: rgba(34, 34, 40, 0.78);
+    --fb-chip-solid: rgba(18, 14, 18, 0.88);
+    --fb-accent: rgb(120, 200, 255);
+    --fb-warn: rgb(245, 170, 40);
+    --fb-good: rgb(98, 224, 106);
+    --fb-danger: rgb(255, 90, 74);
+    --fb-radius: 14px;
+    --fb-font-m: 22px;
+    --fb-font-l: 26px;
+    --fb-font-xl: 58px;
+}

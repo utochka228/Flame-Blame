@@ -1,0 +1,73 @@
+.fb-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--fb-text);
+    -unity-font-style: bold;
+}
+
+.fb-chip {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 18px;
+    border-radius: var(--fb-radius);
+    background-color: var(--fb-chip);
+}
+
+.fb-pill {
+    border-radius: 24px;
+    padding: 10px 24px;
+}
+
+.fb-keycap {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 6px;
+    border-width: 2px;
+    border-radius: 7px;
+    border-color: var(--fb-text);
+    -unity-text-align: middle-center;
+    font-size: 15px;
+}
+
+.fb-keycap--warn {
+    border-color: var(--fb-warn);
+    color: var(--fb-warn);
+}
+
+.fb-text-m {
+    font-size: var(--fb-font-m);
+}
+
+.fb-text-l {
+    font-size: var(--fb-font-l);
+}
+
+.fb-text-muted {
+    color: var(--fb-text-muted);
+    -unity-font-style: normal;
+}
+
+.fb-toast {
+    margin: 3px 0;
+    padding: 8px 16px;
+    border-radius: 10px;
+    background-color: var(--fb-chip);
+    font-size: 19px;
+}
+
+.fb-toast--good {
+    color: var(--fb-good);
+}
+
+.fb-toast--danger {
+    color: var(--fb-danger);
+}
+
+
+.fb-keycap--lit {
+    border-color: var(--fb-accent);
+    color: var(--fb-accent);
+}

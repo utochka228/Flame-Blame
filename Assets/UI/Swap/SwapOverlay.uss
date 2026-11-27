@@ -1,0 +1,33 @@
+.swap-fog {
+    opacity: 0;
+}
+
+.swap-fog__ring {
+    flex-grow: 1;
+    border-width: 36px;
+}
+
+.swap-fog__ring--outer {
+    border-color: rgba(214, 222, 228, 0.55);
+}
+
+.swap-fog__ring--middle {
+    border-color: rgba(214, 222, 228, 0.3);
+    border-radius: 48px;
+}
+
+.swap-fog__ring--inner {
+    border-color: rgba(214, 222, 228, 0.12);
+    border-radius: 96px;
+}
+
+.swap-visor {
+    translate: 0 -100%;
+    justify-content: flex-end;
+    background-color: rgb(18, 22, 26);
+}
+
+.swap-visor__rim {
+    height: 20px;
+    background-color: var(--fb-warn);
+}

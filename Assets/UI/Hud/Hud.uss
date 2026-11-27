@@ -1,0 +1,148 @@
+.hud-objective {
+    position: absolute;
+    top: 16px;
+    align-self: center;
+}
+
+.hud-objective__count {
+    margin-left: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.hud-objective--done {
+    border-width: 2px;
+    border-color: var(--fb-good);
+}
+
+.hud-objective--done .hud-objective__text {
+    color: var(--fb-good);
+}
+
+.hud-objective--done .hud-objective__count {
+    display: none;
+}
+
+.hud-feed {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    align-items: flex-end;
+}
+
+.hud-reticle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    border-width: 2px;
+    border-radius: 22px;
+    border-color: rgba(255, 255, 255, 0.35);
+    transition-duration: 0.12s;
+}
+
+.hud-reticle--active {
+    border-color: var(--fb-accent);
+}
+
+.hud-reticle__dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 3px;
+    background-color: var(--fb-text);
+}
+
+.hud-prompt {
+    position: absolute;
+    right: 53%;
+    top: 50%;
+    margin-top: -26px;
+    padding: 8px 16px 8px 8px;
+    opacity: 0;
+}
+
+.hud-prompt__verb {
+    margin-left: 12px;
+}
+
+.hud-prompt__target {
+    margin-left: 10px;
+}
+
+.hud-swap {
+    position: absolute;
+    left: 22px;
+    bottom: 18px;
+}
+
+.hud-swap__name {
+    margin-right: 16px;
+}
+
+.hud-swap__hint {
+    margin-left: 10px;
+}
+
+.end-screen {
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.end-screen--hidden {
+    display: none;
+}
+
+.end-screen__card {
+    min-width: 460px;
+    padding: 28px 44px;
+    border-radius: 20px;
+    border-width: 3px;
+    border-color: var(--fb-good);
+    background-color: var(--fb-chip-solid);
+}
+
+.end-screen__title {
+    align-self: center;
+    margin-bottom: 18px;
+    font-size: var(--fb-font-xl);
+    color: var(--fb-good);
+}
+
+.end-screen__row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+}
+
+.end-screen__hint {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.end-screen__key {
+    margin: 0 10px;
+}
+
+.hud-controls {
+    position: absolute;
+    right: 22px;
+    bottom: 18px;
+}
+
+.hud-controls__key {
+    margin-left: 14px;
+}
+
+.hud-controls__label {
+    margin-left: 6px;
+    font-size: 17px;
+}

@@ -1,0 +1,72 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="../Kit/Tokens.uss" />
+    <ui:Style src="../Kit/Kit.uss" />
+    <ui:Style src="Hud.uss" />
+    <ui:Style src="../Swap/SwapOverlay.uss" />
+    <ui:VisualElement name="hud" class="fb-layer" picking-mode="Ignore">
+        <ui:VisualElement name="swapFog" class="fb-layer swap-fog" picking-mode="Ignore">
+            <ui:VisualElement class="swap-fog__ring swap-fog__ring--outer" picking-mode="Ignore">
+                <ui:VisualElement class="swap-fog__ring swap-fog__ring--middle" picking-mode="Ignore">
+                    <ui:VisualElement class="swap-fog__ring swap-fog__ring--inner" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="objective" class="fb-chip fb-pill hud-objective" picking-mode="Ignore">
+            <ui:Label name="objectiveText" text="Put out the fires" class="fb-text-l hud-objective__text" picking-mode="Ignore" />
+            <ui:Label name="objectiveCount" text="0 left" class="fb-text-m hud-objective__count" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="feed" class="hud-feed" picking-mode="Ignore" />
+        <ui:VisualElement name="reticle" class="hud-reticle" picking-mode="Ignore">
+            <ui:VisualElement class="hud-reticle__dot" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="prompt" class="fb-chip hud-prompt" picking-mode="Ignore">
+            <ui:Label name="promptKey" text="F" class="fb-keycap" picking-mode="Ignore" />
+            <ui:Label name="promptVerb" text="Use" class="fb-text-m hud-prompt__verb" picking-mode="Ignore" />
+            <ui:Label name="promptTarget" text="" class="fb-text-m fb-text-muted hud-prompt__target" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="swap" class="fb-chip hud-swap" picking-mode="Ignore">
+            <ui:Label name="swapName" text="Firefighter 1" class="fb-text-m hud-swap__name" picking-mode="Ignore" />
+            <ui:Label name="swapKey" text="Tab" class="fb-keycap" picking-mode="Ignore" />
+            <ui:Label text="Swap" class="fb-text-m fb-text-muted hud-swap__hint" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="controls" class="fb-chip hud-controls" picking-mode="Ignore">
+            <ui:Label name="controlMove" text="WASD" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Move" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+            <ui:Label name="controlJump" text="Space" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Jump" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+            <ui:Label name="controlGrab" text="E" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Grab" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+            <ui:Label name="controlUse" text="F" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Use" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+            <ui:Label name="controlThrow" text="LMB" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Throw" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+            <ui:Label name="controlThumb" text="RMB / V" class="fb-keycap hud-controls__key" picking-mode="Ignore" />
+            <ui:Label text="Thumb" class="fb-text-muted hud-controls__label" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="endScreen" class="fb-layer end-screen end-screen--hidden" picking-mode="Ignore">
+            <ui:VisualElement name="endCard" class="end-screen__card" picking-mode="Ignore">
+                <ui:Label name="endTitle" text="All fires out!" class="end-screen__title" picking-mode="Ignore" />
+                <ui:VisualElement name="endTimeRow" class="end-screen__row" picking-mode="Ignore">
+                    <ui:Label text="Time" class="fb-text-m fb-text-muted" picking-mode="Ignore" />
+                    <ui:Label name="endTimeValue" text="-" class="fb-text-l end-screen__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="endHoseRow" class="end-screen__row" picking-mode="Ignore">
+                    <ui:Label text="Hose used" class="fb-text-m fb-text-muted" picking-mode="Ignore" />
+                    <ui:Label name="endHoseValue" text="-" class="fb-text-l end-screen__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="endSwapsRow" class="end-screen__row" picking-mode="Ignore">
+                    <ui:Label text="Swaps" class="fb-text-m fb-text-muted" picking-mode="Ignore" />
+                    <ui:Label name="endSwapsValue" text="-" class="fb-text-l end-screen__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="endHint" class="end-screen__hint" picking-mode="Ignore">
+                    <ui:Label text="Press" class="fb-text-m fb-text-muted" picking-mode="Ignore" />
+                    <ui:Label name="endKey" text="R" class="fb-keycap end-screen__key" picking-mode="Ignore" />
+                    <ui:Label text="to play again" class="fb-text-m fb-text-muted" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="swapVisor" class="fb-layer swap-visor" picking-mode="Ignore">
+            <ui:VisualElement class="swap-visor__rim" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
