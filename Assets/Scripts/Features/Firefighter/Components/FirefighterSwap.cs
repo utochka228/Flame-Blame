@@ -26,6 +26,8 @@ namespace FlameBlame.Firefighter.Components
         public float WarningFraction => _timer.WarningFraction;
         public float VisorFraction => _transition.VisorFraction;
         public bool IsFirstActive => _firstIsActive;
+        public FirefighterCommands Commands { get; private set; }
+        public int SwapCount { get; private set; }
 
         public event System.Action Swapped;
 
@@ -62,9 +64,9 @@ namespace FlameBlame.Firefighter.Components
             if (_transition.Step(Time.deltaTime))
                 CutToOther();
 
-            var commands = _input.Read();
-            _first.Drive(_firstIsActive ? commands : default);
-            _second.Drive(_firstIsActive ? default : commands);
+            Commands = _input.Read();
+            _first.Drive(_firstIsActive ? Commands : default);
+            _second.Drive(_firstIsActive ? default : Commands);
         }
 
         public void StartForcedTimer()
@@ -84,6 +86,7 @@ namespace FlameBlame.Firefighter.Components
         private void CutToOther()
         {
             _firstIsActive = !_firstIsActive;
+            SwapCount++;
             ApplyActive();
             Swapped?.Invoke();
             if (_isTimerStarted)
