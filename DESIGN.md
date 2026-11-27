@@ -151,7 +151,7 @@ Scene: `Assets/Scenes/Level_BurningBuilding.unity`. The building is assembled fr
 - **Pressure is shared.** Everything draws from one truck. A second branch halves everyone's pressure; a pinch (door or body) on one branch gives the other branch full pressure. Most puzzles come down to where the pressure goes right now.
 - **Two bodies, one player.** Many tasks want one firefighter holding or pinching while the other acts. The idle firefighter stays where it was left, so it keeps pinching or holding after a swap.
 - **The level ramps up:** the yard teaches, the ground floor combines two mechanics, the gap and upper floor combine three or more, and the stairwell blaze uses the whole network.
-- **Fires regrow slowly** while no water hits them, but never spread (not built yet). Every route is valid; the challenge is routing and pressure, and regrow adds urgency without making it a race.
+- **Fires regrow slowly** while no water hits them, but never spread; a fire that is out stays out. Every route is valid; the challenge is routing and pressure, and regrow adds urgency without making it a race.
 
 ### Player metrics and kit scale
 
@@ -182,26 +182,27 @@ The building is 24 × 27 m (x −12..12, z 0..27). The yard is in front of it (z
 **Z1 Lobby (ground floor, west).** Entered through the wide front doorway.
 - `Splitter_Lobby` is pre-placed here, so the split decision comes early: split now to cover two rooms and every later zone gets half pressure.
 - `Door_LobbyHall` leads east to the hall; like every kit door it pinches a hose when it closes on it.
-- A heavy crate (`Crate`, with `Socket_Crate` to tie to) jams the doorway to the stairwell: push it with a jet, tie and yank it by opening the valve, or tie-drag it by hand.
+- The lobby's wall to the stairwell is solid, so the stairwell can't be the second stop.
 - One fire behind the counter (`Fire_Z1_Lobby`).
 
 **Z2 Burning hall (ground floor, east, single storey).** Entered through its wide front doorway (closest to the truck) or from the lobby.
 - The hall fire (`Fire_Z2_Hall`) sits on a heat zone (5 × 5 m at x 8.5, z 4.5). The shortest route from the truck to the gap runs through it, so a hose laid here heats up and burns through: problem 4.
 - Repair by swapping the burnt piece with a spare and a coupling, rerouting through the lobby, or taping it (fast, leaks).
 - A wide opening at the back leads to the near side of the gap.
+- On the near side, a heavy crate (`Crate`, with `Socket_Crate` to tie to) jams the doorway into the stairwell (x 3, z 16.5): push it with a jet, tie and yank it by opening the valve, or tie-drag it by hand.
 
 **Z3 The gap (collapsed floor).** A 6 m pit between the near side (z 15..18) and the far side (z 24..27), with `Fire_Z3_GapFar` on the far side.
 - Bridge: latch the far end on `Socket_GapBracket` and give the hose full pressure, usually by pinching the other branch (a closed door or the idle firefighter).
 - Rope: throw an empty hose over the climb beam, climb it, and mantle.
-- Walk-around: clear the crate, go through the stairwell and `Door_StairGap` to reach the far side on foot.
+- Walk-around: clear the near-side crate, go through the stairwell and `Door_StairGap` to reach the far side on foot.
 - A ramp along the pit's east wall leads back out, so falling in is never a soft-lock.
 
 **Z4 Upper floor (rooms, balcony, landing, mezzanine).** Two fire rooms (`Fire_Z4_RoomA` in the west room, `Fire_Z4_RoomB` in the east room) split by `Door_RoomDivider`.
 - Ways up: from the yard over the balcony rail (`Door_Balcony` into room A), from the stairwell via the hose climb onto the landing (`Door_RoomsLanding`), or from the gap's beam onto the mezzanine (`Door_LandingMezzanine` to the landing).
 - Options at the top: haul the nozzle up and spray, anchor it as a fixed sprinkler, or drop it and let the hose snake whip around.
 
-**Z5 Stairwell (finale).** Reached through the crate doorway; the back exit is boarded up.
-- The stairwell blaze (`Fire_Z5_Blaze`) is the biggest fire. Beat it with two nozzles at once (`Splitter_Stairwell` sits at the crate doorway) or one nozzle at full pressure by pinching every other branch.
+**Z5 Stairwell (finale).** Reached from the gap's near side through the crate doorway, so only after the hall (or `Door_LobbyHall`); the back exit is boarded up. About 40 m of hose from the main line's end to the blaze with one nozzle, about 50 m with two.
+- The stairwell blaze (`Fire_Z5_Blaze`, 3× scale, `FireConfig_Blaze`) is by far the biggest fire. Water below its `MinWaterPerSecond` does nothing, so a single split jet only watches it regrow. Beat it with two nozzles at once (`Splitter_Stairwell` sits at the crate doorway) or one nozzle at full pressure by pinching every other branch.
 - Short stairs (top at 1.5 m) stop 2.1 m below the landing; throw a hose over the landing rail and climb.
 
 **Win:** every fire is out. `LevelGoal` tracks all seven fires (`Fire_Z0_YardBin` to `Fire_Z5_Blaze`).
@@ -213,9 +214,9 @@ Every fire zone has at least two ways in, and every route depends on pressure or
 ```mermaid
 graph LR
   Yard["Z0 Yard<br/>fire truck, hose pile"]
-  Lobby["Z1 Lobby<br/>splitter, crate"]
+  Lobby["Z1 Lobby<br/>splitter"]
   Hall["Z2 Burning hall<br/>heat zone"]
-  Near["Z3 Gap near side"]
+  Near["Z3 Gap near side<br/>crate"]
   Far["Z3 Gap far side"]
   Stair["Z5 Stairwell<br/>finale blaze"]
   Landing["Z4 Landing"]
@@ -226,7 +227,7 @@ graph LR
   Yard -- wide doorway --- Hall
   Yard -- "throw + climb over balcony rail" --> Rooms
   Lobby -- Door_LobbyHall --- Hall
-  Lobby -- "crate: jet, yank or drag" --> Stair
+  Near -- "crate: jet, yank or drag" --> Stair
   Hall -- wide opening --- Near
   Near -- "bridge or rope over beam" --> Far
   Near -- "climb beam" --> Mezz
@@ -286,7 +287,7 @@ Each mechanic is taught once where failure is cheap, then tested where it matter
 | Grab, grip, anchored grip | Yard | Gap far side, sprinkler | Holding by hand |
 | Throw and catch | Balcony rail | Gap beam, landing rail | Stairwell walk-around |
 | Climb and mantle | Balcony | Gap beam, landing | Bridge |
-| Tie and drag / yank | Lobby crate | — | Jet push |
+| Tie and drag / yank | Near-side crate | — | Jet push |
 | Tape | Hall burn-through | Any burst | Swap the piece |
 | Puddles | Yard spray | Under the upper rooms | — |
 | Character swap | Yard | Everywhere | — |
@@ -315,14 +316,14 @@ That is 61.6 m in total (21.8 m laid at the start) for a 24 × 27 m building, wi
 
 ### Open items
 
-- **Hose budget:** walk each route in Play mode and measure the length it really takes; target covering about two zones at once.
+- **Hose budget:** walk each route in Play mode and measure the length it really takes; target covering about two zones at once. Since the stairwell moved behind the gap's near side, the finale line alone takes most of the 49.6 m beyond the main line. If two nozzles don't fit at the blaze, lower `FireConfig_Blaze`'s `MinWaterPerSecond` so one full-pressure nozzle can win, rather than adding hose; if three zones still fit at once, remove one thin piece from the pile.
 - **Wall-pipe socket:** marked on the facade (`Marker_WallPipeSocket`) but not built; it would let players latch the hose onto a pre-laid pipe into the lobby.
 - **Lighting:** the roof shades the interior; rooms may need lights.
 - **Not verified in Play mode:** the stair ramp (31° slope), the hose climb to the landing, door slams on hoses, and the 6 m bridge span.
 
 ### Engagement changes
 
-Accepted 2026-11-26 from a design review; not built yet. Each one targets a gap in player engagement; ordered by value for cost.
+Accepted 2026-11-26 from a design review. Applied: 1 (`FireConfig_Blaze` minimum water rate), 2 (`FirefighterSwapConfig` interval 60 s), 3 (`FireConfig` regrow after 2 s at 0.05/s), 5 (`TapeLeakLoss` 20 in the level hose configs) and 6 (end screen with time, hose metres and swaps; R replays) and 7 (stairwell entered from the gap's near side; lobby doorway walled up). 4 waits on the Play-mode walk in Open items. Each one targets a gap in player engagement; ordered by value for cost.
 
 | # | Change | Gap it closes |
 | --- | --- | --- |
