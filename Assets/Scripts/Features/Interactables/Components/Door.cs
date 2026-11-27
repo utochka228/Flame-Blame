@@ -1,4 +1,6 @@
+using FlameBlame.Core.Events;
 using FlameBlame.Hose.Components;
+using FlameBlame.Interactables.Events;
 using FlameBlame.Interactables.Config;
 using FlameBlame.Interactables.Simulation;
 using UnityEngine;
@@ -55,6 +57,8 @@ namespace FlameBlame.Interactables.Components
         public void Toggle()
         {
             _model.Toggle();
+            if (_model.IsOpen)
+                EventBus.Publish(new DoorOpened(_panel.bounds.center));
         }
 
         private void ApplySlam()
