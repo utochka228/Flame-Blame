@@ -2,6 +2,7 @@
     "name": "FlameBlame.Level",
     "rootNamespace": "FlameBlame.Level",
     "references": [
+        "FlameBlame.Audio",
         "FlameBlame.Core",
         "FlameBlame.Fire",
         "FlameBlame.Firefighter",

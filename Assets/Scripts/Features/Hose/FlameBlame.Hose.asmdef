@@ -2,6 +2,7 @@
     "name": "FlameBlame.Hose",
     "rootNamespace": "FlameBlame.Hose",
     "references": [
+        "FlameBlame.Audio",
         "FlameBlame.Core",
         "FlameBlame.Pressure",
         "FlameBlame.Water",
