@@ -43,6 +43,8 @@ namespace FlameBlame.Pressure.Simulation
             return Mathf.Max(0f, pressure) * (1f + surgeFraction);
         }
 
+        public bool IsFed(int hose) => _inletEnds[hose] != NoInlet;
+
         public float TipPressure(int hose)
         {
             if (_inletEnds[hose] == NoInlet) return 0f;

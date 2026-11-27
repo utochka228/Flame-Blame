@@ -183,6 +183,18 @@ namespace FlameBlame.Hose.Components
             return false;
         }
 
+        public float ConnectedHoseMetres()
+        {
+            var metres = 0f;
+            for (var index = 0; index < _hoses.Length; index++)
+            {
+                if (_result.IsFed(HosePartId(index)))
+                    metres += _hoses[index].Config.Length;
+            }
+
+            return metres;
+        }
+
         public int Connect(HoseEndRef first, HoseEndRef second)
         {
             return _ropeJoints.Add(new[] { ToRopeEnd(first), ToRopeEnd(second) });
