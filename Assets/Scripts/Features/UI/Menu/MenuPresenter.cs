@@ -24,20 +24,21 @@ namespace FlameBlame.UI.Menu
         private BriefingWindow _briefing;
         private MenuSettings _settings;
         private MenuState _state;
+        private VisualElement _root;
 
         private void OnEnable()
         {
-            var root = GetComponent<UIDocument>().rootVisualElement;
-            _menu = new MenuScreen(root);
-            _briefing = new BriefingWindow(root);
-            root.Q<Label>("companyLabel").text = $"© {Application.companyName} · not liable for wet carpets";
+            _root = GetComponent<UIDocument>().rootVisualElement;
+            _menu = new MenuScreen(_root);
+            _briefing = new BriefingWindow(_root);
+            _root.Q<Label>("companyLabel").text = $"© {Application.companyName} · not liable for wet carpets";
 
             _menu.PlayClicked += OnPlayClicked;
             _menu.ModeSelected += OnModeSelected;
             _menu.SfxVolumeChanged += OnSfxVolumeChanged;
             _menu.MusicVolumeChanged += OnMusicVolumeChanged;
             _briefing.Finished += OnBriefingFinished;
-            root.RegisterCallback<ClickEvent>(OnClicked);
+            _root.RegisterCallback<ClickEvent>(OnClicked);
         }
 
         private void Start()
@@ -60,7 +61,7 @@ namespace FlameBlame.UI.Menu
             _menu.SfxVolumeChanged -= OnSfxVolumeChanged;
             _menu.MusicVolumeChanged -= OnMusicVolumeChanged;
             _briefing.Finished -= OnBriefingFinished;
-            GetComponent<UIDocument>().rootVisualElement.UnregisterCallback<ClickEvent>(OnClicked);
+            _root.UnregisterCallback<ClickEvent>(OnClicked);
             _menu.Dispose();
             _briefing.Dispose();
         }
