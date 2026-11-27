@@ -7,8 +7,10 @@ namespace FlameBlame.Fire.Presentation
     {
         [SerializeField] private Components.Fire _fire;
         [SerializeField] private ParticleSystem _flames;
+        [SerializeField] private Light _glow;
 
         private Vector3 _restScale;
+        private float _restGlow;
         private AudioSource[] _crackles;
         private float[] _restVolumes;
         private float _shownIntensity = 1f;
@@ -17,6 +19,7 @@ namespace FlameBlame.Fire.Presentation
         private void Awake()
         {
             _restScale = _flames.transform.localScale;
+            _restGlow = _glow.intensity;
             _crackles = _flames.GetComponentsInChildren<AudioSource>();
             _restVolumes = new float[_crackles.Length];
             for (var i = 0; i < _crackles.Length; i++)
@@ -60,6 +63,8 @@ namespace FlameBlame.Fire.Presentation
         private void ApplySize(float fraction)
         {
             _flames.transform.localScale = _restScale * fraction;
+            _glow.intensity = _restGlow * fraction;
+            _glow.enabled = fraction > 0f;
             for (var i = 0; i < _crackles.Length; i++)
                 _crackles[i].volume = _restVolumes[i] * fraction;
         }
