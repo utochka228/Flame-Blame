@@ -783,6 +783,7 @@ GameObject:
   - component: {fileID: 4236791115383380817}
   - component: {fileID: 2574438532797091725}
   - component: {fileID: 8771961468113450895}
+  - component: {fileID: 3994759753996274746}
   m_Layer: 9
   m_Name: Firefighter
   m_TagString: Untagged
@@ -936,6 +937,28 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
   _firefighter: {fileID: 4432599679487170533}
   _network: {fileID: 0}
+--- !u!114 &3994759753996274746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7423857227268460369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a4fa948f5a46019af76e82f02e4d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Presentation.FirefighterFootsteps
+  _body: {fileID: 4432599679487170533}
+  _config: {fileID: 11400000, guid: ef2e7a3c8e66043f3aff8025d5522038, type: 2}
+  _audio: {fileID: 0}
+  _puddles: {fileID: 0}
+  _defaultStep: {fileID: 11400000, guid: 30b6021462c7e4a96adae44c033090b9, type: 2}
+  _grassStep: {fileID: 11400000, guid: f667d67c76d914892bc24ff01a538926, type: 2}
+  _mudStep: {fileID: 11400000, guid: 4e555a850a65247f1845964a290afafc, type: 2}
+  _waterStep: {fileID: 11400000, guid: 8b320af8b9f82414094a9d462a24d9a1, type: 2}
+  _strideMetres: 1.6
+  _surfaceProbeMetres: 1.5
 --- !u!1 &8142803667216118682
 GameObject:
   m_ObjectHideFlags: 0

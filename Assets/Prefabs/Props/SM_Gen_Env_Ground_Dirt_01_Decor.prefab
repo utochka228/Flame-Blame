@@ -56,5 +56,51 @@ PrefabInstance:
     - {fileID: 1570735165927883633, guid: 5f13adf1020d9d3428e681e3b4de11ff, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3890554199827564479, guid: 5f13adf1020d9d3428e681e3b4de11ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 156753176116873537}
+    - targetCorrespondingSourceObject: {fileID: 3890554199827564479, guid: 5f13adf1020d9d3428e681e3b4de11ff, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2205475931382763659}
   m_SourcePrefab: {fileID: 100100000, guid: 5f13adf1020d9d3428e681e3b4de11ff, type: 3}
+--- !u!1 &6760754553326967258 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3890554199827564479, guid: 5f13adf1020d9d3428e681e3b4de11ff, type: 3}
+  m_PrefabInstance: {fileID: 7506656277251546725}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &156753176116873537
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6760754553326967258}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1174912389399945394, guid: 839f95ad66158154598043b59e590f01, type: 3}
+--- !u!114 &2205475931382763659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6760754553326967258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7d9f5441e8654743bdec45495ecbd13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FlameBlame.Firefighter::FlameBlame.Firefighter.Components.FootstepSurface
+  <Kind>k__BackingField: 2
